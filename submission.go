@@ -1,10 +1,9 @@
-package main
+package submission
 
 import (
 	"bufio"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 )
 
@@ -56,9 +55,6 @@ func (h *ReadReturner) Return(line string) {
 
 // RawSubmission is an untyped game stats submission
 type RawSubmission struct {
-	// header data
-	Headers map[string]string
-
 	// game metadata
 	GameMeta map[string]string
 
@@ -73,9 +69,8 @@ type RawSubmission struct {
 }
 
 // NewRawSubmission creates a new RawSubmission from the given reader
-func NewRawSubmission(headers map[string]string, body io.Reader) *RawSubmission {
+func NewRawSubmission(body io.Reader) *RawSubmission {
 	return &RawSubmission{
-		Headers:      headers,
 		GameMeta:     make(map[string]string),
 		TeamEvents:   make([]map[string]string, 0),
 		PlayerEvents: make([]map[string]string, 0),
@@ -192,27 +187,4 @@ func (s *RawSubmission) Parse() error {
 	}
 
 	return nil
-}
-
-func main() {
-	f, err := os.Open(os.Args[1])
-	if err != nil {
-		fmt.Println("Couldn't open the file")
-		os.Exit(1)
-	}
-
-	body := bufio.NewReader(f)
-	headers := make(map[string]string)
-
-	submission := NewRawSubmission(headers, body)
-	err = submission.Parse()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	} else {
-		fmt.Printf("Meta: %+v\n", submission.GameMeta)
-		fmt.Printf("# Teams: %+v\n", len(submission.TeamEvents))
-		fmt.Printf("# Players: %+v\n", len(submission.PlayerEvents))
-	}
-
 }
