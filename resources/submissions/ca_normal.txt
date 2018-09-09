@@ -1,0 +1,81 @@
+V 9
+R xonotic-v0.8.2-711-g4a06745a1
+G ca
+O Xonotic
+M asylum_full_r1
+I 0.1506980694.892611
+S pacman's Pickup
+C 4
+U 26000
+D 1805.331665
+L 
+Q team#14
+e scoreboard-rounds 1
+e scoreboard-score 4.7525
+Q team#5
+e scoreboard-score 3.20302
+P NOT_A_HASHKEY
+i 1
+t 14
+e kills-3 1
+e anticheat-idle_snapaim_m10 35.5625
+e anticheat-idle_snapaim_m7 26.3525
+e anticheat-idle_snapaim_m4 12.477
+e anticheat-idle_snapaim_m3 7.05508
+e anticheat-idle_snapaim_m2 2.61904
+e anticheat-idle_snapaim_noise 0.683736
+e anticheat-idle_snapaim_signal 17.6765
+e anticheat-idle_snapaim 16.9927
+e anticheat-div0_evade 0.005286
+e anticheat-div0_strafebot_new 0.153077
+e anticheat-speedhack_m5 1.00189
+e anticheat-speedhack_m4 1.00189
+e anticheat-speedhack_m3 1.00189
+e anticheat-speedhack_m2 1.00188
+e anticheat-speedhack_m1 1.00188
+e anticheat-speedhack 0.017192
+e anticheat-_time 63.7
+e achievement-firstblood 1
+e avglatency 45.0439
+P NOT_A_HASHKEY
+i 3
+n ^0{^1bot^0} ^x666Pascal
+t 5
+e anticheat-idle_snapaim_m10 24.182
+e anticheat-idle_snapaim_m7 18.0789
+e anticheat-idle_snapaim_m4 9.0112
+e anticheat-idle_snapaim_m3 5.43032
+e anticheat-idle_snapaim_m2 2.23002
+e anticheat-idle_snapaim_noise 0.35847
+e anticheat-idle_snapaim_signal 12.4023
+e anticheat-idle_snapaim 12.0439
+e anticheat-div0_strafebot_new 0.131592
+e anticheat-div0_strafebot_old 0.192711
+e anticheat-speedhack_m5 1.00308
+e anticheat-speedhack_m4 1.00308
+e anticheat-speedhack_m3 1.00308
+e anticheat-speedhack_m2 1.00309
+e anticheat-speedhack_m1 1.00307
+e anticheat-speedhack 9.3e-05
+e anticheat-_time 63.6666
+e achievement-firstvictim 1
+P NOT_A_HASHKEY
+i 2
+n ^0{^1bot^0} ^x666Huygens
+t 14
+e anticheat-idle_snapaim_m10 0.010358
+e anticheat-idle_snapaim_m7 0.010358
+e anticheat-idle_snapaim_m4 0.010358
+e anticheat-idle_snapaim_m3 0.010358
+e anticheat-idle_snapaim_m2 0.010358
+e anticheat-idle_snapaim_noise 0.010358
+e anticheat-idle_snapaim_signal 0.010358
+e anticheat-div0_strafebot_new 0.00011
+e anticheat-speedhack_m5 1.00086
+e anticheat-speedhack_m4 1.00086
+e anticheat-speedhack_m3 1.00086
+e anticheat-speedhack_m2 1.00086
+e anticheat-speedhack_m1 1.00086
+e anticheat-speedhack 9.8e-05
+e anticheat-_time 3.09998
+

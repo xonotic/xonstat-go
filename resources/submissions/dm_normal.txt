@@ -1,0 +1,240 @@
+V 9
+R xonotic-v0.8.0-984-gf0d7836
+G dm
+O Xonotic
+M stormkeep
+I 0.019724
+S Xonotic 0.8.1 Server
+C 2
+U 26000
+D 37.436241
+L 
+P NOT_A_HASHKEY
+i 10
+n Dominator
+e kills-9 1
+e kills-8 1
+e kills-6 1
+e kills-3 1
+e scoreboard-suicides 1
+e total-suicides 1
+e scoreboard-deaths 4
+e total-deaths 4
+e scoreboard-kills 4
+e total-kills 4
+e scoreboard-score 3
+e total-score 3
+e achievement-kill-spree-3 1
+e acc-devastator-frags 4
+e acc-devastator-cnt-fired 15
+e acc-devastator-cnt-hit 8
+e acc-devastator-fired 1200
+e acc-devastator-hit 414.654
+e rank 2
+e scoreboardpos 2
+e scoreboardvalid 1
+e joins 1
+e alivetime 28.4306
+P NOT_A_HASHKEY
+i 9
+n Toxic
+e kills-6 1
+e scoreboard-deaths 5
+e total-deaths 5
+e scoreboard-kills 1
+e total-kills 1
+e scoreboard-score 1
+e total-score 1
+e achievement-firstvictim 1
+e acc-devastator-frags 1
+e acc-devastator-cnt-fired 12
+e acc-devastator-cnt-hit 6
+e acc-devastator-fired 960
+e acc-devastator-hit 308.896
+e rank 8
+e scoreboardpos 8
+e scoreboardvalid 1
+e joins 1
+e alivetime 28.0417
+P NOT_A_HASHKEY
+i 8
+n Necrotic
+e kills-9 1
+e kills-4 1
+e kills-2 1
+e scoreboard-suicides 2
+e total-suicides 2
+e scoreboard-deaths 4
+e total-deaths 4
+e scoreboard-kills 3
+e total-kills 3
+e scoreboard-score 1
+e total-score 1
+e acc-devastator-frags 3
+e acc-devastator-cnt-fired 13
+e acc-devastator-cnt-hit 5
+e acc-devastator-fired 1040
+e acc-devastator-hit 284.008
+e rank 8
+e scoreboardpos 8
+e scoreboardvalid 1
+e joins 1
+e alivetime 30.0278
+P NOT_A_HASHKEY
+i 7
+n Lion
+e kills-10 1
+e kills-8 1
+e kills-5 1
+e scoreboard-deaths 2
+e total-deaths 2
+e scoreboard-kills 3
+e total-kills 3
+e scoreboard-score 3
+e total-score 3
+e acc-devastator-frags 3
+e acc-devastator-cnt-fired 15
+e acc-devastator-cnt-hit 6
+e acc-devastator-fired 1200
+e acc-devastator-hit 333.921
+e rank 2
+e scoreboardpos 2
+e scoreboardvalid 1
+e joins 1
+e alivetime 32.4306
+P NOT_A_HASHKEY
+i 6
+n Mystery
+e kills-4 1
+e kills-3 1
+e kills-2 1
+e scoreboard-deaths 3
+e total-deaths 3
+e scoreboard-kills 3
+e total-kills 3
+e scoreboard-score 3
+e total-score 3
+e achievement-kill-spree-3 1
+e acc-devastator-frags 3
+e acc-devastator-cnt-fired 12
+e acc-devastator-cnt-hit 6
+e acc-devastator-fired 960
+e acc-devastator-hit 337.826
+e rank 2
+e scoreboardpos 2
+e scoreboardvalid 1
+e joins 1
+e alivetime 30.4861
+P NOT_A_HASHKEY
+i 5
+n Thunderstorm
+e kills-9 1
+e kills-3 1
+e kills-2 1
+e scoreboard-suicides 1
+e total-suicides 1
+e scoreboard-deaths 3
+e total-deaths 3
+e scoreboard-kills 3
+e total-kills 3
+e scoreboard-score 2
+e total-score 2
+e acc-devastator-frags 3
+e acc-devastator-cnt-fired 17
+e acc-devastator-cnt-hit 6
+e acc-devastator-fired 1360
+e acc-devastator-hit 297.437
+e rank 6
+e scoreboardpos 6
+e scoreboardvalid 1
+e joins 1
+e alivetime 30.4306
+P NOT_A_HASHKEY
+i 4
+n Pegasus
+e kills-9 1
+e kills-7 1
+e kills-6 1
+e kills-1 1
+e scoreboard-deaths 3
+e total-deaths 3
+e scoreboard-kills 4
+e total-kills 4
+e scoreboard-score 4
+e total-score 4
+e acc-devastator-frags 3
+e acc-devastator-cnt-fired 13
+e acc-devastator-cnt-hit 7
+e acc-devastator-fired 1040
+e acc-devastator-hit 417.001
+e rank 1
+e scoreboardpos 1
+e scoreboardvalid 1
+e joins 1
+e alivetime 30.4167
+P NOT_A_HASHKEY
+i 3
+n Discovery
+e kills-10 1
+e kills-7 1
+e kills-4 1
+e scoreboard-deaths 3
+e total-deaths 3
+e scoreboard-kills 3
+e total-kills 3
+e scoreboard-score 3
+e total-score 3
+e acc-devastator-frags 3
+e acc-devastator-cnt-fired 11
+e acc-devastator-cnt-hit 6
+e acc-devastator-fired 880
+e acc-devastator-hit 299.349
+e rank 2
+e scoreboardpos 2
+e scoreboardvalid 1
+e joins 1
+e alivetime 30.4167
+P NOT_A_HASHKEY
+i 2
+n Resurrection
+e kills-5 1
+e scoreboard-deaths 3
+e total-deaths 3
+e scoreboard-kills 1
+e total-kills 1
+e scoreboard-score 1
+e total-score 1
+e acc-devastator-frags 1
+e acc-devastator-cnt-fired 15
+e acc-devastator-cnt-hit 3
+e acc-devastator-fired 1200
+e acc-devastator-hit 138.83
+e rank 8
+e scoreboardpos 8
+e scoreboardvalid 1
+e joins 1
+e alivetime 30.4306
+P NOT_A_HASHKEY
+i 1
+n Andrius
+e kills-10 1
+e kills-9 1
+e scoreboard-deaths 1
+e total-deaths 1
+e scoreboard-kills 2
+e total-kills 2
+e scoreboard-score 2
+e total-score 2
+e achievement-firstblood 1
+e acc-devastator-frags 2
+e acc-devastator-cnt-fired 16
+e acc-devastator-cnt-hit 7
+e acc-devastator-fired 1280
+e acc-devastator-hit 407.635
+e rank 6
+e scoreboardpos 6
+e scoreboardvalid 1
+e joins 1
+e avglatency 10.1519
+e alivetime 34.7361
+
