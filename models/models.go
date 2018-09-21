@@ -91,3 +91,23 @@ type PlayerWeaponStat struct {
 	Frags              int
 	CreateDt           time.Time
 }
+
+type Player struct {
+	PlayerId     int
+	Nick         string
+	StrippedNick string
+	Location     string
+	EmailAddr    string
+	ActiveInd    string
+	CreateDt     time.Time
+}
+
+type TeamGameStat struct {
+	TeamGameStatId int
+	GameId         int
+	Team           int
+	Score          int
+	Rounds         int
+	Caps           int
+	CreateDt       time.Time
+}
