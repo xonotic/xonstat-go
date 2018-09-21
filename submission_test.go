@@ -32,21 +32,26 @@ func TestCorrectCounts(t *testing.T) {
 		defer f.Close()
 
 		body := bufio.NewReader(f)
-		submission := NewRawSubmission(body)
+		rawSubmission := NewRawSubmission(body)
 
-		err = submission.Parse()
+		err = rawSubmission.Parse()
 		if err != nil {
 			t.Errorf("Unable to parse.")
 		}
 
-		if len(submission.TeamEvents) != testCase.expectedTeamsCount {
+		if len(rawSubmission.TeamEvents) != testCase.expectedTeamsCount {
 			t.Errorf("Incorrect number of teams found: found %d, expected %d",
-				len(submission.TeamEvents), testCase.expectedTeamsCount)
+				len(rawSubmission.TeamEvents), testCase.expectedTeamsCount)
 		}
 
-		if len(submission.PlayerEvents) != testCase.expectedPlayersCount {
+		if len(rawSubmission.PlayerEvents) != testCase.expectedPlayersCount {
 			t.Errorf("Incorrect number of players found: found %d, expected %d",
-				len(submission.PlayerEvents), testCase.expectedPlayersCount)
+				len(rawSubmission.PlayerEvents), testCase.expectedPlayersCount)
+		}
+
+		_, err = NewSubmission(rawSubmission)
+		if err != nil {
+			t.Errorf("Could not parse %s into an actual submission: %s", testCase.filename, err)
 		}
 	}
 }
