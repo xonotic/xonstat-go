@@ -3,8 +3,11 @@ package submission
 import (
 	"bufio"
 	"fmt"
+	"github.com/antzucaro/xonstat-go/models"
 	"io"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // ReadReturner represents a streaming line reader that you can put lines back into. On subsequent
@@ -187,4 +190,73 @@ func (s *RawSubmission) Parse() error {
 	}
 
 	return nil
+}
+
+// Submission is a fully-formatted statistics POST request
+type Submission struct {
+	Game              models.Game
+	Server            models.Server
+	Map               models.Map
+	Players           []models.Player
+	PlayerGameStats   []models.PlayerGameStat
+	PlayerWeaponStats []models.PlayerWeaponStat
+	TeamGameStats     []models.TeamGameStat
+	CreateDt          time.Time
+}
+
+var InvalidGameMeta = fmt.Errorf("Invalid game metadata")
+
+// fillGame fills in the Game attribute from the raw submission
+func (s *Submission) fillGame(rs *RawSubmission) error {
+	if gameTypeCd, ok := rs.GameMeta["G"]; ok {
+		s.Game.GameTypeCd = gameTypeCd
+	} else {
+		return InvalidGameMeta
+	}
+
+	if durationSecsStr, ok := rs.GameMeta["D"]; ok {
+		durationSecs, err := strconv.Atoi(durationSecsStr)
+		if err != nil {
+			return InvalidGameMeta
+		}
+		s.Game.Duration = (time.Duration(durationSecs) * time.Second)
+	} else {
+		return InvalidGameMeta
+	}
+
+	if matchId, ok := rs.GameMeta["I"]; ok {
+		s.Game.MatchId = matchId
+	} else {
+		return InvalidGameMeta
+	}
+
+	if mod, ok := rs.GameMeta["O"]; ok {
+		s.Game.Mod = mod
+	}
+
+	s.Game.StartDt = s.CreateDt
+	s.Game.CreateDt = s.CreateDt
+
+	return nil
+}
+
+// NewSubmission converts a RawSubmission into a fully-formed one
+func NewSubmission(rs *RawSubmission) (*Submission, error) {
+	players := make([]models.Player, 0, len(rs.PlayerEvents))
+	playerGameStats := make([]models.PlayerGameStat, 0, len(rs.PlayerEvents))
+	playerWeaponStats := make([]models.PlayerWeaponStat, 0)
+	teamGameStats := make([]models.TeamGameStat, 0)
+
+	s := &Submission{
+		Players:           players,
+		PlayerGameStats:   playerGameStats,
+		PlayerWeaponStats: playerWeaponStats,
+		TeamGameStats:     teamGameStats,
+		CreateDt:          time.Now().UTC(),
+	}
+
+	// one at a time, we fill the members
+	s.fillGame(rs)
+
+	return s, nil
 }
