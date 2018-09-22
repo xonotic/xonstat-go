@@ -3,6 +3,7 @@ package submission
 import (
 	"bufio"
 	"fmt"
+	"github.com/antzucaro/qstr"
 	"github.com/antzucaro/xonstat-go/models"
 	"io"
 	"strconv"
@@ -192,19 +193,21 @@ func (s *RawSubmission) Parse() error {
 	return nil
 }
 
+// When a submission's "header" information is missing or invalid
+var InvalidGameMeta = fmt.Errorf("invalid game metadata")
+
 // Submission is a fully-formatted statistics POST request
 type Submission struct {
 	Game              models.Game
 	Server            models.Server
 	Map               models.Map
 	Players           []models.Player
+	PlayerHashkeys    []models.PlayerHashkey
 	PlayerGameStats   []models.PlayerGameStat
 	PlayerWeaponStats []models.PlayerWeaponStat
 	TeamGameStats     []models.TeamGameStat
 	CreateDt          time.Time
 }
-
-var InvalidGameMeta = fmt.Errorf("Invalid game metadata")
 
 // fillGame fills in the Game attribute from the raw submission
 func (s *Submission) fillGame(rs *RawSubmission) error {
@@ -282,15 +285,48 @@ func (s *Submission) fillMap(rs *RawSubmission) error {
 	return nil
 }
 
+// fillPlayers fills in the Players and PlayerHashKeys slices from the raw submission
+func (s *Submission) fillPlayers(rs *RawSubmission) error {
+	for _, pe := range rs.PlayerEvents {
+		hashkey := pe["P"]
+		nick := qstr.QStr(pe["n"])
+		strippedNick := nick.Stripped()
+
+		playerId, err := strconv.Atoi(pe["i"])
+		if err != nil {
+			playerId = -1
+		}
+
+		player := models.Player{
+			PlayerId:     playerId,
+			Nick:         string(nick),
+			StrippedNick: strippedNick,
+			CreateDt:     s.CreateDt,
+		}
+
+		playerHashkey := models.PlayerHashkey{
+			PlayerId: playerId,
+			Hashkey:  hashkey,
+			CreateDt: s.CreateDt,
+		}
+
+		s.Players = append(s.Players, player)
+		s.PlayerHashkeys = append(s.PlayerHashkeys, playerHashkey)
+	}
+	return nil
+}
+
 // NewSubmission converts a RawSubmission into a fully-formed one
 func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	players := make([]models.Player, 0, len(rs.PlayerEvents))
+	playerHashkeys := make([]models.PlayerHashkey, 0, len(rs.PlayerEvents))
 	playerGameStats := make([]models.PlayerGameStat, 0, len(rs.PlayerEvents))
 	playerWeaponStats := make([]models.PlayerWeaponStat, 0)
 	teamGameStats := make([]models.TeamGameStat, 0)
 
 	s := &Submission{
 		Players:           players,
+		PlayerHashkeys:    playerHashkeys,
 		PlayerGameStats:   playerGameStats,
 		PlayerWeaponStats: playerWeaponStats,
 		TeamGameStats:     teamGameStats,
@@ -309,6 +345,11 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	}
 
 	err = s.fillMap(rs)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.fillPlayers(rs)
 	if err != nil {
 		return nil, err
 	}

@@ -98,8 +98,15 @@ type Player struct {
 	StrippedNick string
 	Location     string
 	EmailAddr    string
-	ActiveInd    string
+	ActiveInd    bool
 	CreateDt     time.Time
+}
+
+type PlayerHashkey struct {
+	PlayerId  int
+	Hashkey   string
+	ActiveInd bool
+	CreateDt  time.Time
 }
 
 type TeamGameStat struct {
