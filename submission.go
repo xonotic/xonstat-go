@@ -218,23 +218,20 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 	}
 
 	if durationSecsStr, ok := rs.GameMeta["D"]; ok {
-		durationSecs, err := strconv.ParseFloat(durationSecsStr, 32)
-		if err != nil {
-			return InvalidGameMeta
+		if durationSecs, err := strconv.ParseFloat(durationSecsStr, 32); err == nil {
+			d := time.Duration(durationSecs) * time.Second
+			s.Game.Duration = &d
 		}
-		s.Game.Duration = (time.Duration(durationSecs) * time.Second)
 	} else {
 		return InvalidGameMeta
 	}
 
 	if matchId, ok := rs.GameMeta["I"]; ok {
-		s.Game.MatchId = matchId
-	} else {
-		return InvalidGameMeta
+		s.Game.MatchId = &matchId
 	}
 
 	if mod, ok := rs.GameMeta["O"]; ok {
-		s.Game.Mod = mod
+		s.Game.Mod = &mod
 	}
 
 	s.Game.StartDt = s.CreateDt
@@ -246,25 +243,25 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 // fillServer fills in the Server attribute from the raw submission
 func (s *Submission) fillServer(rs *RawSubmission) error {
 	if serverName, ok := rs.GameMeta["S"]; ok {
-		s.Server.Name = serverName
+		s.Server.Name = &serverName
 	} else {
 		return InvalidGameMeta
 	}
 
 	if portStr, ok := rs.GameMeta["U"]; ok {
 		if port, err := strconv.Atoi(portStr); err == nil {
-			s.Server.Port = port
+			s.Server.Port = &port
 		}
 	}
 
 	if impureCvarsStr, ok := rs.GameMeta["C"]; ok {
 		if impureCvars, err := strconv.Atoi(impureCvarsStr); err == nil {
-			s.Server.ImpureCvars = impureCvars
+			s.Server.ImpureCvars = &impureCvars
 		}
 	}
 
 	if revision, ok := rs.GameMeta["R"]; ok {
-		s.Server.Revision = revision
+		s.Server.Revision = &revision
 	}
 
 	s.Server.CreateDt = s.CreateDt
@@ -289,8 +286,9 @@ func (s *Submission) fillMap(rs *RawSubmission) error {
 func (s *Submission) fillPlayers(rs *RawSubmission) error {
 	for _, pe := range rs.PlayerEvents {
 		hashkey := pe["P"]
-		nick := qstr.QStr(pe["n"])
-		strippedNick := nick.Stripped()
+		nick := pe["n"]
+		nickQStr := qstr.QStr(nick)
+		strippedNick := nickQStr.Stripped()
 
 		playerId, err := strconv.Atoi(pe["i"])
 		if err != nil {
@@ -299,8 +297,8 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 
 		player := models.Player{
 			PlayerId:     playerId,
-			Nick:         string(nick),
-			StrippedNick: strippedNick,
+			Nick:         &nick,
+			StrippedNick: &strippedNick,
 			CreateDt:     s.CreateDt,
 		}
 
