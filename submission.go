@@ -269,6 +269,19 @@ func (s *Submission) fillServer(rs *RawSubmission) error {
 	return nil
 }
 
+// fillMap fills in the Map attribute from the raw submission
+func (s *Submission) fillMap(rs *RawSubmission) error {
+	if mapName, ok := rs.GameMeta["M"]; ok {
+		s.Map.Name = mapName
+	} else {
+		return InvalidGameMeta
+	}
+
+	s.Map.CreateDt = s.CreateDt
+
+	return nil
+}
+
 // NewSubmission converts a RawSubmission into a fully-formed one
 func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	players := make([]models.Player, 0, len(rs.PlayerEvents))
@@ -291,6 +304,11 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	}
 
 	err = s.fillServer(rs)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.fillMap(rs)
 	if err != nil {
 		return nil, err
 	}
