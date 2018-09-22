@@ -215,7 +215,7 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 	}
 
 	if durationSecsStr, ok := rs.GameMeta["D"]; ok {
-		durationSecs, err := strconv.Atoi(durationSecsStr)
+		durationSecs, err := strconv.ParseFloat(durationSecsStr, 32)
 		if err != nil {
 			return InvalidGameMeta
 		}
@@ -240,6 +240,35 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 	return nil
 }
 
+// fillServer fills in the Server attribute from the raw submission
+func (s *Submission) fillServer(rs *RawSubmission) error {
+	if serverName, ok := rs.GameMeta["S"]; ok {
+		s.Server.Name = serverName
+	} else {
+		return InvalidGameMeta
+	}
+
+	if portStr, ok := rs.GameMeta["U"]; ok {
+		if port, err := strconv.Atoi(portStr); err == nil {
+			s.Server.Port = port
+		}
+	}
+
+	if impureCvarsStr, ok := rs.GameMeta["C"]; ok {
+		if impureCvars, err := strconv.Atoi(impureCvarsStr); err == nil {
+			s.Server.ImpureCvars = impureCvars
+		}
+	}
+
+	if revision, ok := rs.GameMeta["R"]; ok {
+		s.Server.Revision = revision
+	}
+
+	s.Server.CreateDt = s.CreateDt
+
+	return nil
+}
+
 // NewSubmission converts a RawSubmission into a fully-formed one
 func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	players := make([]models.Player, 0, len(rs.PlayerEvents))
@@ -256,7 +285,15 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	}
 
 	// one at a time, we fill the members
-	s.fillGame(rs)
+	err := s.fillGame(rs)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.fillServer(rs)
+	if err != nil {
+		return nil, err
+	}
 
 	return s, nil
 }
