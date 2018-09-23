@@ -282,9 +282,23 @@ func (s *Submission) fillMap(rs *RawSubmission) error {
 	return nil
 }
 
+// fillPlayerGameStat fills in a single PlayerGameStat struct from the raw submission events
+func (s *Submission) fillPlayerGameStat(rs *RawSubmission, index int) error {
+	// an initialized pgstat based on the game type being played
+	pgs := models.NewPlayerGameStat(s.Game.GameTypeCd)
+
+	// fields passed on from other objects
+	pgs.GameId = s.Game.GameId
+	pgs.CreateDt = s.CreateDt
+
+	s.PlayerGameStats = append(s.PlayerGameStats, *pgs)
+
+	return nil
+}
+
 // fillPlayers fills in the Players and PlayerHashKeys slices from the raw submission
 func (s *Submission) fillPlayers(rs *RawSubmission) error {
-	for _, pe := range rs.PlayerEvents {
+	for i, pe := range rs.PlayerEvents {
 		hashkey := pe["P"]
 		nick := pe["n"]
 		nickQStr := qstr.QStr(nick)
@@ -307,6 +321,8 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 			Hashkey:  hashkey,
 			CreateDt: s.CreateDt,
 		}
+
+		s.fillPlayerGameStat(rs, i)
 
 		s.Players = append(s.Players, player)
 		s.PlayerHashkeys = append(s.PlayerHashkeys, playerHashkey)

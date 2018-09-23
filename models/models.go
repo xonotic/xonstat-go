@@ -78,6 +78,64 @@ type PlayerGameStat struct {
 	CreateDt         time.Time
 }
 
+func NewPlayerGameStat(gameTypeCd string) *PlayerGameStat {
+	var pgs PlayerGameStat
+
+	score := 0
+	pgs.Score = &score
+
+	switch gameTypeCd {
+	case "as":
+		team, kills, deaths, suicides, collects := 0, 0, 0, 0, 0
+		pgs.Team, pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Collects = &team, &kills, &deaths,
+			&suicides, &collects
+
+	case "ca", "dm", "duel", "rune", "tdm":
+		kills, deaths, suicides := 0, 0, 0
+		pgs.Kills, pgs.Deaths, pgs.Suicides = &kills, &deaths, &suicides
+
+	case "ctf":
+		kills, captures, pickups, drops, returns, carrierFrags := 0, 0, 0, 0, 0, 0
+		pgs.Kills, pgs.Captures, pgs.Pickups, pgs.Drops, pgs.Returns, pgs.CarrierFrags = &kills,
+			&captures, &pickups, &drops, &returns, &carrierFrags
+
+	case "cts":
+		deaths := 0
+		pgs.Deaths = &deaths
+
+	case "dom":
+		kills, deaths, suicides, pickups, drops := 0, 0, 0, 0, 0
+		pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Pickups, pgs.Drops = &kills, &deaths, &suicides,
+			&pickups, &drops
+
+	case "ft":
+		kills, deaths, suicides, revivals := 0, 0, 0, 0
+		pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Revivals = &kills, &deaths, &suicides, &revivals
+
+	case "ka":
+		kills, deaths, suicides, pickups, carrierFrags := 0, 0, 0, 0, 0
+		pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Pickups, pgs.CarrierFrags = &kills, &deaths,
+			&suicides, &pickups, &carrierFrags
+
+	case "kh":
+		kills, deaths, suicides, pickups, captures := 0, 0, 0, 0, 0
+		drops, pushes, destroys, carrierFrags := 0, 0, 0, 0
+
+		pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Pickups, pgs.Captures = &kills, &deaths,
+			&suicides, &pickups, &captures
+
+		pgs.Drops, pgs.Pushes, pgs.Destroys, pgs.CarrierFrags = &drops, &pushes, &destroys,
+			&carrierFrags
+
+	case "nb":
+		kills, deaths, suicides, captures, drops := 0, 0, 0, 0, 0
+		pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Captures, pgs.Drops = &kills, &deaths,
+			&suicides, &captures, &drops
+	}
+
+	return &pgs
+}
+
 type PlayerWeaponStat struct {
 	PlayerWeaponStatId int
 	PlayerId           int
