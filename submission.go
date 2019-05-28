@@ -3,12 +3,13 @@ package submission
 import (
 	"bufio"
 	"fmt"
-	"github.com/antzucaro/qstr"
-	"github.com/antzucaro/xonstat-go/models"
 	"io"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/antzucaro/qstr"
+	"github.com/antzucaro/xonstat-go/models"
 )
 
 // ReadReturner represents a streaming line reader that you can put lines back into. On subsequent
@@ -42,14 +43,14 @@ func (h *ReadReturner) Read() (string, error) {
 	scanned := h.scanner.Scan()
 	if scanned {
 		return h.scanner.Text(), nil
-	} else {
-		err := h.scanner.Err()
-		if err != nil {
-			return "", err
-		} else {
-			return "", io.EOF
-		}
 	}
+
+	err := h.scanner.Err()
+	if err != nil {
+		return "", err
+	}
+
+	return "", io.EOF
 }
 
 // Return puts a line back into the Queue for the next call to Read()
@@ -87,9 +88,9 @@ func getPair(s string) (string, string, error) {
 	tokens := strings.SplitN(s, " ", 2)
 	if len(tokens) != 2 {
 		return "", "", nil
-	} else {
-		return tokens[0], tokens[1], nil
 	}
+
+	return tokens[0], tokens[1], nil
 }
 
 // nextPair is a helper utility to fetch the next key:value pair from the ReadReturner
@@ -193,8 +194,8 @@ func (s *RawSubmission) Parse() error {
 	return nil
 }
 
-// When a submission's "header" information is missing or invalid
-var InvalidGameMeta = fmt.Errorf("invalid game metadata")
+// ErrInvalidGameMeta is when a submission's "header" information is missing or invalid
+var ErrInvalidGameMeta = fmt.Errorf("invalid game metadata")
 
 // Submission is a fully-formatted statistics POST request
 type Submission struct {
@@ -214,7 +215,7 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 	if gameTypeCd, ok := rs.GameMeta["G"]; ok {
 		s.Game.GameTypeCd = gameTypeCd
 	} else {
-		return InvalidGameMeta
+		return ErrInvalidGameMeta
 	}
 
 	if durationSecsStr, ok := rs.GameMeta["D"]; ok {
@@ -223,11 +224,11 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 			s.Game.Duration = &d
 		}
 	} else {
-		return InvalidGameMeta
+		return ErrInvalidGameMeta
 	}
 
-	if matchId, ok := rs.GameMeta["I"]; ok {
-		s.Game.MatchId = &matchId
+	if matchID, ok := rs.GameMeta["I"]; ok {
+		s.Game.MatchId = &matchID
 	}
 
 	if mod, ok := rs.GameMeta["O"]; ok {
@@ -245,7 +246,7 @@ func (s *Submission) fillServer(rs *RawSubmission) error {
 	if serverName, ok := rs.GameMeta["S"]; ok {
 		s.Server.Name = &serverName
 	} else {
-		return InvalidGameMeta
+		return ErrInvalidGameMeta
 	}
 
 	if portStr, ok := rs.GameMeta["U"]; ok {
@@ -274,7 +275,7 @@ func (s *Submission) fillMap(rs *RawSubmission) error {
 	if mapName, ok := rs.GameMeta["M"]; ok {
 		s.Map.Name = mapName
 	} else {
-		return InvalidGameMeta
+		return ErrInvalidGameMeta
 	}
 
 	s.Map.CreateDt = s.CreateDt
@@ -304,20 +305,20 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 		nickQStr := qstr.QStr(nick)
 		strippedNick := nickQStr.Stripped()
 
-		playerId, err := strconv.Atoi(pe["i"])
+		playerID, err := strconv.Atoi(pe["i"])
 		if err != nil {
-			playerId = -1
+			playerID = -1
 		}
 
 		player := models.Player{
-			PlayerId:     playerId,
+			PlayerId:     playerID,
 			Nick:         &nick,
 			StrippedNick: &strippedNick,
 			CreateDt:     s.CreateDt,
 		}
 
 		playerHashkey := models.PlayerHashkey{
-			PlayerId: playerId,
+			PlayerId: playerID,
 			Hashkey:  hashkey,
 			CreateDt: s.CreateDt,
 		}
