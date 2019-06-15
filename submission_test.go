@@ -32,9 +32,7 @@ func TestCorrectCounts(t *testing.T) {
 		defer f.Close()
 
 		body := bufio.NewReader(f)
-		rawSubmission := NewRawSubmission(body)
-
-		err = rawSubmission.Parse()
+		rawSubmission, err := NewRawSubmission(body)
 		if err != nil {
 			t.Errorf("Unable to parse.")
 		}

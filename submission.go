@@ -74,13 +74,16 @@ type RawSubmission struct {
 }
 
 // NewRawSubmission creates a new RawSubmission from the given reader
-func NewRawSubmission(body io.Reader) *RawSubmission {
-	return &RawSubmission{
+func NewRawSubmission(body io.Reader) (*RawSubmission, error) {
+	rs := &RawSubmission{
 		GameMeta:     make(map[string]string),
 		TeamEvents:   make([]map[string]string, 0),
 		PlayerEvents: make([]map[string]string, 0),
 		rr:           NewReadReturner(body),
 	}
+
+	err := rs.parse()
+	return rs, err
 }
 
 // getPair returns the space-separated key/value pair from a given string
@@ -170,8 +173,8 @@ func (s *RawSubmission) parsePlayer(label, playerID string) {
 	return
 }
 
-// Parse parses the submission's body
-func (s *RawSubmission) Parse() error {
+// parse parses the submission's body
+func (s *RawSubmission) parse() error {
 	key, value, err := s.nextPair()
 	for err == nil {
 		switch key {
