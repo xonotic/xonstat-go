@@ -75,6 +75,9 @@ type RawSubmission struct {
 	// raw player events: key/value pairs related to players
 	PlayerEvents []map[string]string
 
+	// humans who played in the match
+	Humans []*map[string]string
+
 	// ReadReturner used to parse the submission
 	rr *ReadReturner
 }
@@ -85,10 +88,16 @@ func NewRawSubmission(body io.Reader) (*RawSubmission, error) {
 		GameMeta:     make(map[string]string),
 		TeamEvents:   make([]map[string]string, 0),
 		PlayerEvents: make([]map[string]string, 0),
+		Humans:       make([]*map[string]string, 0),
 		rr:           NewReadReturner(body),
 	}
 
 	err := rs.parse()
+	if err != nil {
+		return nil, err
+	}
+
+	err = rs.analyze()
 	if err != nil {
 		return nil, err
 	}
@@ -259,6 +268,31 @@ func (s *RawSubmission) isSupportedGameType() error {
 	default:
 		return ErrUnsupportedGameType
 	}
+}
+
+// isHuman determines of the set of player events represents a human
+func isHuman(events map[string]string) bool {
+	return !strings.HasPrefix(events["P"], "bot")
+}
+
+// playedInGame determines of the set of player events represents a player who played the match (is on the scoreboard)
+func playedInGame(events map[string]string) bool {
+	_, matches := events["matches"]
+	_, scoreboardvalid := events["scoreboardvalid"]
+	return matches && scoreboardvalid
+}
+
+// analyze looks over the various events and captures information about them for later validation
+func (s *RawSubmission) analyze() error {
+	var human, played bool
+	for _, playerEvents := range s.PlayerEvents {
+		human = isHuman(playerEvents)
+		played = playedInGame(playerEvents)
+		if human && played {
+			s.Humans = append(s.Humans, &playerEvents)
+		}
+	}
+	return nil
 }
 
 // validate runs the preconditions checks possible for raw submissions
