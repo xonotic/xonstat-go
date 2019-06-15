@@ -61,6 +61,9 @@ func (h *ReadReturner) Return(line string) {
 // ErrInvalidGameMeta is when a submission's "header" information is missing or invalid
 var ErrInvalidGameMeta = fmt.Errorf("invalid game metadata")
 
+// ErrUnsupportedGameType is when a submission is for an unsupported game type
+var ErrUnsupportedGameType = fmt.Errorf("unsupported game type")
+
 // RawSubmission is an untyped game stats submission
 type RawSubmission struct {
 	// game metadata
@@ -90,7 +93,7 @@ func NewRawSubmission(body io.Reader) (*RawSubmission, error) {
 		return nil, err
 	}
 
-	err = rs.doPreconditionChecks()
+	err = rs.validate()
 	if err != nil {
 		return nil, err
 	}
@@ -219,9 +222,53 @@ func (s *RawSubmission) hasRequiredMetadata() error {
 	return nil
 }
 
-// doPreconditionChecks runs the preconditions checks possible for raw submissions
-func (s *RawSubmission) doPreconditionChecks() error {
+func (s *RawSubmission) isSupportedGameType() error {
+	switch s.GameMeta["G"] {
+	case "as":
+		return nil
+	case "ca":
+		return nil
+	case "ctf":
+		return nil
+	case "cts":
+		return nil
+	case "dm":
+		return nil
+	case "dom":
+		return nil
+	case "duel":
+		return nil
+	case "ft":
+		return nil
+	case "freezetag":
+		return nil
+	case "ka":
+		return nil
+	case "keepaway":
+		return nil
+	case "kh":
+		return nil
+	case "nb":
+		return nil
+	case "nexball":
+		return nil
+	case "rune":
+		return nil
+	case "tdm":
+		return nil
+	default:
+		return ErrUnsupportedGameType
+	}
+}
+
+// validate runs the preconditions checks possible for raw submissions
+func (s *RawSubmission) validate() error {
 	err := s.hasRequiredMetadata()
+	if err != nil {
+		return err
+	}
+
+	err = s.isSupportedGameType()
 	if err != nil {
 		return err
 	}

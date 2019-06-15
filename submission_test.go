@@ -70,3 +70,20 @@ func TestInvalidMetadata(t *testing.T) {
 		t.Errorf("Did not receive ErrInvalidGameMeta")
 	}
 }
+
+// test that errors are thrown if a submission is for an unsupported game type
+func TestUnsupportedGameType(t *testing.T) {
+	filename := "resources/submissions/unsupported_game_type.txt"
+
+	f, err := os.Open(filename)
+	if err != nil {
+		t.Errorf("Unable to open file %s for testing", filename)
+	}
+	defer f.Close()
+
+	body := bufio.NewReader(f)
+	_, err = NewRawSubmission(body)
+	if err != ErrUnsupportedGameType {
+		t.Errorf("Did not receive ErrUnsupportedGameType")
+	}
+}
