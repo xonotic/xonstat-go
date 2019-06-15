@@ -1,0 +1,35 @@
+R xonotic-v0.8.0-984-gf0d7836
+O Xonotic
+M stormkeep
+I 0.019724
+S Xonotic 0.8.1 Server
+C 2
+U 26000
+D 37.436241
+L 
+P NOT_A_HASHKEY
+i 10
+n Dominator
+e kills-9 1
+e kills-8 1
+e kills-6 1
+e kills-3 1
+e scoreboard-suicides 1
+e total-suicides 1
+e scoreboard-deaths 4
+e total-deaths 4
+e scoreboard-kills 4
+e total-kills 4
+e scoreboard-score 3
+e total-score 3
+e achievement-kill-spree-3 1
+e acc-devastator-frags 4
+e acc-devastator-cnt-fired 15
+e acc-devastator-cnt-hit 8
+e acc-devastator-fired 1200
+e acc-devastator-hit 414.654
+e rank 2
+e scoreboardpos 2
+e scoreboardvalid 1
+e joins 1
+e alivetime 28.4306
