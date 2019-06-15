@@ -58,6 +58,9 @@ func (h *ReadReturner) Return(line string) {
 	h.queue = append(h.queue, line)
 }
 
+// ErrInvalidGameMeta is when a submission's "header" information is missing or invalid
+var ErrInvalidGameMeta = fmt.Errorf("invalid game metadata")
+
 // RawSubmission is an untyped game stats submission
 type RawSubmission struct {
 	// game metadata
@@ -83,7 +86,16 @@ func NewRawSubmission(body io.Reader) (*RawSubmission, error) {
 	}
 
 	err := rs.parse()
-	return rs, err
+	if err != nil {
+		return nil, err
+	}
+
+	err = rs.doPreconditionChecks()
+	if err != nil {
+		return nil, err
+	}
+
+	return rs, nil
 }
 
 // getPair returns the space-separated key/value pair from a given string
@@ -197,8 +209,25 @@ func (s *RawSubmission) parse() error {
 	return nil
 }
 
-// ErrInvalidGameMeta is when a submission's "header" information is missing or invalid
-var ErrInvalidGameMeta = fmt.Errorf("invalid game metadata")
+// hasRequiredMetadata checks that the required top-level metadata is present
+func (s *RawSubmission) hasRequiredMetadata() error {
+	for _, requiredKey := range []string{"G", "V", "I", "S", "M"} {
+		if _, ok := s.GameMeta[requiredKey]; !ok {
+			return ErrInvalidGameMeta
+		}
+	}
+	return nil
+}
+
+// doPreconditionChecks runs the preconditions checks possible for raw submissions
+func (s *RawSubmission) doPreconditionChecks() error {
+	err := s.hasRequiredMetadata()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // Submission is a fully-formatted statistics POST request
 type Submission struct {

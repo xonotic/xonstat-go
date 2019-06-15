@@ -53,3 +53,20 @@ func TestCorrectCounts(t *testing.T) {
 		}
 	}
 }
+
+// test that errors are thrown if a submission is missing required metadata
+func TestInvalidMetadata(t *testing.T) {
+	filename := "resources/submissions/missing_metadata.txt"
+
+	f, err := os.Open(filename)
+	if err != nil {
+		t.Errorf("Unable to open file %s for testing", filename)
+	}
+	defer f.Close()
+
+	body := bufio.NewReader(f)
+	_, err = NewRawSubmission(body)
+	if err != ErrInvalidGameMeta {
+		t.Errorf("Did not receive ErrInvalidGameMeta")
+	}
+}
