@@ -78,6 +78,9 @@ type RawSubmission struct {
 	// humans who played in the match
 	Humans []*map[string]string
 
+	// bots who played in the match
+	Bots []*map[string]string
+
 	// ReadReturner used to parse the submission
 	rr *ReadReturner
 }
@@ -89,6 +92,7 @@ func NewRawSubmission(body io.Reader) (*RawSubmission, error) {
 		TeamEvents:   make([]map[string]string, 0),
 		PlayerEvents: make([]map[string]string, 0),
 		Humans:       make([]*map[string]string, 0),
+		Bots:         make([]*map[string]string, 0),
 		rr:           NewReadReturner(body),
 	}
 
@@ -288,8 +292,12 @@ func (s *RawSubmission) analyze() error {
 	for _, playerEvents := range s.PlayerEvents {
 		human = isHuman(playerEvents)
 		played = playedInGame(playerEvents)
-		if human && played {
-			s.Humans = append(s.Humans, &playerEvents)
+		if played {
+			if human {
+				s.Humans = append(s.Humans, &playerEvents)
+			} else {
+				s.Bots = append(s.Humans, &playerEvents)
+			}
 		}
 	}
 	return nil
