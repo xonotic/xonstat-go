@@ -87,6 +87,9 @@ type RawSubmission struct {
 	// did a human who played in the game fire a weapon?
 	HumanFiredWeapon bool
 
+	// did a human who played in the game record a fastest lap?
+	HumanFastestLap bool
+
 	// references to player events by player hashkey
 	PlayerEventsByHashkey map[string]*map[string]string
 
@@ -186,6 +189,7 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 	events[label] = hashkey
 	index := -1
 	firedWeapon := false
+	hasFastestLap := false
 
 	key, value, err := s.nextPair()
 	for err == nil {
@@ -204,6 +208,11 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 			if strings.HasPrefix(subkey, "acc-") && strings.HasSuffix(subkey, "cnt-fired") {
 				firedWeapon = true
 			}
+
+			// did this player have a fastest lap
+			if subkey == "scoreboard-fastest" {
+				hasFastestLap = true
+			}
 		case "#", "":
 			// no-op: comment or blank line
 		default:
@@ -216,6 +225,9 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 			if isHuman(events) && playedInGame(events) {
 				if firedWeapon {
 					s.HumanFiredWeapon = true
+				}
+				if hasFastestLap {
+					s.HumanFastestLap = true
 				}
 			}
 			// reference by hashkey or player index
