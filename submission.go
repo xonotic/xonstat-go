@@ -81,6 +81,15 @@ type RawSubmission struct {
 	// bots who played in the match
 	Bots []*map[string]string
 
+	// weapons used during the match
+	WeaponsUsed map[string]struct{}
+
+	// references to player events by player hashkey
+	PlayerEventsByHashkey map[string]*map[string]string
+
+	// references to player events by player index
+	PlayerEventsByIndex map[int]*map[string]string
+
 	// ReadReturner used to parse the submission
 	rr *ReadReturner
 }
@@ -88,12 +97,15 @@ type RawSubmission struct {
 // NewRawSubmission creates a new RawSubmission from the given reader
 func NewRawSubmission(body io.Reader) (*RawSubmission, error) {
 	rs := &RawSubmission{
-		GameMeta:     make(map[string]string),
-		TeamEvents:   make([]map[string]string, 0),
-		PlayerEvents: make([]map[string]string, 0),
-		Humans:       make([]*map[string]string, 0),
-		Bots:         make([]*map[string]string, 0),
-		rr:           NewReadReturner(body),
+		GameMeta:              make(map[string]string),
+		TeamEvents:            make([]map[string]string, 0),
+		PlayerEvents:          make([]map[string]string, 0),
+		Humans:                make([]*map[string]string, 0),
+		Bots:                  make([]*map[string]string, 0),
+		WeaponsUsed:           make(map[string]struct{}, 0),
+		PlayerEventsByHashkey: make(map[string]*map[string]string, 0),
+		PlayerEventsByIndex:   make(map[int]*map[string]string, 0),
+		rr:                    NewReadReturner(body),
 	}
 
 	err := rs.parse()
@@ -286,10 +298,21 @@ func playedInGame(events map[string]string) bool {
 	return matches && scoreboardvalid
 }
 
+// weaponFromKey extracts the weapon code from an accuracy event key (e.g. acc-blaster-cnt-fired -> blaster)
+func weaponFromKey(key string) string {
+	pieces := strings.SplitN(key, "-", 3)
+	if len(pieces) == 3 && pieces[0] == "acc" {
+		return pieces[1]
+	} else {
+		return ""
+	}
+}
+
 // analyze looks over the various events and captures information about them for later validation
 func (s *RawSubmission) analyze() error {
 	var human, played bool
 	for _, playerEvents := range s.PlayerEvents {
+		// keep track of the humans and bots that actually played in the game
 		human = isHuman(playerEvents)
 		played = playedInGame(playerEvents)
 		if played {
@@ -297,6 +320,13 @@ func (s *RawSubmission) analyze() error {
 				s.Humans = append(s.Humans, &playerEvents)
 			} else {
 				s.Bots = append(s.Humans, &playerEvents)
+			}
+		}
+
+		for key, _ := range playerEvents {
+			// keep track of which weapons were used (i.e. fired) in the match via accuracy events
+			if strings.HasPrefix(key, "acc-") && strings.HasSuffix(key, "cnt-fired") {
+				s.WeaponsUsed[weaponFromKey(key)] = struct{}{}
 			}
 		}
 	}
