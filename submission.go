@@ -87,6 +87,9 @@ type RawSubmission struct {
 	// did a human who played in the game fire a weapon?
 	HumanFiredWeapon bool
 
+	// did a human who played in the game have a non-zero score?
+	HumanNonZeroScore bool
+
 	// did a human who played in the game record a fastest lap?
 	HumanFastestLap bool
 
@@ -190,6 +193,7 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 	index := -1
 	firedWeapon := false
 	hasFastestLap := false
+	nonZeroScore := false
 
 	key, value, err := s.nextPair()
 	for err == nil {
@@ -209,6 +213,13 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 				firedWeapon = true
 			}
 
+			if subkey == "scoreboard-score" {
+				score, err := strconv.ParseFloat(subvalue, 32)
+				if err == nil && (score > 0.0 || score < 0.0) {
+					nonZeroScore = true
+				}
+			}
+
 			// did this player have a fastest lap
 			if subkey == "scoreboard-fastest" {
 				hasFastestLap = true
@@ -226,6 +237,11 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 				if firedWeapon {
 					s.HumanFiredWeapon = true
 				}
+
+				if nonZeroScore {
+					s.HumanNonZeroScore = true
+				}
+
 				if hasFastestLap {
 					s.HumanFastestLap = true
 				}
