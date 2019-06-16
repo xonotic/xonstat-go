@@ -146,17 +146,18 @@ func (s *RawSubmission) nextPair() (string, string, error) {
 	return getPair(line)
 }
 
-// parseTeam reads all of the team metadata in lines, until hitting a non-team line
-func (s *RawSubmission) parseTeam(label, teamID string) {
-	team := make(map[string]string)
-	team[label] = teamID
+// parseTeamEvents reads all of the team metadata in lines, until hitting a non-team line
+func (s *RawSubmission) parseTeamEvents(label, teamID string) {
+	events := make(map[string]string)
+	events[label] = teamID
 
 	key, value, err := s.nextPair()
 	for err == nil {
+		// consume all team-related events under the team label Q: e
 		switch key {
 		case "e":
 			subkey, subvalue, _ := getPair(value)
-			team[subkey] = subvalue
+			events[subkey] = subvalue
 		case "#", "":
 			// no-op: comment or blank line
 		default:
@@ -164,7 +165,7 @@ func (s *RawSubmission) parseTeam(label, teamID string) {
 			s.rr.Return(fmt.Sprintf("%s %s", key, value))
 
 			// we're done with the team we were working on
-			s.TeamEvents = append(s.TeamEvents, team)
+			s.TeamEvents = append(s.TeamEvents, events)
 
 			return
 		}
@@ -176,19 +177,24 @@ func (s *RawSubmission) parseTeam(label, teamID string) {
 	return
 }
 
-// parsePlayer reads all of the player metadata in lines, until hitting a non-player line
-func (s *RawSubmission) parsePlayer(label, playerID string) {
-	player := make(map[string]string)
-	player[label] = playerID
+// parsePlayerEvents reads all of the player metadata in lines, until hitting a non-player line
+func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
+	events := make(map[string]string)
+	events[label] = hashkey
+	index := -1
 
 	key, value, err := s.nextPair()
 	for err == nil {
+		// consume all player-related keys below the player label P: i, n, t, r, e
 		switch key {
-		case "i", "n", "t", "r":
-			player[key] = value
+		case "i":
+			index, _ = strconv.Atoi(value)
+			events[key] = value
+		case "n", "t", "r":
+			events[key] = value
 		case "e":
 			subkey, subvalue, _ := getPair(value)
-			player[subkey] = subvalue
+			events[subkey] = subvalue
 		case "#", "":
 			// no-op: comment or blank line
 		default:
@@ -196,7 +202,11 @@ func (s *RawSubmission) parsePlayer(label, playerID string) {
 			s.rr.Return(fmt.Sprintf("%s %s", key, value))
 
 			// we must be done w/ the player we were working on...
-			s.PlayerEvents = append(s.PlayerEvents, player)
+			s.PlayerEvents = append(s.PlayerEvents, events)
+
+			// reference by hashkey or player index
+			s.PlayerEventsByHashkey[hashkey] = &events
+			s.PlayerEventsByIndex[index] = &events
 
 			return
 		}
@@ -205,9 +215,9 @@ func (s *RawSubmission) parsePlayer(label, playerID string) {
 		key, value, err = s.nextPair()
 	}
 
-	if err == io.EOF && len(player) > 1 {
+	if err == io.EOF && len(events) > 1 {
 		// special case: the last player in the file
-		s.PlayerEvents = append(s.PlayerEvents, player)
+		s.PlayerEvents = append(s.PlayerEvents, events)
 	}
 
 	return
@@ -222,9 +232,9 @@ func (s *RawSubmission) parse() error {
 			// metadata about the game
 			s.GameMeta[key] = value
 		case "Q":
-			s.parseTeam(key, value)
+			s.parseTeamEvents(key, value)
 		case "P":
-			s.parsePlayer(key, value)
+			s.parsePlayerEvents(key, value)
 		case "#", "":
 			// no-op: a comment or blank line
 		default:
