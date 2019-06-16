@@ -84,6 +84,9 @@ type RawSubmission struct {
 	// weapons used during the match
 	WeaponsUsed map[string]struct{}
 
+	// did a human who played in the game fire a weapon?
+	HumanFiredWeapon bool
+
 	// references to player events by player hashkey
 	PlayerEventsByHashkey map[string]*map[string]string
 
@@ -182,6 +185,7 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 	events := make(map[string]string)
 	events[label] = hashkey
 	index := -1
+	firedWeapon := false
 
 	key, value, err := s.nextPair()
 	for err == nil {
@@ -195,15 +199,25 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 		case "e":
 			subkey, subvalue, _ := getPair(value)
 			events[subkey] = subvalue
+
+			// did this player fire a weapon?
+			if strings.HasPrefix(subkey, "acc-") && strings.HasSuffix(subkey, "cnt-fired") {
+				firedWeapon = true
+			}
 		case "#", "":
 			// no-op: comment or blank line
 		default:
 			// hit a non-player key, so return that line
 			s.rr.Return(fmt.Sprintf("%s %s", key, value))
 
-			// we must be done w/ the player we were working on...
+			// we are done w/ the events we were working on...
 			s.PlayerEvents = append(s.PlayerEvents, events)
 
+			if isHuman(events) && playedInGame(events) {
+				if firedWeapon {
+					s.HumanFiredWeapon = true
+				}
+			}
 			// reference by hashkey or player index
 			s.PlayerEventsByHashkey[hashkey] = &events
 			s.PlayerEventsByIndex[index] = &events
