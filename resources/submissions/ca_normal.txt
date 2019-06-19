@@ -1,81 +1,343 @@
 V 9
-R xonotic-v0.8.2-711-g4a06745a1
+R xonotic-v0.8.2-2743-g0ada14f59
 G ca
 O Xonotic
-M asylum_full_r1
-I 0.1506980694.892611
-S pacman's Pickup
-C 4
-U 26000
-D 1805.331665
+M cucumber_v3r1
+I 0.1560648266.260930
+S [WTWRP] Votable (2)
+C 0
+U 30142
+D 1073.002197
 L 
 Q team#14
-e scoreboard-rounds 1
-e scoreboard-score 4.7525
+e scoreboard-rounds 6
+e scoreboard-score 104.38
 Q team#5
-e scoreboard-score 3.20302
-P NOT_A_HASHKEY
-i 1
+e scoreboard-rounds 10
+e scoreboard-score 130.17
+P aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+i 10
+n van
 t 14
-e kills-3 1
-e anticheat-idle_snapaim_m10 35.5625
-e anticheat-idle_snapaim_m7 26.3525
-e anticheat-idle_snapaim_m4 12.477
-e anticheat-idle_snapaim_m3 7.05508
-e anticheat-idle_snapaim_m2 2.61904
-e anticheat-idle_snapaim_noise 0.683736
-e anticheat-idle_snapaim_signal 17.6765
-e anticheat-idle_snapaim 16.9927
-e anticheat-div0_evade 0.005286
-e anticheat-div0_strafebot_new 0.153077
-e anticheat-speedhack_m5 1.00189
-e anticheat-speedhack_m4 1.00189
-e anticheat-speedhack_m3 1.00189
-e anticheat-speedhack_m2 1.00188
-e anticheat-speedhack_m1 1.00188
-e anticheat-speedhack 0.017192
-e anticheat-_time 63.7
-e achievement-firstblood 1
-e avglatency 45.0439
-P NOT_A_HASHKEY
-i 3
-n ^0{^1bot^0} ^x666Pascal
+e scoreboard-fps 117
+e scoreboard-elo -2
+e scoreboard-dmgtaken 800
+e total-dmgtaken 800
+e scoreboard-dmg 165.858
+e total-dmg 165.858
+e scoreboard-deaths 2
+e total-deaths 2
+e scoreboard-score 1.65858
+e total-score 1.65857
+e acc-crylink-cnt-fired 13
+e acc-crylink-cnt-hit 2
+e acc-crylink-fired 1170
+e acc-crylink-hit 103.607
+e acc-electro-cnt-fired 11
+e acc-electro-cnt-hit 2
+e acc-electro-fired 440
+e acc-electro-hit 62.2508
+e rank 5
+e scoreboardpos 5
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e avglatency 38.7505
+e alivetime 67.9667
+P hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+i 9
+n 🌏D
+t 14
+e total-dmgtaken 651.9
+e total-dmg 370.302
+e total-deaths 1
+e total-score 3.70302
+e acc-vortex-cnt-fired 5
+e acc-vortex-cnt-hit 1
+e acc-vortex-fired 400
+e acc-vortex-hit 80
+e acc-mortar-cnt-fired 21
+e acc-mortar-cnt-hit 5
+e acc-mortar-fired 1155
+e acc-mortar-hit 227.031
+e joins 1
+e avglatency 127.147
+e alivetime 86.7502
+P bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+i 8
+n falih
+t 14
+e total-dmgtaken 2000
+e total-dmg 153.2
+e total-deaths 5
+e total-score 1.532
+e acc-devastator-cnt-fired 21
+e acc-devastator-fired 1680
+e acc-hagar-cnt-fired 35
+e acc-hagar-fired 965
+e acc-vortex-cnt-fired 16
+e acc-vortex-cnt-hit 2
+e acc-vortex-fired 1252.8
+e acc-vortex-hit 153.2
+e joins 1
+e avglatency 236.462
+e alivetime 160.217
+P cccccccccccccccccccccccccccccccccccccccccccc
+i 7
+n floxy
+t -1
+e rank 6
+e avglatency 154.045
+P dddddddddddddddddddddddddddddddddddddddddddd
+i 6
+n ^xFC1FSMP ^xFFF☠^xAAA ♩♪♫ ^x09Bмµѕιcgoαт[91]^xAAA ♫♪♩^7
+t -1
+e rank 6
+e avglatency 147.729
+P eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+i 5
+n ^xFC1FSMP ^xB10☠^xf34 Sitting_Duck^7
 t 5
-e anticheat-idle_snapaim_m10 24.182
-e anticheat-idle_snapaim_m7 18.0789
-e anticheat-idle_snapaim_m4 9.0112
-e anticheat-idle_snapaim_m3 5.43032
-e anticheat-idle_snapaim_m2 2.23002
-e anticheat-idle_snapaim_noise 0.35847
-e anticheat-idle_snapaim_signal 12.4023
-e anticheat-idle_snapaim 12.0439
-e anticheat-div0_strafebot_new 0.131592
-e anticheat-div0_strafebot_old 0.192711
-e anticheat-speedhack_m5 1.00308
-e anticheat-speedhack_m4 1.00308
-e anticheat-speedhack_m3 1.00308
-e anticheat-speedhack_m2 1.00309
-e anticheat-speedhack_m1 1.00307
-e anticheat-speedhack 9.3e-05
-e anticheat-_time 63.6666
+e kills-8 1
+e kills-4 3
+e kills-1 4
+e scoreboard-fps 200
+e scoreboard-elo 100.774
+e scoreboard-dmgtaken 4238.48
+e total-dmgtaken 4238.48
+e scoreboard-dmg 3604.65
+e total-dmg 3604.65
+e scoreboard-deaths 7
+e total-deaths 7
+e scoreboard-kills 8
+e total-kills 8
+e scoreboard-score 36.0465
+e total-score 36.0465
 e achievement-firstvictim 1
-P NOT_A_HASHKEY
-i 2
-n ^0{^1bot^0} ^x666Huygens
+e acc-devastator-frags 1
+e acc-devastator-cnt-fired 78
+e acc-devastator-cnt-hit 12
+e acc-devastator-fired 6240
+e acc-devastator-hit 744.652
+e acc-hagar-cnt-fired 5
+e acc-hagar-cnt-hit 1
+e acc-hagar-fired 125
+e acc-hagar-hit 12.6359
+e acc-vortex-cnt-fired 4
+e acc-vortex-fired 301.2
+e acc-crylink-cnt-fired 6
+e acc-crylink-cnt-hit 1
+e acc-crylink-fired 440
+e acc-crylink-hit 3.40105
+e acc-electro-frags 5
+e acc-electro-cnt-fired 341
+e acc-electro-cnt-hit 73
+e acc-electro-fired 11430
+e acc-electro-hit 2402.75
+e acc-mortar-frags 1
+e acc-mortar-cnt-fired 43
+e acc-mortar-cnt-hit 10
+e acc-mortar-fired 2365
+e acc-mortar-hit 435.595
+e acc-machinegun-cnt-fired 90
+e acc-machinegun-cnt-hit 1
+e acc-machinegun-fired 900
+e acc-machinegun-hit 10
+e acc-shotgun-cnt-fired 2
+e acc-shotgun-cnt-hit 1
+e acc-shotgun-fired 96
+e acc-shotgun-hit 4
+e acc-blaster-cnt-fired 3
+e acc-blaster-cnt-hit 1
+e acc-blaster-fired 60
+e acc-blaster-hit 20
+e rank 4
+e scoreboardpos 2
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e wins 1
+e avglatency 165.487
+e alivetime 930.668
+P ffffffffffffffffffffffffffffffffffffffffffff
+i 3
+n ^x29dArch^x000_^xfff[^x2f0>^x333guh-noo^x29d+^x333linox^xfff]^7
+t 5
+e kills-10 2
+e kills-9 1
+e kills-8 3
+e kills-5 1
+e kills-4 8
+e kills-1 4
+e scoreboard-fps 201
+e scoreboard-elo 301.523
+e scoreboard-dmgtaken 5023.17
+e total-dmgtaken 5023.17
+e scoreboard-dmg 8053.69
+e total-dmg 8053.69
+e scoreboard-suicides 1
+e total-suicides 1
+e scoreboard-deaths 8
+e total-deaths 8
+e scoreboard-kills 19
+e total-kills 19
+e scoreboard-score 80.537
+e total-score 80.537
+e achievement-firstblood 1
+e acc-devastator-frags 14
+e acc-devastator-cnt-fired 165
+e acc-devastator-cnt-hit 69
+e acc-devastator-fired 13200
+e acc-devastator-hit 3975.52
+e acc-vortex-frags 4
+e acc-vortex-cnt-fired 124
+e acc-vortex-cnt-hit 41
+e acc-vortex-fired 8535
+e acc-vortex-hit 2887.2
+e acc-crylink-cnt-fired 64
+e acc-crylink-cnt-hit 7
+e acc-crylink-fired 2560
+e acc-crylink-hit 182.166
+e acc-electro-frags 1
+e acc-electro-cnt-fired 89
+e acc-electro-cnt-hit 18
+e acc-electro-fired 2940
+e acc-electro-hit 556.065
+e acc-mortar-cnt-fired 44
+e acc-mortar-cnt-hit 18
+e acc-mortar-fired 2420
+e acc-mortar-hit 777.604
+e acc-blaster-cnt-fired 22
+e acc-blaster-fired 440
+e rank 1
+e scoreboardpos 1
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e wins 1
+e avglatency 124.151
+e alivetime 784.402
+P player#4
+i 4
 t 14
-e anticheat-idle_snapaim_m10 0.010358
-e anticheat-idle_snapaim_m7 0.010358
-e anticheat-idle_snapaim_m4 0.010358
-e anticheat-idle_snapaim_m3 0.010358
-e anticheat-idle_snapaim_m2 0.010358
-e anticheat-idle_snapaim_noise 0.010358
-e anticheat-idle_snapaim_signal 0.010358
-e anticheat-div0_strafebot_new 0.00011
-e anticheat-speedhack_m5 1.00086
-e anticheat-speedhack_m4 1.00086
-e anticheat-speedhack_m3 1.00086
-e anticheat-speedhack_m2 1.00086
-e anticheat-speedhack_m1 1.00086
-e anticheat-speedhack 9.8e-05
-e anticheat-_time 3.09998
+e kills-5 5
+e kills-3 5
+e kills-1 3
+e scoreboard-fps 241
+e scoreboard-elo -2
+e scoreboard-dmgtaken 5695.57
+e total-dmgtaken 5695.57
+e scoreboard-dmg 7246.48
+e total-dmg 7246.48
+e scoreboard-deaths 11
+e total-deaths 11
+e scoreboard-kills 13
+e total-kills 13
+e scoreboard-score 72.4648
+e total-score 72.4648
+e achievement-kill-spree-3 1
+e acc-devastator-frags 3
+e acc-devastator-cnt-fired 78
+e acc-devastator-cnt-hit 34
+e acc-devastator-fired 6240
+e acc-devastator-hit 1984.12
+e acc-vortex-frags 6
+e acc-vortex-cnt-fired 118
+e acc-vortex-cnt-hit 52
+e acc-vortex-fired 8440.2
+e acc-vortex-hit 3646.8
+e acc-crylink-frags 1
+e acc-crylink-cnt-fired 51
+e acc-crylink-cnt-hit 8
+e acc-crylink-fired 2790
+e acc-crylink-hit 336.569
+e acc-electro-cnt-fired 106
+e acc-electro-cnt-hit 22
+e acc-electro-fired 3460
+e acc-electro-hit 771.319
+e acc-mortar-cnt-fired 74
+e acc-mortar-cnt-hit 10
+e acc-mortar-fired 4070
+e acc-mortar-hit 418.844
+e acc-machinegun-frags 1
+e acc-machinegun-cnt-fired 38
+e acc-machinegun-cnt-hit 12
+e acc-machinegun-fired 380
+e acc-machinegun-hit 120
+e acc-blaster-cnt-fired 26
+e acc-blaster-cnt-hit 6
+e acc-blaster-fired 520
+e acc-blaster-hit 95.9474
+e rank 2
+e scoreboardpos 3
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e avglatency 42.9571
+e alivetime 886.685
+P player#2
+i 2
+t -1
+e avglatency 85.7067
+P gggggggggggggggggggggggggggggggggggggggggggg
+i 1
+n undeadspez
+t 14
+e kills-8 1
+e kills-5 1
+e kills-3 2
+e scoreboard-fps 86
+e scoreboard-elo 132.604
+e scoreboard-dmgtaken 5045.96
+e total-dmgtaken 5045.96
+e scoreboard-dmg 3860.9
+e total-dmg 3860.9
+e scoreboard-suicides 1
+e total-suicides 1
+e scoreboard-deaths 12
+e total-deaths 12
+e scoreboard-kills 4
+e total-kills 4
+e scoreboard-score 38.6089
+e total-score 38.6089
+e acc-devastator-cnt-fired 18
+e acc-devastator-cnt-hit 6
+e acc-devastator-fired 1440
+e acc-devastator-hit 356.223
+e acc-hagar-cnt-fired 184
+e acc-hagar-cnt-hit 28
+e acc-hagar-fired 5115
+e acc-hagar-hit 621.898
+e acc-vortex-cnt-fired 1
+e acc-vortex-cnt-hit 1
+e acc-vortex-fired 80
+e acc-vortex-hit 80
+e acc-crylink-frags 2
+e acc-crylink-cnt-fired 78
+e acc-crylink-cnt-hit 36
+e acc-crylink-fired 6970
+e acc-crylink-hit 1199.18
+e acc-electro-cnt-fired 66
+e acc-electro-cnt-hit 7
+e acc-electro-fired 2190
+e acc-electro-hit 221.538
+e acc-mortar-frags 1
+e acc-mortar-cnt-fired 118
+e acc-mortar-cnt-hit 25
+e acc-mortar-fired 6490
+e acc-mortar-hit 1042.37
+e acc-machinegun-frags 1
+e acc-machinegun-cnt-fired 234
+e acc-machinegun-cnt-hit 41
+e acc-machinegun-fired 2340
+e acc-machinegun-hit 410
+e acc-blaster-cnt-fired 8
+e acc-blaster-fired 160
+e rank 3
+e scoreboardpos 4
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e avglatency 58.8402
+e alivetime 847.997
 

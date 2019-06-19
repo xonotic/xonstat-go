@@ -1,115 +1,45 @@
 V 9
-R xonotic-v0.8.2-605-gdd5d35f
+R xonotic-v0.8.2-2753-g35a93aba4
 G cts
 O XDF
-M r7-alexa
-I 0.613855
-S Xonotic DeFrag - Join/Run now! - balance changes
-C 192
-U 26004
-D 1200.000122
+M bug78
+I 0.1560649007.206577
+S exe.pub | Relaxed Running | CTS/XDF
+C 178
+U 26000
+D 1800.003662
 L 
-P NOT_A_HASHKEY
-i 3
-n ^0ns^1.^1A^0v^1👽^0ll^1👽^0c^1'^0h^7
-e scoreboard-fastest 1205
-e total-fastest 1205
+P aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+i 1
+n night
+e scoreboard-fastest 2751
+e total-fastest 2751
+e scoreboard-fps 200
 e scoreboard-elo -2
-e scoreboard-dmgtaken 300
-e total-dmgtaken 300
-e scoreboard-deaths 91
-e total-deaths 91
-e anticheat-idle_snapaim_m10 120.587
-e anticheat-idle_snapaim_m7 75.3919
-e anticheat-idle_snapaim_m4 28.9458
-e anticheat-idle_snapaim_m3 15.2107
-e anticheat-idle_snapaim_m2 5.44235
-e anticheat-idle_snapaim_noise 1.72934
-e anticheat-idle_snapaim_signal 44.1546
-e anticheat-idle_snapaim 42.4253
-e anticheat-div0_evade 0.000841
-e anticheat-div0_strafebot_new 0.188322
-e anticheat-speedhack_m5 1.00229
-e anticheat-speedhack_m4 1.00229
-e anticheat-speedhack_m3 1.00228
-e anticheat-speedhack_m2 1.00227
-e anticheat-speedhack_m1 1.0023
-e anticheat-speedhack 0.019932
-e anticheat-_time 589.99
+e scoreboard-deaths 157
+e total-deaths 157
+e anticheat-idle_snapaim_m10 530.247
+e anticheat-idle_snapaim_m7 309.924
+e anticheat-idle_snapaim_m4 86.8421
+e anticheat-idle_snapaim_m3 34.3366
+e anticheat-idle_snapaim_m2 6.80072
+e anticheat-idle_snapaim_noise 1.23594
+e anticheat-idle_snapaim_signal 155.401
+e anticheat-idle_snapaim 154.165
+e anticheat-div0_evade 0.074209
+e anticheat-div0_strafebot_new 0.088073
+e anticheat-speedhack_m5 1.0008
+e anticheat-speedhack_m4 1.00071
+e anticheat-speedhack_m3 1.00057
+e anticheat-speedhack_m2 1.00042
+e anticheat-speedhack_m1 1.00022
+e anticheat-speedhack 0.011647
+e anticheat-_time 1798.77
 e rank 1
 e scoreboardpos 1
 e scoreboardvalid 1
 e joins 1
 e matches 1
 e wins 1
-e avglatency 36.3707
-e alivetime 586.76
-P NOT_A_HASHKEY
-i 2
-n  
-e scoreboard-fastest 1350
-e total-fastest 1350
-e scoreboard-elo -2
-e scoreboard-dmgtaken 1300
-e total-dmgtaken 1300
-e scoreboard-deaths 107
-e total-deaths 107
-e anticheat-idle_snapaim_m10 91.9223
-e anticheat-idle_snapaim_m7 61.3371
-e anticheat-idle_snapaim_m4 23.7146
-e anticheat-idle_snapaim_m3 12.2336
-e anticheat-idle_snapaim_m2 4.62745
-e anticheat-idle_snapaim_noise 1.48518
-e anticheat-idle_snapaim_signal 36.5234
-e anticheat-idle_snapaim 35.0383
-e anticheat-div0_evade 0.106258
-e anticheat-div0_strafebot_new 0.146897
-e anticheat-speedhack_m5 1.00124
-e anticheat-speedhack_m4 1.00124
-e anticheat-speedhack_m3 1.00124
-e anticheat-speedhack_m2 1.00124
-e anticheat-speedhack_m1 1.00123
-e anticheat-speedhack 0.020084
-e anticheat-_time 693.06
-e rank 3
-e scoreboardpos 3
-e scoreboardvalid 1
-e joins 1
-e matches 1
-e avglatency 78.8595
-e alivetime 660.13
-P NOT_A_HASHKEY
-i 1
-n ^x06FC^x333i^x06Fto^7
-e scoreboard-fastest 1208
-e total-fastest 1208
-e scoreboard-elo -2
-e scoreboard-dmgtaken 100
-e total-dmgtaken 100
-e scoreboard-deaths 260
-e total-deaths 260
-e anticheat-idle_snapaim_m10 217.399
-e anticheat-idle_snapaim_m7 128.296
-e anticheat-idle_snapaim_m4 35.8112
-e anticheat-idle_snapaim_m3 14.4141
-e anticheat-idle_snapaim_m2 4.61602
-e anticheat-idle_snapaim_noise 2.04527
-e anticheat-idle_snapaim_signal 64.3704
-e anticheat-idle_snapaim 62.3252
-e anticheat-div0_evade 0.006115
-e anticheat-div0_strafebot_new 0.106709
-e anticheat-speedhack_m5 1.00072
-e anticheat-speedhack_m4 1.00071
-e anticheat-speedhack_m3 1.00073
-e anticheat-speedhack_m2 1.00068
-e anticheat-speedhack_m1 1.00053
-e anticheat-speedhack 0.006465
-e anticheat-_time 1199.1
-e rank 2
-e scoreboardpos 2
-e scoreboardvalid 1
-e joins 1
-e matches 1
-e avglatency 34.7304
-e alivetime 1192.9
-
+e avglatency 103.43
+e alivetime 1794.02

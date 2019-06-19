@@ -11,15 +11,15 @@ var eventCountTests = []struct {
 	expectedTeamsCount   int
 	expectedPlayersCount int
 }{
-	{"resources/submissions/ca_normal.txt", 2, 3},
+	{"resources/submissions/cts_normal.txt", 0, 1},
+	{"resources/submissions/ca_normal.txt", 2, 10},
 	{"resources/submissions/ctf_normal.txt", 2, 11},
-	{"resources/submissions/cts_normal.txt", 0, 3},
-	{"resources/submissions/dm_normal.txt", 0, 10},
-	{"resources/submissions/duel_normal.txt", 0, 3},
-	{"resources/submissions/ft_normal.txt", 2, 6},
+	{"resources/submissions/dm_normal.txt", 0, 8},
+	{"resources/submissions/duel_normal.txt", 0, 4},
+	{"resources/submissions/ft_normal.txt", 2, 11},
 	{"resources/submissions/ka_normal.txt", 0, 7},
-	{"resources/submissions/kh_normal.txt", 3, 9},
-	{"resources/submissions/tdm_normal.txt", 2, 6},
+	{"resources/submissions/kh_normal.txt", 4, 10},
+	{"resources/submissions/tdm_normal.txt", 2, 8},
 }
 
 // test the correct counts of team and player events
@@ -34,17 +34,17 @@ func TestCorrectCounts(t *testing.T) {
 		body := bufio.NewReader(f)
 		rawSubmission, err := NewRawSubmission(body)
 		if err != nil {
-			t.Errorf("Unable to parse.")
+			t.Errorf("Unable to parse %s: %s", testCase.filename, err)
 		}
 
 		if len(rawSubmission.TeamEvents) != testCase.expectedTeamsCount {
-			t.Errorf("Incorrect number of teams found: found %d, expected %d",
-				len(rawSubmission.TeamEvents), testCase.expectedTeamsCount)
+			t.Errorf("Incorrect number of teams found in %s: found %d, expected %d",
+				testCase.filename, len(rawSubmission.TeamEvents), testCase.expectedTeamsCount)
 		}
 
 		if len(rawSubmission.PlayerEvents) != testCase.expectedPlayersCount {
-			t.Errorf("Incorrect number of players found: found %d, expected %d",
-				len(rawSubmission.PlayerEvents), testCase.expectedPlayersCount)
+			t.Errorf("Incorrect number of players found in %s: found %d, expected %d",
+				testCase.filename, len(rawSubmission.PlayerEvents), testCase.expectedPlayersCount)
 		}
 
 		_, err = NewSubmission(rawSubmission)
@@ -85,5 +85,26 @@ func TestUnsupportedGameType(t *testing.T) {
 	_, err = NewRawSubmission(body)
 	if err != ErrUnsupportedGameType {
 		t.Errorf("Did not receive ErrUnsupportedGameType")
+	}
+}
+
+// test that errors are thrown if a submission is for a blank game
+func TestBlankGame(t *testing.T) {
+	files := []string{
+		"resources/submissions/cts_blank_game.txt",
+	}
+
+	for _, filename := range files {
+		f, err := os.Open(filename)
+		if err != nil {
+			t.Errorf("Unable to open file %s for testing", filename)
+		}
+		defer f.Close()
+
+		body := bufio.NewReader(f)
+		_, err = NewRawSubmission(body)
+		if err != ErrBlankGame {
+			t.Errorf("Did not receive ErrBlankGame")
+		}
 	}
 }

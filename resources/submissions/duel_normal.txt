@@ -1,170 +1,197 @@
 V 9
-R xonotic-v0.8.2~
+R xonotic-v0.8.2-872-g002481c18
 G duel
 O XPM
-M fuse
-I 0.626350
-S Cito's Xonotic Server
-C 51
+M hub3aeroq3a_nex_r4
+I 0.1514125633.925527
+S PsyX Duel (France)
+C 20
 U 26000
-D 600.032715
+D 600.032776
 L 
-P NOT_A_HASHKEY
-i 3
-n [BOT]Discovery
-e scoreboard-dmgtaken 5972.01
-e total-dmgtaken 5972.01
-e scoreboard-dmg 938.704
-e total-dmg 938.704
-e scoreboard-suicides 1
-e total-suicides 1
-e scoreboard-deaths 44
-e total-deaths 44
-e scoreboard-score -1
-e total-score -1
-e anticheat-idle_snapaim_m10 40.4968
-e anticheat-idle_snapaim_m7 29.8206
-e anticheat-idle_snapaim_m4 14.9218
-e anticheat-idle_snapaim_m3 9.41767
-e anticheat-idle_snapaim_m2 4.81587
-e anticheat-idle_snapaim_noise 1.97944
-e anticheat-idle_snapaim_signal 20.3623
-e anticheat-idle_snapaim 18.3829
-e anticheat-div0_strafebot_new 0.216046
-e anticheat-div0_strafebot_old 0.213422
-e anticheat-speedhack_m5 1.00334
-e anticheat-speedhack_m4 1.00331
-e anticheat-speedhack_m3 1.00337
-e anticheat-speedhack_m2 1.00347
-e anticheat-speedhack_m1 1.00348
-e anticheat-speedhack 1.3e-05
-e anticheat-_time 611.766
-e achievement-firstvictim 1
-e acc-devastator-cnt-fired 5
-e acc-devastator-cnt-hit 2
-e acc-devastator-fired 400
-e acc-devastator-hit 95.7822
-e acc-vortex-cnt-fired 30
-e acc-vortex-cnt-hit 5
-e acc-vortex-fired 2112.8
-e acc-vortex-hit 326
-e acc-crylink-cnt-fired 10
-e acc-crylink-cnt-hit 4
-e acc-crylink-fired 450
-e acc-crylink-hit 110.609
-e acc-electro-cnt-fired 2
-e acc-electro-cnt-hit 1
-e acc-electro-fired 80
-e acc-electro-hit 37.0789
-e acc-mortar-cnt-fired 7
-e acc-mortar-cnt-hit 2
-e acc-mortar-fired 385
-e acc-mortar-hit 69.2338
-e acc-shotgun-cnt-fired 48
-e acc-shotgun-cnt-hit 20
-e acc-shotgun-fired 2370
-e acc-shotgun-hit 300
-e acc-blaster-cnt-fired 37
-e acc-blaster-fired 740
-e rank 2
-e scoreboardpos 2
-e scoreboardvalid 1
-e joins 1
-e matches 1
-e alivetime 510.574
-P NOT_A_HASHKEY
-i 2
-n [BOT]Sensible
-e anticheat-idle_snapaim_m10 23.4628
-e anticheat-idle_snapaim_m7 20.7292
-e anticheat-idle_snapaim_m4 15.2086
-e anticheat-idle_snapaim_m3 11.9547
-e anticheat-idle_snapaim_m2 7.43002
-e anticheat-idle_snapaim_noise 2.48577
-e anticheat-idle_snapaim_signal 17.5733
-e anticheat-idle_snapaim 15.0875
-e anticheat-div0_strafebot_new 0.186458
-e anticheat-speedhack_m5 1.0002
-e anticheat-speedhack_m4 1.0002
-e anticheat-speedhack_m3 1.0002
-e anticheat-speedhack_m2 1.0002
-e anticheat-speedhack_m1 1.0002
-e anticheat-_time 0.633333
-P NOT_A_HASHKEY
-i 1
-n ^x06FC^x333i^x06Fto^7
-e kills-3 43
-e scoreboard-dmgtaken 938.704
-e total-dmgtaken 938.704
-e scoreboard-dmg 5972.01
-e total-dmg 5972.01
-e scoreboard-kills 43
-e total-kills 43
-e scoreboard-score 43
-e total-score 43
-e anticheat-idle_snapaim_m10 113.872
-e anticheat-idle_snapaim_m7 73.2129
-e anticheat-idle_snapaim_m4 27.4052
-e anticheat-idle_snapaim_m3 13.6914
-e anticheat-idle_snapaim_m2 4.3893
-e anticheat-idle_snapaim_noise 1.59069
-e anticheat-idle_snapaim_signal 42.6244
-e anticheat-idle_snapaim 41.0337
-e anticheat-div0_evade 0.00585
-e anticheat-div0_strafebot_new 0.182291
-e anticheat-speedhack_m5 1.00186
-e anticheat-speedhack_m4 1.00186
-e anticheat-speedhack_m3 1.00187
-e anticheat-speedhack_m2 1.00188
-e anticheat-speedhack_m1 1.0019
-e anticheat-speedhack 0.016708
-e anticheat-_time 612.033
+P 61
+i 4
+n ^xE00🔥^xE00D^x333odger^xE00🔥^7
+e kills-3 24
+e scoreboard-elo 1121.86
+e scoreboard-dmgtaken 4669.17
+e total-dmgtaken 4669.17
+e scoreboard-dmg 5581.85
+e total-dmg 5581.85
+e scoreboard-deaths 12
+e total-deaths 12
+e scoreboard-kills 24
+e total-kills 24
+e scoreboard-score 24
+e total-score 24
+e anticheat-idle_snapaim_m10 102.616
+e anticheat-idle_snapaim_m7 66.4741
+e anticheat-idle_snapaim_m4 23.9008
+e anticheat-idle_snapaim_m3 11.6621
+e anticheat-idle_snapaim_m2 4.14598
+e anticheat-idle_snapaim_noise 1.57478
+e anticheat-idle_snapaim_signal 38.0618
+e anticheat-idle_snapaim 36.487
+e anticheat-div0_evade 0.086545
+e anticheat-div0_strafebot_new 0.147765
+e anticheat-speedhack_m5 1.00322
+e anticheat-speedhack_m4 1.00321
+e anticheat-speedhack_m3 1.0032
+e anticheat-speedhack_m2 1.0032
+e anticheat-speedhack_m1 1.00321
+e anticheat-speedhack 0.083811
+e anticheat-_time 672.266
 e achievement-firstblood 1
-e achievement-kill-spree-30 1
-e achievement-kill-spree-25 1
-e achievement-kill-spree-20 1
-e achievement-kill-spree-15 1
-e achievement-kill-spree-10 1
-e achievement-kill-spree-5 1
-e achievement-kill-spree-3 1
-e acc-devastator-frags 2
-e acc-devastator-cnt-fired 25
-e acc-devastator-cnt-hit 12
-e acc-devastator-fired 2000
-e acc-devastator-hit 746.168
-e acc-vortex-frags 12
-e acc-vortex-cnt-fired 42
-e acc-vortex-cnt-hit 26
-e acc-vortex-fired 3118.4
-e acc-vortex-hit 1943.2
-e acc-crylink-cnt-fired 3
-e acc-crylink-fired 170
-e acc-electro-frags 2
-e acc-electro-cnt-fired 52
-e acc-electro-cnt-hit 15
-e acc-electro-fired 1700
-e acc-electro-hit 591.018
-e acc-mortar-frags 25
-e acc-mortar-cnt-fired 166
-e acc-mortar-cnt-hit 83
-e acc-mortar-fired 9130
-e acc-mortar-hit 3624.39
+e achievement-kill-spree-5 2
+e achievement-kill-spree-3 4
+e acc-devastator-frags 10
+e acc-devastator-cnt-fired 150
+e acc-devastator-cnt-hit 51
+e acc-devastator-fired 12000
+e acc-devastator-hit 3178.79
+e acc-vortex-frags 6
+e acc-vortex-cnt-fired 32
+e acc-vortex-cnt-hit 10
+e acc-vortex-fired 2373.6
+e acc-vortex-hit 790.4
+e acc-electro-cnt-fired 35
+e acc-electro-cnt-hit 16
+e acc-electro-fired 1140
+e acc-electro-hit 514.721
+e acc-mortar-frags 6
+e acc-mortar-cnt-fired 86
+e acc-mortar-cnt-hit 34
+e acc-mortar-fired 4730
+e acc-mortar-hit 1395.45
 e acc-shotgun-frags 1
-e acc-shotgun-cnt-fired 2
-e acc-shotgun-cnt-hit 1
-e acc-shotgun-fired 118
-e acc-shotgun-hit 8
+e acc-shotgun-cnt-fired 12
+e acc-shotgun-cnt-hit 9
+e acc-shotgun-fired 620
+e acc-shotgun-hit 186
 e acc-blaster-frags 1
-e acc-blaster-cnt-fired 37
-e acc-blaster-cnt-hit 2
-e acc-blaster-fired 740
-e acc-blaster-hit 25.2752
+e acc-blaster-cnt-fired 31
+e acc-blaster-cnt-hit 1
+e acc-blaster-fired 620
+e acc-blaster-hit 20
 e rank 1
 e scoreboardpos 1
 e scoreboardvalid 1
 e joins 1
 e matches 1
 e wins 1
-e avglatency 6.8109
-e alivetime 600.033
+e avglatency 38.2556
+e alivetime 575.133
+P 59
+i 3
+n ^1Ch4mp^7
+e kills-4 12
+e scoreboard-elo 551.022
+e scoreboard-dmgtaken 5581.85
+e total-dmgtaken 5581.85
+e scoreboard-dmg 4669.17
+e total-dmg 4669.17
+e scoreboard-suicides 1
+e total-suicides 1
+e scoreboard-deaths 25
+e total-deaths 25
+e scoreboard-kills 12
+e total-kills 12
+e scoreboard-score 11
+e total-score 11
+e anticheat-idle_snapaim_m10 498.374
+e anticheat-idle_snapaim_m7 285.668
+e anticheat-idle_snapaim_m4 79.0097
+e anticheat-idle_snapaim_m3 32.0155
+e anticheat-idle_snapaim_m2 7.02204
+e anticheat-idle_snapaim_noise 1.6693
+e anticheat-idle_snapaim_signal 141.223
+e anticheat-idle_snapaim 139.554
+e anticheat-div0_evade 0.089424
+e anticheat-div0_strafebot_new 0.179532
+e anticheat-speedhack_m5 1.00154
+e anticheat-speedhack_m4 1.00154
+e anticheat-speedhack_m3 1.00155
+e anticheat-speedhack_m2 1.00156
+e anticheat-speedhack_m1 1.0016
+e anticheat-speedhack 0.011527
+e anticheat-_time 676.533
+e achievement-firstvictim 1
+e achievement-kill-spree-5 1
+e achievement-kill-spree-3 1
+e acc-devastator-frags 9
+e acc-devastator-cnt-fired 155
+e acc-devastator-cnt-hit 51
+e acc-devastator-fired 12400
+e acc-devastator-hit 2974.1
+e acc-vortex-frags 2
+e acc-vortex-cnt-fired 42
+e acc-vortex-cnt-hit 15
+e acc-vortex-fired 3104.8
+e acc-vortex-hit 1112.8
+e acc-electro-cnt-fired 9
+e acc-electro-cnt-hit 2
+e acc-electro-fired 290
+e acc-electro-hit 80.1713
+e acc-mortar-cnt-fired 52
+e acc-mortar-cnt-hit 12
+e acc-mortar-fired 2860
+e acc-mortar-hit 477.856
+e acc-machinegun-cnt-fired 36
+e acc-machinegun-cnt-hit 2
+e acc-machinegun-fired 360
+e acc-machinegun-hit 20
+e acc-shotgun-frags 1
+e acc-shotgun-cnt-fired 28
+e acc-shotgun-cnt-hit 15
+e acc-shotgun-fired 1344
+e acc-shotgun-hit 256
+e acc-blaster-cnt-fired 43
+e acc-blaster-cnt-hit 4
+e acc-blaster-fired 860
+e acc-blaster-hit 67.3038
+e rank 2
+e scoreboardpos 2
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e avglatency 44.4549
+e alivetime 549.2
+P bot#10#Justin_Bieber
+i 2
+n ^1(bot) ^7Justin_Bieber
+e anticheat-idle_snapaim_m10 1.06872
+e anticheat-idle_snapaim_m7 0.878066
+e anticheat-idle_snapaim_m4 0.537476
+e anticheat-idle_snapaim_m3 0.367704
+e anticheat-idle_snapaim_m2 0.175048
+e anticheat-idle_snapaim_noise 0.024902
+e anticheat-idle_snapaim_signal 0.675725
+e anticheat-idle_snapaim 0.650823
+e anticheat-div0_strafebot_new 0.00717
+e anticheat-speedhack_m5 1.0009
+e anticheat-speedhack_m4 1.0009
+e anticheat-speedhack_m3 1.0009
+e anticheat-speedhack_m2 1.0009
+e anticheat-speedhack_m1 1.0009
+e anticheat-_time 3.4
+P bot#10#Azathoth
+i 1
+n ^1(bot) ^7Azathoth
+e anticheat-idle_snapaim_m10 40.5322
+e anticheat-idle_snapaim_m7 29.5245
+e anticheat-idle_snapaim_m4 14.5158
+e anticheat-idle_snapaim_m3 9.63266
+e anticheat-idle_snapaim_m2 5.63931
+e anticheat-idle_snapaim_noise 2.6533
+e anticheat-idle_snapaim_signal 19.7809
+e anticheat-idle_snapaim 17.1276
+e anticheat-div0_strafebot_new 0.209881
+e anticheat-div0_strafebot_old 0.306013
+e anticheat-speedhack_m5 1.00306
+e anticheat-speedhack_m4 1.00306
+e anticheat-speedhack_m3 1.00306
+e anticheat-speedhack_m2 1.00308
+e anticheat-speedhack_m1 1.00305
+e anticheat-speedhack 2e-06
+e anticheat-_time 59.5999
 

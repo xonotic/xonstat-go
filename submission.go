@@ -64,6 +64,9 @@ var ErrInvalidGameMeta = fmt.Errorf("invalid game metadata")
 // ErrUnsupportedGameType is when a submission is for an unsupported game type
 var ErrUnsupportedGameType = fmt.Errorf("unsupported game type")
 
+// ErrBlankGame is when a submission is blank
+var ErrBlankGame = fmt.Errorf("blank game")
+
 // RawSubmission is an untyped game stats submission
 type RawSubmission struct {
 	// game metadata
@@ -186,6 +189,34 @@ func (s *RawSubmission) parseTeamEvents(label, teamID string) {
 	return
 }
 
+// addPlayerEvents adds a set of player events to the running list and performs some bookkeeping for the same
+func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string, index int, firedWeapon, nonZeroScore, hasFastestLap bool) {
+	if len(events) <= 0 {
+		return
+	}
+
+	if isHuman(events) && playedInGame(events) {
+		if firedWeapon {
+			s.HumanFiredWeapon = true
+		}
+
+		if nonZeroScore {
+			s.HumanNonZeroScore = true
+		}
+
+		if hasFastestLap {
+			s.HumanFastestLap = true
+		}
+	}
+
+	// reference by hashkey or player index
+	s.PlayerEventsByHashkey[hashkey] = &events
+	s.PlayerEventsByIndex[index] = &events
+
+	// we are done w/ the events we were working on...
+	s.PlayerEvents = append(s.PlayerEvents, events)
+}
+
 // parsePlayerEvents reads all of the player metadata in lines, until hitting a non-player line
 func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 	events := make(map[string]string)
@@ -229,26 +260,7 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 		default:
 			// hit a non-player key, so return that line
 			s.rr.Return(fmt.Sprintf("%s %s", key, value))
-
-			// we are done w/ the events we were working on...
-			s.PlayerEvents = append(s.PlayerEvents, events)
-
-			if isHuman(events) && playedInGame(events) {
-				if firedWeapon {
-					s.HumanFiredWeapon = true
-				}
-
-				if nonZeroScore {
-					s.HumanNonZeroScore = true
-				}
-
-				if hasFastestLap {
-					s.HumanFastestLap = true
-				}
-			}
-			// reference by hashkey or player index
-			s.PlayerEventsByHashkey[hashkey] = &events
-			s.PlayerEventsByIndex[index] = &events
+			s.addPlayerEvents(events, hashkey, index, firedWeapon, nonZeroScore, hasFastestLap)
 
 			return
 		}
@@ -257,9 +269,9 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 		key, value, err = s.nextPair()
 	}
 
-	if err == io.EOF && len(events) > 1 {
+	if err == io.EOF {
 		// special case: the last player in the file
-		s.PlayerEvents = append(s.PlayerEvents, events)
+		s.addPlayerEvents(events, hashkey, index, firedWeapon, nonZeroScore, hasFastestLap)
 	}
 
 	return
@@ -375,13 +387,31 @@ func (s *RawSubmission) analyze() error {
 			}
 		}
 
-		for key, _ := range playerEvents {
+		for key := range playerEvents {
 			// keep track of which weapons were used (i.e. fired) in the match via accuracy events
 			if strings.HasPrefix(key, "acc-") && strings.HasSuffix(key, "cnt-fired") {
 				s.WeaponsUsed[weaponFromKey(key)] = struct{}{}
 			}
 		}
 	}
+	return nil
+}
+
+// isBlankGame determines if the game has data worth processing
+func (s *RawSubmission) isBlankGame() error {
+	gameType := s.GameMeta["G"]
+	if gameType == "cts" {
+		if !s.HumanFastestLap {
+			// CTS requires a human to capture a fastest lap
+			return ErrBlankGame
+		}
+	} else if (gameType == "nb" || gameType == "nexball") && !s.HumanNonZeroScore {
+		// in Nexball, we need a human to have a non-zero score
+		return ErrBlankGame
+	} else if !(s.HumanNonZeroScore && s.HumanFiredWeapon) {
+		return ErrBlankGame
+	}
+
 	return nil
 }
 
@@ -397,6 +427,10 @@ func (s *RawSubmission) validate() error {
 		return err
 	}
 
+	err = s.isBlankGame()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
