@@ -189,6 +189,18 @@ func (s *RawSubmission) parseTeamEvents(label, teamID string) {
 	return
 }
 
+// isHuman determines of the set of player events represents a human
+func isHuman(events map[string]string) bool {
+	return !strings.HasPrefix(events["P"], "bot")
+}
+
+// playedInGame determines of the set of player events represents a player who played the match (is on the scoreboard)
+func playedInGame(events map[string]string) bool {
+	_, matches := events["matches"]
+	_, scoreboardvalid := events["scoreboardvalid"]
+	return matches && scoreboardvalid
+}
+
 // addPlayerEvents adds a set of player events to the running list and performs some bookkeeping for the same
 func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string, index int, firedWeapon, nonZeroScore, hasFastestLap bool) {
 	if len(events) <= 0 {
@@ -356,18 +368,6 @@ func (s *RawSubmission) isSupportedGameType() error {
 	}
 }
 
-// isHuman determines of the set of player events represents a human
-func isHuman(events map[string]string) bool {
-	return !strings.HasPrefix(events["P"], "bot")
-}
-
-// playedInGame determines of the set of player events represents a player who played the match (is on the scoreboard)
-func playedInGame(events map[string]string) bool {
-	_, matches := events["matches"]
-	_, scoreboardvalid := events["scoreboardvalid"]
-	return matches && scoreboardvalid
-}
-
 // weaponFromKey extracts the weapon code from an accuracy event key (e.g. acc-blaster-cnt-fired -> blaster)
 func weaponFromKey(key string) string {
 	pieces := strings.SplitN(key, "-", 3)
@@ -379,19 +379,7 @@ func weaponFromKey(key string) string {
 
 // analyze looks over the various events and captures information about them for later validation
 func (s *RawSubmission) analyze() error {
-	var human, played bool
 	for _, playerEvents := range s.PlayerEvents {
-		// keep track of the humans and bots that actually played in the game
-		human = isHuman(playerEvents)
-		played = playedInGame(playerEvents)
-		if played {
-			if human {
-				s.Humans = append(s.Humans, &playerEvents)
-			} else {
-				s.Bots = append(s.Humans, &playerEvents)
-			}
-		}
-
 		for key := range playerEvents {
 			// keep track of which weapons were used (i.e. fired) in the match via accuracy events
 			if strings.HasPrefix(key, "acc-") && strings.HasSuffix(key, "cnt-fired") {
