@@ -27,14 +27,14 @@ func TestCorrectCounts(t *testing.T) {
 	for _, testCase := range eventCountTests {
 		f, err := os.Open(testCase.filename)
 		if err != nil {
-			t.Errorf("Unable to open file %s for testing", testCase.filename)
+			t.Fatalf("Unable to open file %s for testing", testCase.filename)
 		}
 		defer f.Close()
 
 		body := bufio.NewReader(f)
 		rawSubmission, err := NewRawSubmission(body)
 		if err != nil {
-			t.Errorf("Unable to parse %s: %s", testCase.filename, err)
+			t.Fatalf("Unable to parse %s: %s", testCase.filename, err)
 		}
 
 		if len(rawSubmission.TeamEvents) != testCase.expectedTeamsCount {
@@ -60,7 +60,7 @@ func TestInvalidMetadata(t *testing.T) {
 
 	f, err := os.Open(filename)
 	if err != nil {
-		t.Errorf("Unable to open file %s for testing", filename)
+		t.Fatalf("Unable to open file %s for testing", filename)
 	}
 	defer f.Close()
 
@@ -77,7 +77,7 @@ func TestUnsupportedGameType(t *testing.T) {
 
 	f, err := os.Open(filename)
 	if err != nil {
-		t.Errorf("Unable to open file %s for testing", filename)
+		t.Fatalf("Unable to open file %s for testing", filename)
 	}
 	defer f.Close()
 
@@ -97,7 +97,7 @@ func TestBlankGame(t *testing.T) {
 	for _, filename := range files {
 		f, err := os.Open(filename)
 		if err != nil {
-			t.Errorf("Unable to open file %s for testing", filename)
+			t.Fatalf("Unable to open file %s for testing", filename)
 		}
 		defer f.Close()
 
