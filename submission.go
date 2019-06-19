@@ -367,9 +367,8 @@ func weaponFromKey(key string) string {
 	pieces := strings.SplitN(key, "-", 3)
 	if len(pieces) == 3 && pieces[0] == "acc" {
 		return pieces[1]
-	} else {
-		return ""
 	}
+	return ""
 }
 
 // analyze looks over the various events and captures information about them for later validation
