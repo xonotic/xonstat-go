@@ -195,7 +195,9 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 		return
 	}
 
-	if isHuman(events) && playedInGame(events) {
+	human := isHuman(events)
+	played := playedInGame(events)
+	if human && played {
 		if firedWeapon {
 			s.HumanFiredWeapon = true
 		}
@@ -207,6 +209,10 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 		if hasFastestLap {
 			s.HumanFastestLap = true
 		}
+
+		s.Humans = append(s.Humans, &events)
+	} else if !human && played {
+		s.Bots = append(s.Bots, &events)
 	}
 
 	// reference by hashkey or player index
