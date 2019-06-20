@@ -440,6 +440,83 @@ type Submission struct {
 	CreateDt          time.Time
 }
 
+// gameCategory determines the game's "category" field
+func gameCategory(rs *RawSubmission) string {
+	// allowed weapons in each of the various categories
+	vanillaAllowedWeapons := map[string]struct{}{
+		"shotgun":    struct{}{},
+		"devastator": struct{}{},
+		"blaster":    struct{}{},
+		"mortar":     struct{}{},
+		"vortex":     struct{}{},
+		"electro":    struct{}{},
+		"arc":        struct{}{},
+		"hagar":      struct{}{},
+		"crylink":    struct{}{},
+		"machinegun": struct{}{},
+	}
+
+	instaAllowedWeapons := map[string]struct{}{
+		"vaporizer": struct{}{},
+		"blaster":   struct{}{},
+	}
+
+	overkillAllowedWeapons := map[string]struct{}{
+		"hmg":        struct{}{},
+		"vortex":     struct{}{},
+		"shotgun":    struct{}{},
+		"blaster":    struct{}{},
+		"machinegun": struct{}{},
+		"rpc":        struct{}{},
+	}
+
+	// for each category, have we seen all allowed weapons?
+	vanillaOK := true
+	instaOK := true
+	overkillOK := true
+
+	// loop through the weapons fired to see if any disallowed weapons were fired for each category
+	for weapon := range rs.WeaponsUsed {
+		if _, ok := vanillaAllowedWeapons[weapon]; !ok {
+			vanillaOK = false
+		}
+
+		if _, ok := instaAllowedWeapons[weapon]; !ok {
+			instaOK = false
+		}
+
+		if _, ok := overkillAllowedWeapons[weapon]; !ok {
+			instaOK = false
+		}
+	}
+
+	var mod string
+	modVal, ok := rs.GameMeta["O"]
+	if ok {
+		mod = modVal
+	} else {
+		mod = "Xonotic"
+	}
+
+	if mod == "Xonotic" {
+		if vanillaOK {
+			return "vanilla"
+		}
+	} else if mod == "InstaGib" {
+		if instaOK {
+			return "insta"
+		}
+	} else if mod == "Overkill" {
+		if overkillOK {
+			return "overkill"
+		}
+	} else {
+		return "general"
+	}
+
+	return "general"
+}
+
 // fillGame fills in the Game attribute from the raw submission
 func (s *Submission) fillGame(rs *RawSubmission) error {
 	if gameTypeCd, ok := rs.GameMeta["G"]; ok {
@@ -464,6 +541,9 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 	if mod, ok := rs.GameMeta["O"]; ok {
 		s.Game.Mod = &mod
 	}
+
+	category := gameCategory(rs)
+	s.Game.Category = &category
 
 	s.Game.StartDt = s.CreateDt
 	s.Game.CreateDt = s.CreateDt
