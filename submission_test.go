@@ -116,6 +116,7 @@ func TestCategory(t *testing.T) {
 		category string
 	}{
 		{"resources/submissions/ctf_normal.txt", "vanilla"},
+		{"resources/submissions/ctf_insta.txt", "insta"},
 	}
 
 	for _, categoryTest := range categoryTests {
