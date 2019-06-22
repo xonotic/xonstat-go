@@ -486,7 +486,7 @@ func gameCategory(rs *RawSubmission) string {
 		}
 
 		if _, ok := overkillAllowedWeapons[weapon]; !ok {
-			instaOK = false
+			overkillOK = false
 		}
 	}
 
