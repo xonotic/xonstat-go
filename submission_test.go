@@ -13,7 +13,7 @@ var eventCountTests = []struct {
 }{
 	{"resources/submissions/cts_normal.txt", 0, 1},
 	{"resources/submissions/ca_normal.txt", 2, 10},
-	{"resources/submissions/ctf_normal.txt", 2, 11},
+	{"resources/submissions/ctf_normal.txt", 2, 14},
 	{"resources/submissions/dm_normal.txt", 0, 8},
 	{"resources/submissions/duel_normal.txt", 0, 4},
 	{"resources/submissions/ft_normal.txt", 2, 11},
@@ -105,6 +105,42 @@ func TestBlankGame(t *testing.T) {
 		_, err = NewRawSubmission(body)
 		if err != ErrBlankGame {
 			t.Errorf("Did not receive ErrBlankGame")
+		}
+	}
+}
+
+// test that the submissions have the correct category
+func TestCategory(t *testing.T) {
+	var categoryTests = []struct {
+		filename string
+		category string
+	}{
+		{"resources/submissions/ctf_normal.txt", "vanilla"},
+	}
+
+	for _, categoryTest := range categoryTests {
+		f, err := os.Open(categoryTest.filename)
+		if err != nil {
+			t.Fatalf("Unable to open file %s for testing", categoryTest.filename)
+		}
+		defer f.Close()
+
+		body := bufio.NewReader(f)
+		rs, err := NewRawSubmission(body)
+		if err != nil {
+			t.Fatalf("Couldn't parse %s as a valid RawSubmission: %s", categoryTest.filename, err)
+		}
+
+		s, err := NewSubmission(rs)
+		if err != nil {
+			t.Fatalf("Couldn't parse %s into a Submission: %s", categoryTest.filename, err)
+		}
+
+		if s.Game.Category == nil {
+			t.Fatalf("nil Game.category for %s", categoryTest.filename)
+		} else if *s.Game.Category != categoryTest.category {
+			t.Fatalf("Incorrect Game.Category for %s: expected %s, got %s", categoryTest.filename,
+				categoryTest.category, *s.Game.Category)
 		}
 	}
 }
