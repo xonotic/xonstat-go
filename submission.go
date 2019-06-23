@@ -640,6 +640,15 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	}
 	pgs.Rank = &rank
 
+	scoreboardPos := 0
+	if scoreboardPosStr, ok := events["scoreboardpos"]; ok {
+		spInt, err := strconv.Atoi(scoreboardPosStr)
+		if err == nil {
+			scoreboardPos = spInt
+		}
+	}
+	pgs.ScoreboardPos = &scoreboardPos
+
 	s.PlayerGameStats = append(s.PlayerGameStats, *pgs)
 	s.PlayerGameStatsByID[pgs.PlayerId] = pgs
 
