@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -438,6 +439,12 @@ type Submission struct {
 	PlayerWeaponStats []models.PlayerWeaponStat
 	TeamGameStats     []models.TeamGameStat
 	CreateDt          time.Time
+
+	// References by player ID (initially the player events 'i' or index value) for easier processing
+	PlayersByID           map[int]*models.Player
+	PlayerHashkeysByID    map[int]*models.PlayerHashkey
+	PlayerGameStatsByID   map[int]*models.PlayerGameStat
+	PlayerWeaponStatsByID map[int][]*models.PlayerWeaponStat
 }
 
 // gameCategory determines the game's "category" field
@@ -594,28 +601,69 @@ func (s *Submission) fillMap(rs *RawSubmission) error {
 }
 
 // fillPlayerGameStat fills in a single PlayerGameStat struct from the raw submission events
-func (s *Submission) fillPlayerGameStat(rs *RawSubmission, index int) error {
+func (s *Submission) fillPlayerGameStat(events map[string]string, player *models.Player) error {
 	// an initialized pgstat based on the game type being played
 	pgs := models.NewPlayerGameStat(s.Game.GameTypeCd)
 
 	// fields passed on from other objects
+	pgs.PlayerId = player.PlayerId
 	pgs.GameId = s.Game.GameId
 	pgs.CreateDt = s.CreateDt
+	pgs.Nick = player.Nick
+	pgs.StrippedNick = player.StrippedNick
+
+	score := 0
+	if scoreStr, ok := events["scoreboard-score"]; ok {
+		scoreFloat, err := strconv.ParseFloat(scoreStr, 32)
+		if err == nil {
+			score = int(math.Round(scoreFloat))
+		}
+	}
+	pgs.Score = &score
+
+	alivetimeSecs := 0
+	if alivetimeStr, ok := events["alivetime"]; ok {
+		alivetimeFloat, err := strconv.ParseFloat(alivetimeStr, 64)
+		if err == nil {
+			alivetimeSecs = int(math.Round(alivetimeFloat))
+		}
+	}
+	alivetime := time.Duration(alivetimeSecs) * time.Second
+	pgs.AliveTime = &alivetime
+
+	rank := 0
+	if rankStr, ok := events["rank"]; ok {
+		rankInt, err := strconv.Atoi(rankStr)
+		if err == nil {
+			rank = rankInt
+		}
+	}
+	pgs.Rank = &rank
 
 	s.PlayerGameStats = append(s.PlayerGameStats, *pgs)
+	s.PlayerGameStatsByID[pgs.PlayerId] = pgs
 
 	return nil
 }
 
 // fillPlayers fills in the Players and PlayerHashKeys slices from the raw submission
 func (s *Submission) fillPlayers(rs *RawSubmission) error {
-	for i, pe := range rs.PlayerEvents {
-		hashkey := pe["P"]
-		nick := pe["n"]
+	for _, events := range rs.PlayerEvents {
+		hashkey := events["P"]
+
+		nick := "Anonymous Player"
+		if nickStr, ok := events["n"]; ok {
+			if len(nickStr) > 128 {
+				nick = nickStr[:128]
+			} else {
+				nick = nickStr
+			}
+		}
+
 		nickQStr := qstr.QStr(nick)
 		strippedNick := nickQStr.Stripped()
 
-		playerID, err := strconv.Atoi(pe["i"])
+		playerID, err := strconv.Atoi(events["i"])
 		if err != nil {
 			playerID = -1
 		}
@@ -626,17 +674,18 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 			StrippedNick: &strippedNick,
 			CreateDt:     s.CreateDt,
 		}
+		s.Players = append(s.Players, player)
+		s.PlayersByID[playerID] = &player
 
 		playerHashkey := models.PlayerHashkey{
 			PlayerId: playerID,
 			Hashkey:  hashkey,
 			CreateDt: s.CreateDt,
 		}
-
-		s.fillPlayerGameStat(rs, i)
-
-		s.Players = append(s.Players, player)
 		s.PlayerHashkeys = append(s.PlayerHashkeys, playerHashkey)
+		s.PlayerHashkeysByID[playerID] = &playerHashkey
+
+		s.fillPlayerGameStat(events, &player)
 	}
 	return nil
 }
@@ -648,14 +697,22 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	playerGameStats := make([]models.PlayerGameStat, 0, len(rs.PlayerEvents))
 	playerWeaponStats := make([]models.PlayerWeaponStat, 0)
 	teamGameStats := make([]models.TeamGameStat, 0)
+	playersByID := make(map[int]*models.Player, 0)
+	playerHashkeysByIndex := make(map[int]*models.PlayerHashkey, 0)
+	playerGameStatsByIndex := make(map[int]*models.PlayerGameStat, 0)
+	playerWeaponStatsByIndex := make(map[int][]*models.PlayerWeaponStat, 0)
 
 	s := &Submission{
-		Players:           players,
-		PlayerHashkeys:    playerHashkeys,
-		PlayerGameStats:   playerGameStats,
-		PlayerWeaponStats: playerWeaponStats,
-		TeamGameStats:     teamGameStats,
-		CreateDt:          time.Now().UTC(),
+		Players:               players,
+		PlayerHashkeys:        playerHashkeys,
+		PlayerGameStats:       playerGameStats,
+		PlayerWeaponStats:     playerWeaponStats,
+		TeamGameStats:         teamGameStats,
+		CreateDt:              time.Now().UTC(),
+		PlayersByID:           playersByID,
+		PlayerHashkeysByID:    playerHashkeysByIndex,
+		PlayerGameStatsByID:   playerGameStatsByIndex,
+		PlayerWeaponStatsByID: playerWeaponStatsByIndex,
 	}
 
 	// one at a time, we fill the members
