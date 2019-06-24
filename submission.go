@@ -600,6 +600,24 @@ func (s *Submission) fillMap(rs *RawSubmission) error {
 	return nil
 }
 
+// intFromStringDefault converts a string to an int if possible, and if not returns a default value
+func intFromStringDefault(value string, defaultVal int) *int {
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return &defaultVal
+	}
+	return &intVal
+}
+
+// intFromStringDefault converts a string to an int if possible, and if not returns nil
+func intFromString(value string) *int {
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return nil
+	}
+	return &intVal
+}
+
 // fillPlayerGameStat fills in a single PlayerGameStat struct from the raw submission events
 func (s *Submission) fillPlayerGameStat(events map[string]string, player *models.Player) error {
 	// an initialized pgstat based on the game type being played
@@ -612,6 +630,7 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	pgs.Nick = player.Nick
 	pgs.StrippedNick = player.StrippedNick
 
+	// required fields
 	score := 0
 	if scoreStr, ok := events["scoreboard-score"]; ok {
 		scoreFloat, err := strconv.ParseFloat(scoreStr, 32)
@@ -631,23 +650,68 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	alivetime := time.Duration(alivetimeSecs) * time.Second
 	pgs.AliveTime = &alivetime
 
-	rank := 0
 	if rankStr, ok := events["rank"]; ok {
-		rankInt, err := strconv.Atoi(rankStr)
-		if err == nil {
-			rank = rankInt
-		}
+		pgs.Rank = intFromStringDefault(rankStr, 0)
 	}
-	pgs.Rank = &rank
 
-	scoreboardPos := 0
 	if scoreboardPosStr, ok := events["scoreboardpos"]; ok {
-		spInt, err := strconv.Atoi(scoreboardPosStr)
-		if err == nil {
-			scoreboardPos = spInt
-		}
+		pgs.ScoreboardPos = intFromStringDefault(scoreboardPosStr, 0)
 	}
-	pgs.ScoreboardPos = &scoreboardPos
+
+	wins := false
+
+	for key, value := range events {
+		switch key {
+		case "wins":
+			wins = true
+		case "t":
+			pgs.Team = intFromString(value)
+		case "scoreboard-drops", "scoreboard-released", "scoreboard-ticks", "scoreboard-losses":
+			pgs.Drops = intFromString(value)
+		case "scoreboard-returns":
+			pgs.Returns = intFromString(value)
+		case "scoreboard-fckills", "scoreboard-bckills", "scoreboard-kckills":
+			pgs.CarrierFrags = intFromString(value)
+		case "scoreboard-pickups", "scoreboard-takes":
+			pgs.Pickups = intFromString(value)
+		case "scoreboard-caps", "scoreboard-captured", "scoreboard-goals":
+			pgs.Captures = intFromString(value)
+		case "scoreboard-deaths":
+			pgs.Deaths = intFromString(value)
+		case "scoreboard-kills":
+			pgs.Kills = intFromString(value)
+		case "scoreboard-suicides":
+			pgs.Suicides = intFromString(value)
+		case "scoreboard-objectives":
+			pgs.Collects = intFromString(value)
+		case "scoreboard-fastest", "scoreboard-captime":
+			// TODO: pgstat.fastest = datetime.timedelta(seconds=float(value)/100)
+			// TODO: if the game type is ctf, do fastest cap processing
+		case "scoreboard-revivals":
+			pgs.Revivals = intFromString(value)
+		case "scoreboard-bctime":
+			// TODO: pgstat.time = datetime.timedelta(seconds=int(value))
+		case "scoreboard-pushes":
+			pgs.Pushes = intFromString(value)
+		case "scoreboard-destroyed":
+			pgs.Destroys = intFromString(value)
+		case "scoreboard-lives":
+			pgs.Lives = intFromString(value)
+		case "scoreboard-faults":
+			pgs.Drops = intFromString(value)
+		case "scoreboard-laps":
+			pgs.Laps = intFromString(value)
+		case "avglatency":
+			// TODO: pgstat.avg_latency = float(value)
+		}
+
+		// TODO: process anticheat records
+	}
+
+	// there is no "winning team" field, so we derive it
+	if wins {
+		s.Game.Winner = pgs.Team
+	}
 
 	s.PlayerGameStats = append(s.PlayerGameStats, *pgs)
 	s.PlayerGameStatsByID[pgs.PlayerId] = pgs
