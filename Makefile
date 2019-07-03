@@ -1,6 +1,6 @@
 .PHONY: test
 test:
-	go test -cover -coverprofile=coverage.out
+	go test -cover -coverprofile=coverage.out ./...
 
 coverage: test
 	go tool cover -html=coverage.out

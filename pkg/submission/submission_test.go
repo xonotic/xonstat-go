@@ -11,15 +11,15 @@ var eventCountTests = []struct {
 	expectedTeamsCount   int
 	expectedPlayersCount int
 }{
-	{"test/submissions/cts_normal.txt", 0, 1},
-	{"test/submissions/ca_normal.txt", 2, 10},
-	{"test/submissions/ctf_normal.txt", 2, 14},
-	{"test/submissions/dm_normal.txt", 0, 8},
-	{"test/submissions/duel_normal.txt", 0, 4},
-	{"test/submissions/ft_normal.txt", 2, 11},
-	{"test/submissions/ka_normal.txt", 0, 7},
-	{"test/submissions/kh_normal.txt", 4, 10},
-	{"test/submissions/tdm_normal.txt", 2, 8},
+	{"../../test/submissions/cts_normal.txt", 0, 1},
+	{"../../test/submissions/ca_normal.txt", 2, 10},
+	{"../../test/submissions/ctf_normal.txt", 2, 14},
+	{"../../test/submissions/dm_normal.txt", 0, 8},
+	{"../../test/submissions/duel_normal.txt", 0, 4},
+	{"../../test/submissions/ft_normal.txt", 2, 11},
+	{"../../test/submissions/ka_normal.txt", 0, 7},
+	{"../../test/submissions/kh_normal.txt", 4, 10},
+	{"../../test/submissions/tdm_normal.txt", 2, 8},
 }
 
 // test the correct counts of team and player events
@@ -56,7 +56,7 @@ func TestCorrectCounts(t *testing.T) {
 
 // test that errors are thrown if a submission is missing required metadata
 func TestInvalidMetadata(t *testing.T) {
-	filename := "test/submissions/missing_metadata.txt"
+	filename := "../../test/submissions/missing_metadata.txt"
 
 	f, err := os.Open(filename)
 	if err != nil {
@@ -73,7 +73,7 @@ func TestInvalidMetadata(t *testing.T) {
 
 // test that errors are thrown if a submission is for an unsupported game type
 func TestUnsupportedGameType(t *testing.T) {
-	filename := "test/submissions/unsupported_game_type.txt"
+	filename := "../../test/submissions/unsupported_game_type.txt"
 
 	f, err := os.Open(filename)
 	if err != nil {
@@ -91,7 +91,7 @@ func TestUnsupportedGameType(t *testing.T) {
 // test that errors are thrown if a submission is for a blank game
 func TestBlankGame(t *testing.T) {
 	files := []string{
-		"test/submissions/cts_blank_game.txt",
+		"../../test/submissions/cts_blank_game.txt",
 	}
 
 	for _, filename := range files {
@@ -115,9 +115,9 @@ func TestCategory(t *testing.T) {
 		filename string
 		category string
 	}{
-		{"test/submissions/ctf_normal.txt", "vanilla"},
-		{"test/submissions/ctf_insta.txt", "insta"},
-		{"test/submissions/ctf_jeff.txt", "general"},
+		{"../../test/submissions/ctf_normal.txt", "vanilla"},
+		{"../../test/submissions/ctf_insta.txt", "insta"},
+		{"../../test/submissions/ctf_jeff.txt", "general"},
 	}
 
 	for _, categoryTest := range categoryTests {
