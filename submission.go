@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/antzucaro/qstr"
-	"gitlab.com/antibody/xonstat/models"
+	"gitlab.com/antibody/xonstat/pkg/models"
 )
 
 // ReadReturner represents a streaming line reader that you can put lines back into. On subsequent
