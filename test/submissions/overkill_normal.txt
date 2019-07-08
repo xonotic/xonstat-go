@@ -1,0 +1,269 @@
+V 9
+R xonotic-v0.8.2-2734-gcf9256c2a
+G dm
+O Overkill
+M afterslime
+I 0.552585
+S Xonotic git Server
+C 43
+U 26000
+D 294.999817
+L 
+P player#5
+i 5
+n ^x0a0print('^xE09Anti^xea0body^x0a0')^7
+e kills-4 5
+e kills-3 8
+e kills-2 7
+e kills-1 9
+e scoreboard-fps 111
+e scoreboard-elo 100
+e total-elo 101
+e scoreboard-dmgtaken 500
+e total-dmgtaken 500
+e scoreboard-dmg 3956.73
+e total-dmg 3956.73
+e scoreboard-kills 29
+e total-kills 29
+e scoreboard-score 29
+e total-score 29
+e anticheat-idle_snapaim_m10 95.1074
+e anticheat-idle_snapaim_m7 65.6252
+e anticheat-idle_snapaim_m4 26.7689
+e anticheat-idle_snapaim_m3 13.5935
+e anticheat-idle_snapaim_m2 4.20161
+e anticheat-idle_snapaim_noise 1.14949
+e anticheat-idle_snapaim_signal 40.533
+e anticheat-idle_snapaim 39.3835
+e anticheat-div0_evade 0.015195
+e anticheat-div0_strafebot_new 0.185007
+e anticheat-speedhack_m5 1.00185
+e anticheat-speedhack_m4 1.00185
+e anticheat-speedhack_m3 1.00185
+e anticheat-speedhack_m2 1.00184
+e anticheat-speedhack_m1 1.00187
+e anticheat-speedhack 0.008979
+e anticheat-_time 294.4
+e achievement-kill-spree-25 1
+e achievement-kill-spree-20 1
+e achievement-kill-spree-15 1
+e achievement-kill-spree-10 1
+e achievement-kill-spree-5 1
+e achievement-kill-spree-3 1
+e acc-okshotgun-frags 5
+e acc-okshotgun-cnt-fired 22
+e acc-okshotgun-cnt-hit 16
+e acc-okshotgun-fired 3740
+e acc-okshotgun-hit 1241
+e acc-oknex-frags 17
+e acc-oknex-cnt-fired 44
+e acc-oknex-cnt-hit 25
+e acc-oknex-fired 4400
+e acc-oknex-hit 2500
+e acc-okmachinegun-frags 3
+e acc-okmachinegun-cnt-fired 42
+e acc-okmachinegun-cnt-hit 14
+e acc-okmachinegun-fired 1050
+e acc-okmachinegun-hit 350
+e acc-okhmg-frags 3
+e acc-okhmg-cnt-fired 120
+e acc-okhmg-cnt-hit 15
+e acc-okhmg-fired 3600
+e acc-okhmg-hit 450
+e acc-blaster-cnt-fired 13
+e acc-blaster-cnt-hit 1
+e acc-blaster-fired 325
+e acc-blaster-hit 25
+e rank 1
+e scoreboardpos 1
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e wins 1
+e avglatency 14.5586
+e alivetime 292.5
+P bot#0#Shadow
+i 4
+n [BOT]Shadow
+e kills-3 3
+e kills-2 5
+e kills-1 2
+e scoreboard-elo -2
+e scoreboard-dmgtaken 2353.39
+e total-dmgtaken 2353.39
+e scoreboard-dmg 1304.93
+e total-dmg 1304.93
+e scoreboard-suicides 1
+e total-suicides 1
+e scoreboard-deaths 17
+e total-deaths 17
+e scoreboard-kills 10
+e total-kills 10
+e scoreboard-score 9
+e total-score 9
+e anticheat-idle_snapaim_m10 36.8633
+e anticheat-idle_snapaim_m7 27.002
+e anticheat-idle_snapaim_m4 13.4961
+e anticheat-idle_snapaim_m3 8.56272
+e anticheat-idle_snapaim_m2 4.18931
+e anticheat-idle_snapaim_noise 1.15465
+e anticheat-idle_snapaim_signal 18.368
+e anticheat-idle_snapaim 17.2133
+e anticheat-div0_strafebot_new 0.194892
+e anticheat-div0_strafebot_old 0.253214
+e anticheat-speedhack_m5 1.00328
+e anticheat-speedhack_m4 1.00328
+e anticheat-speedhack_m3 1.00328
+e anticheat-speedhack_m2 1.00326
+e anticheat-speedhack_m1 1.00329
+e anticheat-speedhack 1e-05
+e anticheat-_time 294.9
+e achievement-firstvictim 1
+e achievement-kill-spree-3 1
+e acc-oknex-frags 10
+e acc-oknex-cnt-fired 135
+e acc-oknex-cnt-hit 15
+e acc-oknex-fired 13500
+e acc-oknex-hit 1500
+e acc-okmachinegun-cnt-fired 4
+e acc-okmachinegun-fired 100
+e rank 2
+e scoreboardpos 2
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e alivetime 260.233
+P bot#0#Resurrection
+i 3
+n [BOT]Resurrection
+e kills-4 4
+e scoreboard-elo -2
+e scoreboard-dmgtaken 2312.63
+e total-dmgtaken 2312.63
+e scoreboard-dmg 525
+e total-dmg 525
+e scoreboard-deaths 17
+e total-deaths 17
+e scoreboard-kills 4
+e total-kills 4
+e scoreboard-score 4
+e total-score 4
+e anticheat-idle_snapaim_m10 42.7959
+e anticheat-idle_snapaim_m7 31.7775
+e anticheat-idle_snapaim_m4 15.6303
+e anticheat-idle_snapaim_m3 9.32933
+e anticheat-idle_snapaim_m2 3.82557
+e anticheat-idle_snapaim_noise 1.19312
+e anticheat-idle_snapaim_signal 21.6303
+e anticheat-idle_snapaim 20.4372
+e anticheat-div0_strafebot_new 0.229507
+e anticheat-div0_strafebot_old 0.23362
+e anticheat-speedhack_m5 1.00328
+e anticheat-speedhack_m4 1.00328
+e anticheat-speedhack_m3 1.00328
+e anticheat-speedhack_m2 1.00326
+e anticheat-speedhack_m1 1.00329
+e anticheat-speedhack 1e-05
+e anticheat-_time 294.9
+e achievement-firstblood 1
+e acc-oknex-frags 4
+e acc-oknex-cnt-fired 126
+e acc-oknex-cnt-hit 6
+e acc-oknex-fired 12600
+e acc-oknex-hit 600
+e rank 5
+e scoreboardpos 5
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e alivetime 260.233
+P bot#0#Sensible
+i 2
+n [BOT]Sensible
+e kills-4 4
+e kills-3 4
+e kills-1 1
+e scoreboard-elo -2
+e scoreboard-dmgtaken 2323.47
+e total-dmgtaken 2323.47
+e scoreboard-dmg 1840.8
+e total-dmg 1840.8
+e scoreboard-deaths 16
+e total-deaths 16
+e scoreboard-kills 9
+e total-kills 9
+e scoreboard-score 9
+e total-score 9
+e anticheat-idle_snapaim_m10 42.064
+e anticheat-idle_snapaim_m7 31.4962
+e anticheat-idle_snapaim_m4 15.8911
+e anticheat-idle_snapaim_m3 9.61043
+e anticheat-idle_snapaim_m2 3.95396
+e anticheat-idle_snapaim_noise 1.23993
+e anticheat-idle_snapaim_signal 21.7413
+e anticheat-idle_snapaim 20.5014
+e anticheat-div0_strafebot_new 0.230685
+e anticheat-div0_strafebot_old 0.263112
+e anticheat-speedhack_m5 1.00328
+e anticheat-speedhack_m4 1.00328
+e anticheat-speedhack_m3 1.00328
+e anticheat-speedhack_m2 1.00326
+e anticheat-speedhack_m1 1.00329
+e anticheat-speedhack 1e-05
+e anticheat-_time 294.9
+e acc-oknex-frags 7
+e acc-oknex-cnt-fired 142
+e acc-oknex-cnt-hit 17
+e acc-oknex-fired 14200
+e acc-oknex-hit 1700
+e rank 2
+e scoreboardpos 2
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e alivetime 262.266
+P bot#0#Lion
+i 1
+n [BOT]Lion
+e kills-4 3
+e kills-3 2
+e kills-2 4
+e scoreboard-elo -2
+e scoreboard-dmgtaken 1544.13
+e total-dmgtaken 1544.13
+e scoreboard-dmg 1300
+e total-dmg 1300
+e scoreboard-deaths 12
+e total-deaths 12
+e scoreboard-kills 9
+e total-kills 9
+e scoreboard-score 9
+e total-score 9
+e anticheat-idle_snapaim_m10 41.5722
+e anticheat-idle_snapaim_m7 31.1154
+e anticheat-idle_snapaim_m4 16.4606
+e anticheat-idle_snapaim_m3 10.726
+e anticheat-idle_snapaim_m2 5.21047
+e anticheat-idle_snapaim_noise 1.08098
+e anticheat-idle_snapaim_signal 21.8603
+e anticheat-idle_snapaim 20.7793
+e anticheat-div0_strafebot_new 0.231947
+e anticheat-div0_strafebot_old 0.241461
+e anticheat-speedhack_m5 1.00328
+e anticheat-speedhack_m4 1.00328
+e anticheat-speedhack_m3 1.00328
+e anticheat-speedhack_m2 1.00326
+e anticheat-speedhack_m1 1.00329
+e anticheat-speedhack 1e-05
+e anticheat-_time 294.9
+e acc-oknex-frags 9
+e acc-oknex-cnt-fired 134
+e acc-oknex-cnt-hit 13
+e acc-oknex-fired 13400
+e acc-oknex-hit 1300
+e rank 2
+e scoreboardpos 2
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e alivetime 270.4
