@@ -469,12 +469,12 @@ func gameCategory(rs *RawSubmission) string {
 	}
 
 	overkillAllowedWeapons := map[string]struct{}{
-		"hmg":        struct{}{},
-		"vortex":     struct{}{},
-		"shotgun":    struct{}{},
-		"blaster":    struct{}{},
-		"machinegun": struct{}{},
-		"rpc":        struct{}{},
+		"okhmg":        struct{}{},
+		"oknex":        struct{}{},
+		"okshotgun":    struct{}{},
+		"okmachinegun": struct{}{},
+		"blaster":      struct{}{},
+		"rpc":          struct{}{}, // does this actually exist?
 	}
 
 	// for each category, have we seen all allowed weapons?

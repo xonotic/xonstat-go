@@ -20,6 +20,7 @@ var eventCountTests = []struct {
 	{"../../test/submissions/ka_normal.txt", 0, 7},
 	{"../../test/submissions/kh_normal.txt", 4, 10},
 	{"../../test/submissions/tdm_normal.txt", 2, 8},
+	{"../../test/submissions/overkill_normal.txt", 0, 5},
 }
 
 // test the correct counts of team and player events
@@ -116,6 +117,7 @@ func TestCategory(t *testing.T) {
 		category string
 	}{
 		{"../../test/submissions/ctf_normal.txt", "vanilla"},
+		{"../../test/submissions/overkill_normal.txt", "overkill"},
 		{"../../test/submissions/ctf_insta.txt", "insta"},
 		{"../../test/submissions/ctf_jeff.txt", "general"},
 	}
