@@ -560,6 +560,8 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 
 // fillServer fills in the Server attribute from the raw submission
 func (s *Submission) fillServer(rs *RawSubmission) error {
+	s.Server.ActiveInd = true
+
 	if serverName, ok := rs.GameMeta["S"]; ok {
 		s.Server.Name = &serverName
 	} else {
@@ -575,6 +577,10 @@ func (s *Submission) fillServer(rs *RawSubmission) error {
 	if impureCvarsStr, ok := rs.GameMeta["C"]; ok {
 		if impureCvars, err := strconv.Atoi(impureCvarsStr); err == nil {
 			s.Server.ImpureCvars = &impureCvars
+		}
+
+		if s.Server.ImpureCvars != nil && *s.Server.ImpureCvars == 0 {
+			s.Server.PureInd = true
 		}
 	}
 
@@ -745,6 +751,7 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 			PlayerId:     playerID,
 			Nick:         &nick,
 			StrippedNick: &strippedNick,
+			ActiveInd:    true,
 			CreateDt:     s.CreateDt,
 		}
 		s.Players = append(s.Players, player)
@@ -760,6 +767,7 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 
 		s.fillPlayerGameStat(events, &player)
 	}
+
 	return nil
 }
 
