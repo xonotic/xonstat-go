@@ -473,8 +473,8 @@ func gameCategory(rs *RawSubmission) string {
 		"oknex":        struct{}{},
 		"okshotgun":    struct{}{},
 		"okmachinegun": struct{}{},
+		"okrpc":        struct{}{},
 		"blaster":      struct{}{},
-		"rpc":          struct{}{}, // does this actually exist?
 	}
 
 	// for each category, have we seen all allowed weapons?
