@@ -624,6 +624,36 @@ func intFromString(value string) *int {
 	return &intVal
 }
 
+// fillPlayerWeaponStat populates a PlayerWeaponStat object from the events in the events map
+func (s *Submission) fillPlayerWeaponStat(weapon string, events map[string]string, player *models.Player) error {
+	var ws models.PlayerWeaponStat
+	ws.WeaponCd = weapon
+	ws.CreateDt = s.Game.CreateDt
+
+	// helper function to pull weapon stat values, rounded from the floats they might be
+	var intFromFloat = func(key string) int {
+		if s, ok := events[key]; ok {
+			val, err := strconv.ParseFloat(s, 32)
+			if err != nil {
+				return 0
+			}
+			return int(math.Round(val))
+		}
+		return 0
+	}
+
+	ws.Fired = intFromFloat(fmt.Sprintf("acc-%s-cnt-fired", weapon))
+	ws.Hit = intFromFloat(fmt.Sprintf("acc-%s-cnt-hit", weapon))
+	ws.Max = intFromFloat(fmt.Sprintf("acc-%s-fired", weapon))
+	ws.Actual = intFromFloat(fmt.Sprintf("acc-%s-hit", weapon))
+	ws.Frags = intFromFloat(fmt.Sprintf("acc-%s-frags", weapon))
+
+	s.PlayerWeaponStats = append(s.PlayerWeaponStats, ws)
+	s.PlayerWeaponStatsByID[player.PlayerId] = append(s.PlayerWeaponStatsByID[player.PlayerId], &ws)
+
+	return nil
+}
+
 // fillPlayerGameStat fills in a single PlayerGameStat struct from the raw submission events
 func (s *Submission) fillPlayerGameStat(events map[string]string, player *models.Player) error {
 	// an initialized pgstat based on the game type being played
@@ -709,6 +739,11 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 			pgs.Laps = intFromString(value)
 		case "avglatency":
 			// TODO: pgstat.avg_latency = float(value)
+		}
+
+		if strings.HasSuffix(key, "cnt-fired") {
+			weapon := weaponFromKey(key)
+			s.fillPlayerWeaponStat(weapon, events, player)
 		}
 
 		// TODO: process anticheat records
