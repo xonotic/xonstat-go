@@ -430,15 +430,16 @@ func (s *RawSubmission) validate() error {
 
 // Submission is a fully-formatted statistics POST request
 type Submission struct {
-	Game              models.Game
-	Server            models.Server
-	Map               models.Map
-	Players           []models.Player
-	PlayerHashkeys    []models.PlayerHashkey
-	PlayerGameStats   []models.PlayerGameStat
-	PlayerWeaponStats []models.PlayerWeaponStat
-	TeamGameStats     []models.TeamGameStat
-	CreateDt          time.Time
+	Game                 models.Game
+	Server               models.Server
+	Map                  models.Map
+	Players              []models.Player
+	PlayerHashkeys       []models.PlayerHashkey
+	PlayerGameStats      []models.PlayerGameStat
+	PlayerWeaponStats    []models.PlayerWeaponStat
+	TeamGameStats        []models.TeamGameStat
+	PlayerGameAnticheats []models.PlayerGameAnticheat
+	CreateDt             time.Time
 
 	// References by player ID (initially the player events 'i' or index value) for easier processing
 	PlayersByID           map[int]*models.Player
@@ -746,7 +747,18 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 			s.fillPlayerWeaponStat(weapon, events, player)
 		}
 
-		// TODO: process anticheat records
+		if strings.HasPrefix(key, "anticheat") {
+			floatVal, _ := strconv.ParseFloat(value, 64)
+			ac := models.PlayerGameAnticheat{
+				PlayerID: pgs.PlayerId,
+				GameID:   pgs.GameId,
+				Key:      key,
+				Value:    floatVal,
+				CreateDt: pgs.CreateDt,
+			}
+
+			s.PlayerGameAnticheats = append(s.PlayerGameAnticheats, ac)
+		}
 	}
 
 	// there is no "winning team" field, so we derive it
@@ -813,6 +825,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	playerGameStats := make([]models.PlayerGameStat, 0, len(rs.PlayerEvents))
 	playerWeaponStats := make([]models.PlayerWeaponStat, 0)
 	teamGameStats := make([]models.TeamGameStat, 0)
+	playerGameAnticheats := make([]models.PlayerGameAnticheat, 0)
 	playersByID := make(map[int]*models.Player, 0)
 	playerHashkeysByIndex := make(map[int]*models.PlayerHashkey, 0)
 	playerGameStatsByIndex := make(map[int]*models.PlayerGameStat, 0)
@@ -824,6 +837,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 		PlayerGameStats:       playerGameStats,
 		PlayerWeaponStats:     playerWeaponStats,
 		TeamGameStats:         teamGameStats,
+		PlayerGameAnticheats:  playerGameAnticheats,
 		CreateDt:              time.Now().UTC(),
 		PlayersByID:           playersByID,
 		PlayerHashkeysByID:    playerHashkeysByIndex,

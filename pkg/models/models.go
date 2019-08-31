@@ -181,7 +181,7 @@ type PlayerGameAnticheat struct {
 	PlayerGameAnticheatID int
 	PlayerID              int
 	GameID                int
-	key                   string
-	value                 string
+	Key                   string
+	Value                 float64
 	CreateDt              time.Time
 }
