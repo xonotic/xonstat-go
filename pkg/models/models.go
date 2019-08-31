@@ -176,3 +176,12 @@ type TeamGameStat struct {
 	Caps           *int
 	CreateDt       time.Time
 }
+
+type PlayerGameAnticheat struct {
+	PlayerGameAnticheatID int
+	PlayerID              int
+	GameID                int
+	key                   string
+	value                 string
+	CreateDt              time.Time
+}
