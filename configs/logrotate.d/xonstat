@@ -1,0 +1,7 @@
+/var/log/xonstat.log
+{
+	rotate 4
+	weekly
+	missingok
+	notifempty
+}
