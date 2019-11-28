@@ -625,6 +625,22 @@ func intFromString(value string) *int {
 	return &intVal
 }
 
+// durationFromString converts a string representing hundredths of seconds to a duration.
+func durationFromString(value string) *time.Duration {
+	floatVal, err := strconv.ParseFloat(value, 32)
+	if err != nil {
+		return nil
+	}
+
+	seconds := floatVal / 100.0
+	duration, err := time.ParseDuration(fmt.Sprintf("%.2fs", seconds))
+	if err != nil {
+		return nil
+	}
+
+	return &duration
+}
+
 // fillPlayerWeaponStat populates a PlayerWeaponStat object from the events in the events map
 func (s *Submission) fillPlayerWeaponStat(weapon string, events map[string]string, player *models.Player) error {
 	var ws models.PlayerWeaponStat
@@ -722,7 +738,7 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 		case "scoreboard-objectives":
 			pgs.Collects = intFromString(value)
 		case "scoreboard-fastest", "scoreboard-captime":
-			// TODO: pgstat.fastest = datetime.timedelta(seconds=float(value)/100)
+			pgs.Fastest = durationFromString(value)
 			// TODO: if the game type is ctf, do fastest cap processing
 		case "scoreboard-revivals":
 			pgs.Revivals = intFromString(value)
