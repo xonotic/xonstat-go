@@ -177,6 +177,26 @@ type TeamGameStat struct {
 	CreateDt       time.Time
 }
 
+func NewTeamGameStat(gameTypeCd string) *TeamGameStat {
+	var tgs TeamGameStat
+
+	// All TeamGameStat records have a score
+	score := 0
+	tgs.Score = &score
+
+	switch gameTypeCd {
+	case "ca", "ft", "ka":
+		rounds := 0
+		tgs.Rounds = &rounds
+
+	case "ctf":
+		caps := 0
+		tgs.Caps = &caps
+	}
+
+	return &tgs
+}
+
 type PlayerGameAnticheat struct {
 	PlayerGameAnticheatID int
 	PlayerID              int

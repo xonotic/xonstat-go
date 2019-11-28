@@ -607,6 +607,50 @@ func (s *Submission) fillMap(rs *RawSubmission) error {
 	return nil
 }
 
+// fillTeamStats fills in the stats attributable to teams
+func (s *Submission) fillTeamStats(rs *RawSubmission) error {
+	// helper function to return an int from a rounded float
+	var intFromFloat = func(value string) *int {
+		var intVal *int
+
+		floatVal, err := strconv.ParseFloat(value, 32)
+		if err != nil {
+			return intVal
+		}
+		rounded := int(math.Round(floatVal))
+		intVal = &rounded
+
+		return intVal
+	}
+
+	for _, events := range rs.TeamEvents {
+		tgs := models.NewTeamGameStat(s.Game.GameTypeCd)
+		tgs.GameId = s.Game.GameId
+		tgs.CreateDt = s.Game.CreateDt
+
+		team, err := strconv.Atoi(strings.Split(events["Q"], "#")[1])
+		if err != nil {
+			return err
+		}
+		tgs.Team = team
+
+		for key, value := range events {
+			switch key {
+			case "scoreboard-score":
+				tgs.Score = intFromFloat(value)
+			case "scoreboard-caps", "scoreboard-goals":
+				tgs.Caps = intFromString(value)
+			case "scoreboard-rounds":
+				tgs.Rounds = intFromString(value)
+			}
+		}
+
+		s.TeamGameStats = append(s.TeamGameStats, *tgs)
+	}
+
+	return nil
+}
+
 // intFromStringDefault converts a string to an int if possible, and if not returns a default value
 func intFromStringDefault(value string, defaultVal int) *int {
 	intVal, err := strconv.Atoi(value)
@@ -890,6 +934,11 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	}
 
 	err = s.fillMap(rs)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.fillTeamStats(rs)
 	if err != nil {
 		return nil, err
 	}
