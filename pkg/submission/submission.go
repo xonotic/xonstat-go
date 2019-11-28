@@ -625,14 +625,16 @@ func intFromString(value string) *int {
 	return &intVal
 }
 
-// durationFromString converts a string representing hundredths of seconds to a duration.
-func durationFromString(value string) *time.Duration {
+// durationFromString converts a string representing some multiple of seconds to a duration.
+// Adjust the divisor argument to account for the scale of the raw value (sometimes raw values
+// are reported in hundredths of seconds, etc).
+func durationFromString(value string, divisor float64) *time.Duration {
 	floatVal, err := strconv.ParseFloat(value, 32)
 	if err != nil {
 		return nil
 	}
 
-	seconds := floatVal / 100.0
+	seconds := floatVal / divisor
 	duration, err := time.ParseDuration(fmt.Sprintf("%.2fs", seconds))
 	if err != nil {
 		return nil
@@ -738,12 +740,12 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 		case "scoreboard-objectives":
 			pgs.Collects = intFromString(value)
 		case "scoreboard-fastest", "scoreboard-captime":
-			pgs.Fastest = durationFromString(value)
+			pgs.Fastest = durationFromString(value, 100.0)
 			// TODO: if the game type is ctf, do fastest cap processing
 		case "scoreboard-revivals":
 			pgs.Revivals = intFromString(value)
 		case "scoreboard-bctime":
-			// TODO: pgstat.time = datetime.timedelta(seconds=int(value))
+			pgs.Time = durationFromString(value, 1.0)
 		case "scoreboard-pushes":
 			pgs.Pushes = intFromString(value)
 		case "scoreboard-destroyed":
