@@ -616,13 +616,22 @@ func intFromStringDefault(value string, defaultVal int) *int {
 	return &intVal
 }
 
-// intFromStringDefault converts a string to an int if possible, and if not returns nil
+// intFromString converts a string to an int if possible, and if not returns nil
 func intFromString(value string) *int {
 	intVal, err := strconv.Atoi(value)
 	if err != nil {
 		return nil
 	}
 	return &intVal
+}
+
+// floatFromString converts a string to an int if possible, and if not returns nil
+func floatFromString(value string) *float64 {
+	floatVal, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return nil
+	}
+	return &floatVal
 }
 
 // durationFromString converts a string representing some multiple of seconds to a duration.
@@ -757,7 +766,13 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 		case "scoreboard-laps":
 			pgs.Laps = intFromString(value)
 		case "avglatency":
-			// TODO: pgstat.avg_latency = float(value)
+			pgs.AvgLatency = floatFromString(value)
+		case "scoreboard-dmg":
+			// TODO: database field and parsing
+		case "scoreboard-dmgtaken":
+			// TODO: database field and parsing
+		case "scoreboard-fps":
+			// TODO: database field and parsing? Not sure if we want this saved.
 		}
 
 		if strings.HasSuffix(key, "cnt-fired") {
