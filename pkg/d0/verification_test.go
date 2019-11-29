@@ -15,7 +15,7 @@ func TestBlankGame(t *testing.T) {
 
 	result, err := Verify(sig, querystring, postdata)
 	if err != nil {
-		t.Fatalf("Unable to verify the request: %s", err)
+		t.Fatalf("%s", err)
 	}
 
 	if result.IDFP != idfp {
