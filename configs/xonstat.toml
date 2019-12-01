@@ -1,0 +1,10 @@
+# Connection string to use for XonStatDB PostgreSQL database
+ConnStr = "user=xonstat host=localhost dbname=xonstatdb sslmode=disable"
+
+# Time limits controlling how much history is shown on various pages
+SummaryStatsDays = 30
+TopPlayersByTimeDays = 30
+TopPlayersByScoreDays = 30
+TopServersByGamesDays = 30
+TopMapsByGamesDays = 30
+RecentGamesDays = 30
