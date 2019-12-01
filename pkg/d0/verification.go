@@ -9,12 +9,11 @@ import (
 	"strings"
 )
 
-// BlindIDKeygen is the location of the d0_blind_id keygen executable
-const BlindIDKeygen = "crypto-keygen-standalone"
+// D0BlindIDKeyGen is the default location standalone verification binary.
+const D0BlindIDKeyGen = "/usr/local/bin/crypto-keygen-standalone"
 
-// BlindIDD0pk is the location of the d0_blind_id public key
-// TODO: pass this in via some configurable method. Viper?
-const BlindIDD0pk = "/home/ant/bin/key_0.d0pk"
+// D0BlindIDPubKey is the default location of the d0 public key.
+const D0BlindIDPubKey = "~/key_0.d0pk"
 
 // VerifyResult is the result of a d0_blind_id verification
 type VerifyResult struct {
@@ -24,7 +23,7 @@ type VerifyResult struct {
 
 // Verify checks if the given request data is verified via the d0_blind_id library
 // via its command line executable.
-func Verify(signature, queryString, data string) (*VerifyResult, error) {
+func Verify(keygen, pubkey, signature, queryString, data string) (*VerifyResult, error) {
 	if signature == "" {
 		return nil, fmt.Errorf("missing signature")
 	}
@@ -61,7 +60,7 @@ func Verify(signature, queryString, data string) (*VerifyResult, error) {
 	sFile.Close()
 	defer os.Remove(sFile.Name())
 
-	cmd := exec.Command(BlindIDKeygen, "-p", BlindIDD0pk, "-d", dFile.Name(), "-s", sFile.Name())
+	cmd := exec.Command(keygen, "-p", pubkey, "-d", dFile.Name(), "-s", sFile.Name())
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, err
@@ -69,7 +68,7 @@ func Verify(signature, queryString, data string) (*VerifyResult, error) {
 
 	parts := strings.Split(string(output), "\n")
 	if len(parts) < 2 {
-		return nil, fmt.Errorf("unexpected output format from %s", BlindIDKeygen)
+		return nil, fmt.Errorf("unexpected output format from %s", keygen)
 	}
 
 	caStatus := parts[0] == "1"

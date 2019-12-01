@@ -13,7 +13,7 @@ func TestBlankGame(t *testing.T) {
 	idfp := "+r+m++fKd1mvYYr5qlZe+FsInDPcj8a2RpwwbII+/20="
 	caStatus := true
 
-	result, err := Verify(sig, querystring, postdata)
+	result, err := Verify(D0BlindIDKeyGen, D0BlindIDPubKey, sig, querystring, postdata)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}

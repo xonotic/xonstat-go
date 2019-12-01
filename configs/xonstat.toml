@@ -1,6 +1,11 @@
 # Connection string to use for XonStatDB PostgreSQL database
 ConnStr = "user=xonstat host=localhost dbname=xonstatdb sslmode=disable"
 
+# D0_BLIND_ID verification
+VerifyRequests = true
+D0BlindIDKeyGen = "/usr/local/bin/crypto-keygen-standalone"
+D0BlindIDPubKey = "~/key_0.d0pk"
+
 # Time limits controlling how much history is shown on various pages
 SummaryStatsDays = 30
 TopPlayersByTimeDays = 30
