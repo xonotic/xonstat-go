@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"log/syslog"
@@ -9,7 +8,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/spf13/cobra"
-	"gitlab.com/antibody/xonstat/pkg/submission"
+	"gitlab.com/antibody/xonstat/pkg/handlers"
 )
 
 func initLog() error {
@@ -27,26 +26,12 @@ func initLog() error {
 
 func web(port string) {
 	r := chi.NewRouter()
-	r.Post("/stats/submit", func(w http.ResponseWriter, r *http.Request) {
-		body := bufio.NewReader(r.Body)
-		rawSubmission, err := submission.NewRawSubmission(body)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
-			return
-		}
 
-		_, err = submission.NewSubmission(rawSubmission)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
-			return
-		}
+	// Register all routes and handlers.
+	r.Post("/stats/submit", handlers.SubmissionHandler)
 
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("200 OK"))
-	})
-
+	// Start the web application server on the specified port.
 	log.Printf("Starting XonStat web application server on port %s...", port)
-
 	addr := fmt.Sprintf(":%s", port)
 	http.ListenAndServe(addr, r)
 }
