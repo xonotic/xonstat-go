@@ -3,7 +3,6 @@ package d0
 import (
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -13,7 +12,7 @@ import (
 const D0BlindIDKeyGen = "/usr/local/bin/crypto-keygen-standalone"
 
 // D0BlindIDPubKey is the default location of the d0 public key.
-const D0BlindIDPubKey = "~/key_0.d0pk"
+const D0BlindIDPubKey = "/home/ant/key_0.d0pk"
 
 // VerifyResult is the result of a d0_blind_id verification
 type VerifyResult struct {
@@ -36,19 +35,21 @@ func Verify(keygen, pubkey, signature, queryString, data string) (*VerifyResult,
 	}
 
 	// Create the data file for processing.
-	dFile, err := ioutil.TempFile("", "d0verify_d.*")
+	dr, dw, err := os.Pipe()
 	if err != nil {
-		return nil, fmt.Errorf("unable to create temporary data file for d0 verification")
+		return nil, err
 	}
+	defer dr.Close()
 
-	dFile.Write([]byte(input))
-	dFile.Close()
-	defer os.Remove(dFile.Name())
+	go func() {
+		defer dw.Close()
+		dw.WriteString(input)
+	}()
 
 	// Create the signature file for processing.
-	sFile, err := ioutil.TempFile("", "d0verify_s.*")
+	sr, sw, err := os.Pipe()
 	if err != nil {
-		return nil, fmt.Errorf("unable to create temporary signature file for d0 verification")
+		return nil, err
 	}
 
 	sData64, err := base64.StdEncoding.DecodeString(signature)
@@ -56,13 +57,16 @@ func Verify(keygen, pubkey, signature, queryString, data string) (*VerifyResult,
 		return nil, err
 	}
 
-	sFile.Write([]byte(sData64))
-	sFile.Close()
-	defer os.Remove(sFile.Name())
+	go func() {
+		defer sw.Close()
+		sw.Write(sData64)
+	}()
 
-	cmd := exec.Command(keygen, "-p", pubkey, "-d", dFile.Name(), "-s", sFile.Name())
+	cmd := exec.Command(keygen, "-p", pubkey, "-d", "/dev/fd/3", "-s", "/dev/fd/4")
+	cmd.ExtraFiles = append(cmd.ExtraFiles, dr, sr)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		fmt.Println(string(output))
 		return nil, err
 	}
 
