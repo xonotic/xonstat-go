@@ -8,12 +8,6 @@ import (
 	"strings"
 )
 
-// D0BlindIDKeyGen is the default location standalone verification binary.
-const D0BlindIDKeyGen = "/usr/local/bin/crypto-keygen-standalone"
-
-// D0BlindIDPubKey is the default location of the d0 public key.
-const D0BlindIDPubKey = "/home/ant/key_0.d0pk"
-
 // VerifyResult is the result of a d0_blind_id verification
 type VerifyResult struct {
 	IDFP     string

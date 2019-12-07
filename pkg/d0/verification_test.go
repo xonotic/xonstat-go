@@ -1,6 +1,8 @@
 package d0
 
 import (
+	"fmt"
+	"os/user"
 	"testing"
 )
 
@@ -13,7 +15,14 @@ func TestBlankGame(t *testing.T) {
 	idfp := "+r+m++fKd1mvYYr5qlZe+FsInDPcj8a2RpwwbII+/20="
 	caStatus := true
 
-	result, err := Verify(D0BlindIDKeyGen, D0BlindIDPubKey, sig, querystring, postdata)
+	// Assume the keygen is in the PATH.
+	keygen := "crypto-keygen-standalone"
+
+	// Use the key file in the user's home directory by default.
+	currUser, _ := user.Current()
+	pubKey := fmt.Sprintf("%s/key_0.d0pk", currUser.HomeDir)
+
+	result, err := Verify(keygen, pubKey, sig, querystring, postdata)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
