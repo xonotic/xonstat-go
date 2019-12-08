@@ -7,7 +7,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gitlab.com/antibody/xonstat/pkg/handlers"
 )
 
@@ -26,6 +28,14 @@ func initLog() error {
 
 func web(port string) {
 	r := chi.NewRouter()
+
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger) // TODO: emit to the already-configured logger here
+
+	if viper.GetBool("VerifyRequests") {
+		log.Println("Verifying requests.")
+		r.Use(handlers.D0Verify)
+	}
 
 	// Register all routes and handlers.
 	r.Post("/stats/submit", handlers.SubmissionHandler)
