@@ -13,12 +13,17 @@ import (
 	"gitlab.com/antibody/xonstat/pkg/handlers"
 )
 
+// Global log for the application.
+var logger *log.Logger
+
 func initLog() error {
 	writer, err := syslog.New(syslog.LOG_DEBUG, "xonstat")
 	if err != nil {
 		return err
 	}
 	defer writer.Close()
+
+	logger = log.New(writer, "", log.Ldate|log.Ltime|log.LUTC)
 
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC)
 	log.SetOutput(writer)
@@ -29,11 +34,16 @@ func initLog() error {
 func web(port string) {
 	r := chi.NewRouter()
 
+	// Save the real IP address from X-Forward-For and the like.
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger) // TODO: emit to the already-configured logger here
 
+	// Log request metadata: the URI, the response, and how long it took.
+	formatter := middleware.DefaultLogFormatter{Logger: logger, NoColor: true}
+	middleware.DefaultLogger = middleware.RequestLogger(&formatter)
+	r.Use(middleware.Logger)
+
+	// Verify certain routes with do_blind_id.
 	if viper.GetBool("VerifyRequests") {
-		log.Println("Verifying requests.")
 		r.Use(handlers.D0Verify)
 	}
 
