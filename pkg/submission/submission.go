@@ -25,7 +25,7 @@ type ReadReturner struct {
 
 // NewReadReturner creates a new ReadReturner.
 func NewReadReturner(r io.Reader) *ReadReturner {
-	queue := make([]string, 0)
+	var queue []string
 	scanner := bufio.NewScanner(r)
 	return &ReadReturner{scanner, queue}
 }
@@ -900,9 +900,9 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	players := make([]models.Player, 0, len(rs.PlayerEvents))
 	playerHashkeys := make([]models.PlayerHashkey, 0, len(rs.PlayerEvents))
 	playerGameStats := make([]models.PlayerGameStat, 0, len(rs.PlayerEvents))
-	playerWeaponStats := make([]models.PlayerWeaponStat, 0)
-	teamGameStats := make([]models.TeamGameStat, 0)
-	playerGameAnticheats := make([]models.PlayerGameAnticheat, 0)
+	var playerWeaponStats []models.PlayerWeaponStat
+	var teamGameStats []models.TeamGameStat
+	var playerGameAnticheats []models.PlayerGameAnticheat
 	playersByID := make(map[int]*models.Player, 0)
 	playerHashkeysByIndex := make(map[int]*models.PlayerHashkey, 0)
 	playerGameStatsByIndex := make(map[int]*models.PlayerGameStat, 0)
