@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -21,15 +22,15 @@ type Game struct {
 
 type Server struct {
 	ServerId    int
-	Name        *string
-	Location    *string
-	IPAddr      *string
-	Port        *int
-	HashKey     *string
-	PublicKey   *string
-	Revision    *string
+	Name        sql.NullString
+	Location    sql.NullString
+	IPAddr      sql.NullString
+	Port        sql.NullInt64
+	HashKey     sql.NullString
+	PublicKey   sql.NullString
+	Revision    sql.NullString
 	PureInd     bool
-	ImpureCvars *int
+	ImpureCvars sql.NullInt64
 	EloInd      bool
 	Categories  []string
 	ActiveInd   bool

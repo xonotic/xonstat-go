@@ -2,6 +2,7 @@ package submission
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
 	"io"
 	"math"
@@ -564,29 +565,29 @@ func (s *Submission) fillServer(rs *RawSubmission) error {
 	s.Server.ActiveInd = true
 
 	if serverName, ok := rs.GameMeta["S"]; ok {
-		s.Server.Name = &serverName
+		s.Server.Name = sql.NullString{String: serverName, Valid: true}
 	} else {
 		return ErrInvalidGameMeta
 	}
 
 	if portStr, ok := rs.GameMeta["U"]; ok {
 		if port, err := strconv.Atoi(portStr); err == nil {
-			s.Server.Port = &port
+			s.Server.Port = sql.NullInt64{Int64: int64(port), Valid: true}
 		}
 	}
 
 	if impureCvarsStr, ok := rs.GameMeta["C"]; ok {
 		if impureCvars, err := strconv.Atoi(impureCvarsStr); err == nil {
-			s.Server.ImpureCvars = &impureCvars
+			s.Server.ImpureCvars = sql.NullInt64{Int64: int64(impureCvars), Valid: true}
 		}
 
-		if s.Server.ImpureCvars != nil && *s.Server.ImpureCvars == 0 {
+		if s.Server.ImpureCvars.Valid && s.Server.ImpureCvars.Int64 == 0 {
 			s.Server.PureInd = true
 		}
 	}
 
 	if revision, ok := rs.GameMeta["R"]; ok {
-		s.Server.Revision = &revision
+		s.Server.Revision = sql.NullString{String: revision, Valid: true}
 	}
 
 	s.Server.CreateDt = s.CreateDt
