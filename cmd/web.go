@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.com/antibody/xonstat/pkg/handlers"
+	"gitlab.com/antibody/xonstat/pkg/models"
 )
 
 // Global log for the application.
@@ -32,6 +33,14 @@ func initLog() error {
 }
 
 func web(port string) {
+	dsn := viper.GetString("ConnStr")
+	db, err := models.NewPGDatastore(dsn)
+	if err != nil {
+		log.Fatal("Unable to initialize database connection.")
+	}
+
+	env := handlers.NewAppEnv(db)
+
 	r := chi.NewRouter()
 
 	// Save the real IP address from X-Forward-For and the like.
@@ -48,7 +57,7 @@ func web(port string) {
 	}
 
 	// Register all routes and handlers.
-	r.Post("/stats/submit", handlers.SubmissionHandler)
+	r.Post("/stats/submit", env.SubmissionHandler)
 
 	// Start the web application server on the specified port.
 	log.Printf("Starting XonStat web application server on port %s...", port)
