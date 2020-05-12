@@ -958,7 +958,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 func Submit(s *Submission, db models.Datastore) error {
 	if s.Server.HashKey.Valid {
 		log.Printf("Looking for server by hashkey '%s'", s.Server.HashKey.String)
-		server, err := db.ServerByHashkey(s.Server.HashKey.String)
+		server, err := db.RServerByHashkey(s.Server.HashKey.String)
 		if err != nil {
 			return err
 		}

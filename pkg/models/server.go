@@ -1,7 +1,7 @@
 package models
 
-// ServerByHashkey retrives a server record by the server's hashkey value
-func (ds *PGDatastore) ServerByHashkey(hashkey string) (*Server, error) {
+// RServerByHashkey retrives a server record by the server's hashkey value
+func (ds *PGDatastore) RServerByHashkey(hashkey string) (*Server, error) {
 	sql := `select server_id, name, location, ip_addr, port, hashkey, public_key, revision, 
 	pure_ind, impure_cvars, elo_ind, active_ind, create_dt
 	from servers
