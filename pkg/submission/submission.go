@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"strconv"
 	"strings"
@@ -950,4 +951,22 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	}
 
 	return s, nil
+}
+
+// Submit takes a fully-formed submission and stores it in the database, filling out all the
+// missing information (like primary key values) along the way.
+func Submit(s *Submission, db models.Datastore) error {
+	if s.Server.HashKey.Valid {
+		log.Printf("Looking for server by hashkey '%s'", s.Server.HashKey.String)
+		server, err := db.ServerByHashkey(s.Server.HashKey.String)
+		if err != nil {
+			return err
+		}
+
+		log.Printf("Found server '%s' by its hashkey.", server.Name.String)
+	}
+
+	log.Printf("Looking for server by name '%s'", s.Server.Name.String)
+
+	return nil
 }
