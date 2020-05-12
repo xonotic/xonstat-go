@@ -12,8 +12,8 @@ const IdleConnections = 5
 // Datastore is the interface representing all database operations.
 // This is useful for mocking or implementing different backends.
 type Datastore interface {
-	RServerByHashkey(hashkey string) (*Server, error)
-	RServerByName(name string) (*Server, error)
+	RServersByHashkey(hashkey string) ([]*Server, error)
+	RServersByName(name string) ([]*Server, error)
 }
 
 // PGDatastore is an implementation of the Datastore interface for a Postgresql database.
