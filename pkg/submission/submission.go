@@ -963,10 +963,18 @@ func Submit(s *Submission, db models.Datastore) error {
 			return err
 		}
 
-		log.Printf("Found server '%s' by its hashkey.", server.Name.String)
+		log.Printf("Found server %d by hashkey.", server.ServerId)
 	}
 
-	log.Printf("Looking for server by name '%s'", s.Server.Name.String)
+	if s.Server.Name.Valid {
+		log.Printf("Looking for server by name '%s'", s.Server.Name.String)
+		server, err := db.RServerByName(s.Server.Name.String)
+		if err != nil {
+			return err
+		}
+
+		log.Printf("Found server %d by name.", server.ServerId)
+	}
 
 	return nil
 }
