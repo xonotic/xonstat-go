@@ -976,7 +976,11 @@ func Submit(s *Submission, db models.Datastore) error {
 	}
 
 	if len(servers) == 0 {
-		// No servers found in the DB. Create one.
+		serverID, err := db.CServer(s.Server)
+		if err != nil {
+			return err
+		}
+		log.Printf("Created new server %d.", serverID)
 	} else if len(servers) == 1 {
 		log.Printf("Found matching server %d.", servers[0].ServerId)
 	} else {

@@ -12,6 +12,7 @@ const IdleConnections = 5
 // Datastore is the interface representing all database operations.
 // This is useful for mocking or implementing different backends.
 type Datastore interface {
+	CServer(server Server) (int64, error)
 	RServersByHashkey(hashkey string) ([]*Server, error)
 	RServersByName(name string) ([]*Server, error)
 }

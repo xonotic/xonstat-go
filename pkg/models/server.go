@@ -56,3 +56,22 @@ func (ds *PGDatastore) RServersByName(name string) ([]*Server, error) {
 	defer rows.Close()
 	return scanServers(rows)
 }
+
+// CServer inserts a Server record into the database.
+func (ds *PGDatastore) CServer(server Server) (int64, error) {
+	sql := `insert into servers (name, location, ip_addr, port, hashkey, public_key, revision, 
+		pure_ind, impure_cvars, elo_ind, active_ind)
+		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) returning server_id`
+
+	row := ds.db.QueryRow(sql, server.Name, server.Location, server.IPAddr, server.Port,
+		server.HashKey, server.PublicKey, server.Revision, server.PureInd, server.ImpureCvars,
+		true, true)
+
+	var serverID int64
+	err := row.Scan(&serverID)
+	if err != nil {
+		return serverID, err
+	}
+
+	return serverID, nil
+}
