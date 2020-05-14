@@ -16,6 +16,7 @@ type Datastore interface {
 	CServer(tx *sql.Tx, server Server) (int64, error)
 	RServersByHashkey(hashkey string) ([]*Server, error)
 	RServersByName(name string) ([]*Server, error)
+	UServer(tx *sql.Tx, server Server) error
 }
 
 // PGDatastore is an implementation of the Datastore interface for a Postgresql database.
