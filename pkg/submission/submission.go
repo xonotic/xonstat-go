@@ -956,8 +956,12 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
 // missing information (like primary key values) along the way.
 func Submit(s *Submission, db models.Datastore) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
 	var servers []*models.Server
-	var err error
 	if s.Server.HashKey.Valid {
 		log.Printf("Looking for server by hashkey '%s'", s.Server.HashKey.String)
 		servers, err = db.RServersByHashkey(s.Server.HashKey.String)
@@ -976,7 +980,7 @@ func Submit(s *Submission, db models.Datastore) error {
 	}
 
 	if len(servers) == 0 {
-		serverID, err := db.CServer(s.Server)
+		serverID, err := db.CServer(tx, s.Server)
 		if err != nil {
 			return err
 		}
@@ -985,6 +989,11 @@ func Submit(s *Submission, db models.Datastore) error {
 		log.Printf("Found matching server %d.", servers[0].ServerId)
 	} else {
 		log.Printf("Multiple matching servers found. Using the first one (%d).", servers[0].ServerId)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
 	}
 
 	return nil
