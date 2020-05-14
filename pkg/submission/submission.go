@@ -1024,6 +1024,7 @@ func GetOrCreateServer(tx *sql.Tx, db models.Datastore, rawServer *models.Server
 	rawServer.ServerId = servers[0].ServerId
 
 	if ShouldUpdateServer(rawServer, servers[0]) {
+		log.Printf("Updating server %d.", rawServer.ServerId)
 		err := db.UServer(tx, *rawServer)
 		if err != nil {
 			return nil, err

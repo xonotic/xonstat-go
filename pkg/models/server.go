@@ -84,7 +84,7 @@ func (ds *PGDatastore) RServersByName(name string) ([]*Server, error) {
 // UServer updates a Server record in the database.
 func (ds *PGDatastore) UServer(tx *sql.Tx, server Server) error {
 	sql := `update servers set name=$1, location=$2, ip_addr=$3, port=$4, hashkey=$5, 
-	public_key=$6, revision=$7, pure_ind=$8, impure_cvars=$9, 
+	public_key=$6, revision=$7, pure_ind=$8, impure_cvars=$9 
 	where server_id = $10`
 
 	_, err := tx.Exec(sql, server.Name, server.Location, server.IPAddr, server.Port,
