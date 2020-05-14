@@ -953,6 +953,36 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	return s, nil
 }
 
+// ShouldUpdateServer determines if the database server record needs to be updated with
+// new information coming from the submission.
+func ShouldUpdateServer(incoming, existing *models.Server) bool {
+	if incoming.Name.Valid && incoming.Name.String != existing.Name.String {
+		return true
+	}
+
+	if incoming.HashKey.Valid && incoming.HashKey.String != existing.HashKey.String {
+		return true
+	}
+
+	if incoming.IPAddr.Valid && incoming.IPAddr.String != existing.IPAddr.String {
+		return true
+	}
+
+	if incoming.Port.Valid && incoming.Port.Int64 != existing.Port.Int64 {
+		return true
+	}
+
+	if incoming.Revision.Valid && incoming.Revision.String != existing.Revision.String {
+		return true
+	}
+
+	if incoming.ImpureCvars.Valid && incoming.ImpureCvars.Int64 != existing.ImpureCvars.Int64 {
+		return true
+	}
+
+	return false
+}
+
 // GetOrCreateServer finds an existing server matching the one provided or constructs a new one.
 func GetOrCreateServer(tx *sql.Tx, db models.Datastore, rawServer *models.Server) (*models.Server, error) {
 	var servers []*models.Server
@@ -990,6 +1020,14 @@ func GetOrCreateServer(tx *sql.Tx, db models.Datastore, rawServer *models.Server
 		log.Printf("Found matching server %d.", servers[0].ServerId)
 	} else {
 		log.Printf("Multiple matching servers found. Using the first one (%d).", servers[0].ServerId)
+	}
+	rawServer.ServerId = servers[0].ServerId
+
+	if ShouldUpdateServer(rawServer, servers[0]) {
+		err := db.UServer(tx, *rawServer)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return servers[0], nil
