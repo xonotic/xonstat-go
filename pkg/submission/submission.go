@@ -953,6 +953,46 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	return s, nil
 }
 
+// GetOrCreateServer finds an existing server matching the one provided or constructs a new one.
+func GetOrCreateServer(tx *sql.Tx, db models.Datastore, rawServer *models.Server) (*models.Server, error) {
+	var servers []*models.Server
+	var err error
+
+	if rawServer.HashKey.Valid {
+		log.Printf("Looking for server by hashkey '%s'", rawServer.HashKey.String)
+		servers, err = db.RServersByHashkey(rawServer.HashKey.String)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Fall back to searching by name if hashkey is not provided.
+	if len(servers) == 0 && rawServer.Name.Valid {
+		log.Printf("Looking for server by name '%s'", rawServer.Name.String)
+		servers, err = db.RServersByName(rawServer.Name.String)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if len(servers) == 0 {
+		// We haven't found a matching server. Create one.
+		serverID, err := db.CServer(tx, *rawServer)
+		if err != nil {
+			return nil, err
+		}
+		rawServer.ServerId = int(serverID)
+		log.Printf("Created new server %d.", serverID)
+		return rawServer, nil
+	} else if len(servers) == 1 {
+		log.Printf("Found matching server %d.", servers[0].ServerId)
+	} else {
+		log.Printf("Multiple matching servers found. Using the first one (%d).", servers[0].ServerId)
+	}
+
+	return servers[0], nil
+}
+
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
 // missing information (like primary key values) along the way.
 func Submit(s *Submission, db models.Datastore) error {
@@ -961,34 +1001,9 @@ func Submit(s *Submission, db models.Datastore) error {
 		return err
 	}
 
-	var servers []*models.Server
-	if s.Server.HashKey.Valid {
-		log.Printf("Looking for server by hashkey '%s'", s.Server.HashKey.String)
-		servers, err = db.RServersByHashkey(s.Server.HashKey.String)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Fall back to searching by name if hashkey is not provided.
-	if len(servers) == 0 && s.Server.Name.Valid {
-		log.Printf("Looking for server by name '%s'", s.Server.Name.String)
-		servers, err = db.RServersByName(s.Server.Name.String)
-		if err != nil {
-			return err
-		}
-	}
-
-	if len(servers) == 0 {
-		serverID, err := db.CServer(tx, s.Server)
-		if err != nil {
-			return err
-		}
-		log.Printf("Created new server %d.", serverID)
-	} else if len(servers) == 1 {
-		log.Printf("Found matching server %d.", servers[0].ServerId)
-	} else {
-		log.Printf("Multiple matching servers found. Using the first one (%d).", servers[0].ServerId)
+	_, err = GetOrCreateServer(tx, db, &s.Server)
+	if err != nil {
+		return err
 	}
 
 	err = tx.Commit()
