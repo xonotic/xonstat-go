@@ -984,7 +984,9 @@ func GetOrCreateServer(tx *sql.Tx, db models.Datastore, rawServer *models.Server
 		rawServer.ServerId = int(serverID)
 		log.Printf("Created new server %d.", serverID)
 		return rawServer, nil
-	} else if len(servers) == 1 {
+	}
+
+	if len(servers) == 1 {
 		log.Printf("Found matching server %d.", servers[0].ServerId)
 	} else {
 		log.Printf("Multiple matching servers found. Using the first one (%d).", servers[0].ServerId)
