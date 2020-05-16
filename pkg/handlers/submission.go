@@ -16,21 +16,21 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 	body := bufio.NewReader(r.Body)
 	rawSubmission, err := submission.NewRawSubmission(body)
 	if err != nil {
-		log.Printf("%s", err)
+		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
 		return
 	}
 
 	sub, err := submission.NewSubmission(rawSubmission)
 	if err != nil {
-		log.Printf("%s", err)
+		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
 		return
 	}
 
 	err = submission.Submit(sub, ae.db)
 	if err != nil {
-		log.Printf("%s", err)
+		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
 		return
 	}
