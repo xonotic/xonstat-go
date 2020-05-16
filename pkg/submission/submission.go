@@ -1031,6 +1031,11 @@ func GetOrCreateServer(tx *sql.Tx, db models.Datastore, rawServer *models.Server
 		}
 	}
 
+	// Do not proceed if a server is inactive (banned, broken, etc).
+	if !servers[0].ActiveInd {
+		return nil, fmt.Errorf("server %d is inactive", servers[0].ServerId)
+	}
+
 	return servers[0], nil
 }
 

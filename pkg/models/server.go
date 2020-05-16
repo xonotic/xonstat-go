@@ -52,7 +52,6 @@ func (ds *PGDatastore) RServersByHashkey(hashkey string) ([]*Server, error) {
 	pure_ind, impure_cvars, elo_ind, active_ind, create_dt
 	from servers
 	where hashkey = $1
-	and active_ind = true
 	order by hashkey, create_dt`
 
 	rows, err := ds.db.Query(sql, hashkey)
@@ -70,7 +69,6 @@ func (ds *PGDatastore) RServersByName(name string) ([]*Server, error) {
 	pure_ind, impure_cvars, elo_ind, active_ind, create_dt
 	from servers
 	where name = $1
-	and active_ind = true
 	order by create_dt`
 
 	rows, err := ds.db.Query(sql, name)
