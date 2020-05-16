@@ -41,8 +41,8 @@ type Map struct {
 	MapId    int
 	Name     string
 	Version  int
-	Pk3Name  *string
-	CurlUrl  *string
+	Pk3Name  sql.NullString
+	CurlUrl  sql.NullString
 	CreateDt time.Time
 }
 

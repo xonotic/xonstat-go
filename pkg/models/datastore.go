@@ -3,7 +3,7 @@ package models
 import (
 	"database/sql"
 
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // PostgreSQL-specific datastore implementation
 )
 
 // IdleConnections is the maximum number of idle connections we should maintain for the database.
@@ -13,10 +13,15 @@ const IdleConnections = 5
 // This is useful for mocking or implementing different backends.
 type Datastore interface {
 	Begin() (*sql.Tx, error)
+
+	// Server-oriented methods
 	CServer(tx *sql.Tx, server Server) (int64, error)
 	RServersByHashkey(hashkey string) ([]*Server, error)
 	RServersByName(name string) ([]*Server, error)
 	UServer(tx *sql.Tx, server Server) error
+
+	// Map-oriented methods
+	CMap(tx *sql.Tx, m Map) (int64, error)
 }
 
 // PGDatastore is an implementation of the Datastore interface for a Postgresql database.
