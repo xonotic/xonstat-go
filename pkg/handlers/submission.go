@@ -28,7 +28,12 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	submission.Submit(sub, ae.db)
+	err = submission.Submit(sub, ae.db)
+	if err != nil {
+		log.Printf("%s", err)
+		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("200 OK\n"))

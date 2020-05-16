@@ -6,7 +6,7 @@ import (
 
 // CMap inserts a Map record into the database.
 func (ds *PGDatastore) CMap(tx *sql.Tx, m Map) (int64, error) {
-	sql := `insert into servers (name, version, pk3_name, curl_url)
+	sql := `insert into maps (name, version, pk3_name, curl_url)
 		values ($1, $2, $3, $4) returning map_id`
 
 	row := tx.QueryRow(sql, m.Name, m.Version, m.Pk3Name, m.CurlUrl)

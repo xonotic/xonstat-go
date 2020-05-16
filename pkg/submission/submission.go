@@ -1034,6 +1034,38 @@ func GetOrCreateServer(tx *sql.Tx, db models.Datastore, rawServer *models.Server
 	return servers[0], nil
 }
 
+// GetOrCreateMap finds an existing map matching the one provided or constructs a new one.
+func GetOrCreateMap(tx *sql.Tx, db models.Datastore, rawMap *models.Map) (*models.Map, error) {
+	var maps []*models.Map
+	var err error
+
+	log.Printf("Looking for map by name '%s'", rawMap.Name)
+	maps, err = db.RMapsByName(rawMap.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(maps) == 0 {
+		// We haven't found a matching map. Create one.
+		mapID, err := db.CMap(tx, *rawMap)
+		if err != nil {
+			return nil, err
+		}
+		rawMap.MapId = int(mapID)
+		log.Printf("Created new map %d.", mapID)
+		return rawMap, nil
+	}
+
+	if len(maps) == 1 {
+		log.Printf("Found matching map %d.", maps[0].MapId)
+	} else {
+		log.Printf("Multiple matching maps found. Using the first one (%d).", maps[0].MapId)
+	}
+	rawMap.MapId = maps[0].MapId
+
+	return maps[0], nil
+}
+
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
 // missing information (like primary key values) along the way.
 func Submit(s *Submission, db models.Datastore) error {
@@ -1043,6 +1075,11 @@ func Submit(s *Submission, db models.Datastore) error {
 	}
 
 	_, err = GetOrCreateServer(tx, db, &s.Server)
+	if err != nil {
+		return err
+	}
+
+	_, err = GetOrCreateMap(tx, db, &s.Map)
 	if err != nil {
 		return err
 	}
