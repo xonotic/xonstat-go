@@ -48,3 +48,8 @@ func NewPGDatastore(dsn string) (*PGDatastore, error) {
 
 	return &PGDatastore{db}, nil
 }
+
+// Begin starts a transaction.
+func (ds *PGDatastore) Begin() (*sql.Tx, error) {
+	return ds.db.Begin()
+}

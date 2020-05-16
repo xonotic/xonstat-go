@@ -4,11 +4,6 @@ import (
 	"database/sql"
 )
 
-// Begin starts a transaction.
-func (ds *PGDatastore) Begin() (*sql.Tx, error) {
-	return ds.db.Begin()
-}
-
 // CServer inserts a Server record into the database.
 func (ds *PGDatastore) CServer(tx *sql.Tx, server Server) (int64, error) {
 	sql := `insert into servers (name, location, ip_addr, port, hashkey, public_key, revision, 
