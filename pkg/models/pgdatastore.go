@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/lib/pq" // PostgreSQL-specific datastore implementation
 )
@@ -36,4 +37,18 @@ func NewPGDatastore(dsn string) (*PGDatastore, error) {
 // Begin starts a transaction.
 func (ds *PGDatastore) Begin() (*sql.Tx, error) {
 	return ds.db.Begin()
+}
+
+// nextSeqVal grabs the next value of the given sequence name.
+func (ds *PGDatastore) nextSeqVal(sequenceName string) (int64, error) {
+	sql := fmt.Sprintf("select nextval('%s')", sequenceName)
+	row := ds.db.QueryRow(sql)
+
+	var seqVal int64
+	err := row.Scan(&seqVal)
+	if err != nil {
+		return seqVal, err
+	}
+
+	return seqVal, nil
 }

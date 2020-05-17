@@ -15,7 +15,6 @@ type Game struct {
 	Winner     *int
 	MatchID    *string
 	Mod        *string
-	Category   *string
 	Players    []int
 	StartDt    time.Time
 	CreateDt   time.Time

@@ -552,8 +552,9 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 		s.Game.Mod = &mod
 	}
 
-	category := gameCategory(rs)
-	s.Game.Category = &category
+	// Category is not supported yet.
+	// category := gameCategory(rs)
+	// s.Game.Category = &category
 
 	s.Game.StartDt = s.CreateDt
 	s.Game.CreateDt = s.CreateDt
@@ -1071,6 +1072,29 @@ func GetOrCreateMap(tx *sql.Tx, db models.Datastore, rawMap *models.Map) (*model
 	return maps[0], nil
 }
 
+// CreateGame creates a game record in the database, first checking if it exists using the MatchID.
+// We expect a game to be inserted upon each submission, so this method only returns an error.
+func CreateGame(tx *sql.Tx, db models.Datastore, rawGame *models.Game) error {
+	games, err := db.RGamesByMatchID(*rawGame.MatchID)
+	if err != nil {
+		return err
+	}
+
+	if len(games) > 0 {
+		log.Printf("A game with match_id %s already exists in the database.", *rawGame.MatchID)
+		return fmt.Errorf("duplicate game found via match_id")
+	}
+
+	gameID, err := db.CGame(tx, *rawGame)
+	if err != nil {
+		return err
+	}
+	rawGame.GameID = int(gameID)
+	log.Printf("Created game %d.", gameID)
+
+	return nil
+}
+
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
 // missing information (like primary key values) along the way.
 func Submit(s *Submission, db models.Datastore) error {
@@ -1085,6 +1109,11 @@ func Submit(s *Submission, db models.Datastore) error {
 	}
 
 	_, err = GetOrCreateMap(tx, db, &s.Map)
+	if err != nil {
+		return err
+	}
+
+	err = CreateGame(tx, db, &s.Game)
 	if err != nil {
 		return err
 	}

@@ -9,15 +9,23 @@ func (ds *PGDatastore) CGame(tx *sql.Tx, game Game) (int64, error) {
 	// TODO: validate start_dt is set properly
 	// TODO: validate winner is set properly in Submission object before getting here
 	// TODO: validate players is set properly to an array type
-	sql := `insert into games (game_type_cd, server_id, map_id, duration, winner, match_id, mod,
-		category, players, start_dt)
-		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning game_id`
-
-	row := tx.QueryRow(sql, game.GameTypeCd, game.ServerID, game.MapID, game.Duration, game.Winner,
-		game.MatchID, game.Mod, game.Category, game.Players, game.StartDt)
-
 	var gameID int64
-	err := row.Scan(&gameID)
+
+	// The games table is partitioned, so the "returning" clause will not work like
+	// the other tables. We must grab the sequence value explicitly.
+	seqVal, err := ds.nextSeqVal("games_game_id_seq")
+	if err != nil {
+		return gameID, err
+	}
+	gameID = seqVal
+
+	sql := `insert into games (game_id, game_type_cd, server_id, map_id, winner, match_id, mod,
+		start_dt)
+		values ($1, $2, $3, $4, $5, $6, $7, $8)`
+
+	// duration := fmt.Sprintf("%v", game.Duration)
+	_, err = tx.Exec(sql, seqVal, game.GameTypeCd, game.ServerID, game.MapID, game.Winner, game.MatchID,
+		game.Mod, game.StartDt)
 	if err != nil {
 		return gameID, err
 	}
@@ -27,11 +35,12 @@ func (ds *PGDatastore) CGame(tx *sql.Tx, game Game) (int64, error) {
 
 // scanGames is a helper function to parse full Game records out of a resultset.
 func scanGames(rows *sql.Rows) ([]*Game, error) {
+	// TODO: retrieve interval values back out as time.Duration-s
 	var games []*Game
 	for rows.Next() {
 		var g Game
-		err := rows.Scan(&g.GameID, &g.GameTypeCd, &g.ServerID, &g.MapID, &g.Duration, &g.Winner,
-			&g.MatchID, &g.Mod, &g.Category, &g.Players, &g.StartDt)
+		err := rows.Scan(&g.GameID, &g.GameTypeCd, &g.ServerID, &g.MapID, &g.Winner,
+			&g.MatchID, &g.Mod, &g.StartDt)
 
 		if err != nil {
 			return nil, err
@@ -45,8 +54,8 @@ func scanGames(rows *sql.Rows) ([]*Game, error) {
 
 // RGamesByMatchID retrives game records by their MatchID value.
 func (ds *PGDatastore) RGamesByMatchID(matchID string) ([]*Game, error) {
-	sql := `select game_id, game_type_cd, server_id, map_id, duration, winner, match_id, mod, 
-	category, players, start_dt
+	sql := `select game_id, game_type_cd, server_id, map_id, winner, match_id, mod, 
+	start_dt
 	from games
 	where match_id = $1
 	order by create_dt`
