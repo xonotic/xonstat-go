@@ -23,6 +23,10 @@ type Datastore interface {
 	// Map-oriented methods
 	CMap(tx *sql.Tx, m Map) (int64, error)
 	RMapsByName(name string) ([]*Map, error)
+
+	// Game-oriented methods
+	CGame(tx *sql.Tx, game Game) (int64, error)
+	RGamesByMatchID(matchID string) ([]*Game, error)
 }
 
 // PGDatastore is an implementation of the Datastore interface for a Postgresql database.
