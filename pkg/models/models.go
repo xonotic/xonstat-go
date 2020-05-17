@@ -5,14 +5,15 @@ import (
 	"time"
 )
 
+// Game is a single Xonotic match played.
 type Game struct {
-	GameId     int
+	GameID     int
 	GameTypeCd string
-	ServerId   int
-	MapId      int
+	ServerID   int
+	MapID      int
 	Duration   *time.Duration
 	Winner     *int
-	MatchId    *string
+	MatchID    *string
 	Mod        *string
 	Category   *string
 	Players    []int
@@ -20,8 +21,9 @@ type Game struct {
 	CreateDt   time.Time
 }
 
+// Server is a Xonotic server which hosts games.
 type Server struct {
-	ServerId    int
+	ServerID    int
 	Name        sql.NullString
 	Location    sql.NullString
 	IPAddr      sql.NullString
@@ -37,19 +39,21 @@ type Server struct {
 	CreateDt    time.Time
 }
 
+// Map is the arena games are played in.
 type Map struct {
-	MapId    int
+	MapID    int
 	Name     string
 	Version  int
 	Pk3Name  sql.NullString
-	CurlUrl  sql.NullString
+	CurlURL  sql.NullString
 	CreateDt time.Time
 }
 
+// PlayerGameStat houses the statistics for a single player (bot or human) in a game.
 type PlayerGameStat struct {
-	PlayerGameStatId int
-	PlayerId         int
-	GameId           int
+	PlayerGameStatID int
+	PlayerID         int
+	GameID           int
 	Nick             *string
 	StrippedNick     *string
 	Team             *int
@@ -79,6 +83,7 @@ type PlayerGameStat struct {
 	CreateDt         time.Time
 }
 
+// NewPlayerGameStat creates a default record based on the "zeroed" stats of a particular game type.
 func NewPlayerGameStat(gameTypeCd string) *PlayerGameStat {
 	var pgs PlayerGameStat
 
@@ -137,11 +142,12 @@ func NewPlayerGameStat(gameTypeCd string) *PlayerGameStat {
 	return &pgs
 }
 
+// PlayerWeaponStat is the weapon details of a single player weapon within a given game.
 type PlayerWeaponStat struct {
-	PlayerWeaponStatId int
-	PlayerId           int
-	GameId             int
-	PlayerGameStatId   int
+	PlayerWeaponStatID int
+	PlayerID           int
+	GameID             int
+	PlayerGameStatID   int
 	WeaponCd           string
 	Actual             int
 	Max                int
@@ -151,8 +157,9 @@ type PlayerWeaponStat struct {
 	CreateDt           time.Time
 }
 
+// Player is a bot or human that participated in a game at some point.
 type Player struct {
-	PlayerId     int
+	PlayerID     int
 	Nick         *string
 	StrippedNick *string
 	Location     *string
@@ -161,16 +168,21 @@ type Player struct {
 	CreateDt     time.Time
 }
 
+// PlayerHashkey is an identifier for a Player. A single player may have multiple hashkeys
+// depending upon how many installations of Xonotic they have. A hashkey corresponds to
+// the key_0.d0si file in the Xonotic user directory.
 type PlayerHashkey struct {
-	PlayerId  int
+	PlayerID  int
 	Hashkey   string
 	ActiveInd bool
 	CreateDt  time.Time
 }
 
+// TeamGameStat holds team-specific stats for a game: number of team flag captures in CTF or
+// rounds won in CA, for example.
 type TeamGameStat struct {
-	TeamGameStatId int
-	GameId         int
+	TeamGameStatID int
+	GameID         int
 	Team           int
 	Score          *int
 	Rounds         *int
@@ -178,6 +190,7 @@ type TeamGameStat struct {
 	CreateDt       time.Time
 }
 
+// NewTeamGameStat creates a "zeroed" TeamGameStat record depending upon the game type.
 func NewTeamGameStat(gameTypeCd string) *TeamGameStat {
 	var tgs TeamGameStat
 
@@ -198,6 +211,7 @@ func NewTeamGameStat(gameTypeCd string) *TeamGameStat {
 	return &tgs
 }
 
+// PlayerGameAnticheat holds telemetry from the anticheat subsystem in the Xonotic server.
 type PlayerGameAnticheat struct {
 	PlayerGameAnticheatID int
 	PlayerID              int

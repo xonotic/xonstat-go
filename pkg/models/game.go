@@ -13,8 +13,8 @@ func (ds *PGDatastore) CGame(tx *sql.Tx, game Game) (int64, error) {
 		category, players, start_dt)
 		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning game_id`
 
-	row := tx.QueryRow(sql, game.GameTypeCd, game.ServerId, game.MapId, game.Duration, game.Winner,
-		game.MatchId, game.Mod, game.Category, game.Players, game.StartDt)
+	row := tx.QueryRow(sql, game.GameTypeCd, game.ServerID, game.MapID, game.Duration, game.Winner,
+		game.MatchID, game.Mod, game.Category, game.Players, game.StartDt)
 
 	var gameID int64
 	err := row.Scan(&gameID)
@@ -30,8 +30,8 @@ func scanGames(rows *sql.Rows) ([]*Game, error) {
 	var games []*Game
 	for rows.Next() {
 		var g Game
-		err := rows.Scan(&g.GameId, &g.GameTypeCd, &g.ServerId, &g.MapId, &g.Duration, &g.Winner,
-			&g.MatchId, &g.Mod, &g.Category, &g.Players, &g.StartDt)
+		err := rows.Scan(&g.GameID, &g.GameTypeCd, &g.ServerID, &g.MapID, &g.Duration, &g.Winner,
+			&g.MatchID, &g.Mod, &g.Category, &g.Players, &g.StartDt)
 
 		if err != nil {
 			return nil, err

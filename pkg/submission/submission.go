@@ -545,7 +545,7 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 	}
 
 	if matchID, ok := rs.GameMeta["I"]; ok {
-		s.Game.MatchId = &matchID
+		s.Game.MatchID = &matchID
 	}
 
 	if mod, ok := rs.GameMeta["O"]; ok {
@@ -627,7 +627,7 @@ func (s *Submission) fillTeamStats(rs *RawSubmission) error {
 
 	for _, events := range rs.TeamEvents {
 		tgs := models.NewTeamGameStat(s.Game.GameTypeCd)
-		tgs.GameId = s.Game.GameId
+		tgs.GameID = s.Game.GameID
 		tgs.CreateDt = s.Game.CreateDt
 
 		team, err := strconv.Atoi(strings.Split(events["Q"], "#")[1])
@@ -723,7 +723,7 @@ func (s *Submission) fillPlayerWeaponStat(weapon string, events map[string]strin
 	ws.Frags = intFromFloat(fmt.Sprintf("acc-%s-frags", weapon))
 
 	s.PlayerWeaponStats = append(s.PlayerWeaponStats, ws)
-	s.PlayerWeaponStatsByID[player.PlayerId] = append(s.PlayerWeaponStatsByID[player.PlayerId], &ws)
+	s.PlayerWeaponStatsByID[player.PlayerID] = append(s.PlayerWeaponStatsByID[player.PlayerID], &ws)
 
 	return nil
 }
@@ -734,8 +734,8 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	pgs := models.NewPlayerGameStat(s.Game.GameTypeCd)
 
 	// fields passed on from other objects
-	pgs.PlayerId = player.PlayerId
-	pgs.GameId = s.Game.GameId
+	pgs.PlayerID = player.PlayerID
+	pgs.GameID = s.Game.GameID
 	pgs.CreateDt = s.CreateDt
 	pgs.Nick = player.Nick
 	pgs.StrippedNick = player.StrippedNick
@@ -829,8 +829,8 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 		if strings.HasPrefix(key, "anticheat") {
 			floatVal, _ := strconv.ParseFloat(value, 64)
 			ac := models.PlayerGameAnticheat{
-				PlayerID: pgs.PlayerId,
-				GameID:   pgs.GameId,
+				PlayerID: pgs.PlayerID,
+				GameID:   pgs.GameID,
 				Key:      key,
 				Value:    floatVal,
 				CreateDt: pgs.CreateDt,
@@ -846,7 +846,7 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	}
 
 	s.PlayerGameStats = append(s.PlayerGameStats, *pgs)
-	s.PlayerGameStatsByID[pgs.PlayerId] = pgs
+	s.PlayerGameStatsByID[pgs.PlayerID] = pgs
 
 	return nil
 }
@@ -874,7 +874,7 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 		}
 
 		player := models.Player{
-			PlayerId:     playerID,
+			PlayerID:     playerID,
 			Nick:         &nick,
 			StrippedNick: &strippedNick,
 			ActiveInd:    true,
@@ -884,7 +884,7 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 		s.PlayersByID[playerID] = &player
 
 		playerHashkey := models.PlayerHashkey{
-			PlayerId: playerID,
+			PlayerID: playerID,
 			Hashkey:  hashkey,
 			CreateDt: s.CreateDt,
 		}
@@ -1011,20 +1011,20 @@ func GetOrCreateServer(tx *sql.Tx, db models.Datastore, rawServer *models.Server
 		if err != nil {
 			return nil, err
 		}
-		rawServer.ServerId = int(serverID)
+		rawServer.ServerID = int(serverID)
 		log.Printf("Created new server %d.", serverID)
 		return rawServer, nil
 	}
 
 	if len(servers) == 1 {
-		log.Printf("Found matching server %d.", servers[0].ServerId)
+		log.Printf("Found matching server %d.", servers[0].ServerID)
 	} else {
-		log.Printf("Multiple matching servers found. Using the first one (%d).", servers[0].ServerId)
+		log.Printf("Multiple matching servers found. Using the first one (%d).", servers[0].ServerID)
 	}
-	rawServer.ServerId = servers[0].ServerId
+	rawServer.ServerID = servers[0].ServerID
 
 	if ShouldUpdateServer(rawServer, servers[0]) {
-		log.Printf("Updating server %d.", rawServer.ServerId)
+		log.Printf("Updating server %d.", rawServer.ServerID)
 		err := db.UServer(tx, *rawServer)
 		if err != nil {
 			return nil, err
@@ -1033,7 +1033,7 @@ func GetOrCreateServer(tx *sql.Tx, db models.Datastore, rawServer *models.Server
 
 	// Do not proceed if a server is inactive (banned, broken, etc).
 	if !servers[0].ActiveInd {
-		return nil, fmt.Errorf("server %d is inactive", servers[0].ServerId)
+		return nil, fmt.Errorf("server %d is inactive", servers[0].ServerID)
 	}
 
 	return servers[0], nil
@@ -1056,17 +1056,17 @@ func GetOrCreateMap(tx *sql.Tx, db models.Datastore, rawMap *models.Map) (*model
 		if err != nil {
 			return nil, err
 		}
-		rawMap.MapId = int(mapID)
+		rawMap.MapID = int(mapID)
 		log.Printf("Created new map %d.", mapID)
 		return rawMap, nil
 	}
 
 	if len(maps) == 1 {
-		log.Printf("Found matching map %d.", maps[0].MapId)
+		log.Printf("Found matching map %d.", maps[0].MapID)
 	} else {
-		log.Printf("Multiple matching maps found. Using the first one (%d).", maps[0].MapId)
+		log.Printf("Multiple matching maps found. Using the first one (%d).", maps[0].MapID)
 	}
-	rawMap.MapId = maps[0].MapId
+	rawMap.MapID = maps[0].MapID
 
 	return maps[0], nil
 }

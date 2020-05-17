@@ -9,7 +9,7 @@ func (ds *PGDatastore) CMap(tx *sql.Tx, m Map) (int64, error) {
 	sql := `insert into maps (name, version, pk3_name, curl_url)
 		values ($1, $2, $3, $4) returning map_id`
 
-	row := tx.QueryRow(sql, m.Name, m.Version, m.Pk3Name, m.CurlUrl)
+	row := tx.QueryRow(sql, m.Name, m.Version, m.Pk3Name, m.CurlURL)
 
 	var mapID int64
 	err := row.Scan(&mapID)
@@ -25,7 +25,7 @@ func scanMaps(rows *sql.Rows) ([]*Map, error) {
 	var maps []*Map
 	for rows.Next() {
 		var m Map
-		err := rows.Scan(&m.MapId, &m.Name, &m.Version, &m.Pk3Name, &m.CurlUrl, &m.CreateDt)
+		err := rows.Scan(&m.MapID, &m.Name, &m.Version, &m.Pk3Name, &m.CurlURL, &m.CreateDt)
 
 		if err != nil {
 			return nil, err

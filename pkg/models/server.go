@@ -28,7 +28,7 @@ func scanServers(rows *sql.Rows) ([]*Server, error) {
 	var servers []*Server
 	for rows.Next() {
 		var s Server
-		err := rows.Scan(&s.ServerId, &s.Name, &s.Location, &s.IPAddr, &s.Port, &s.HashKey, &s.PublicKey,
+		err := rows.Scan(&s.ServerID, &s.Name, &s.Location, &s.IPAddr, &s.Port, &s.HashKey, &s.PublicKey,
 			&s.Revision, &s.PureInd, &s.ImpureCvars, &s.EloInd, &s.ActiveInd, &s.CreateDt)
 
 		if err != nil {
@@ -82,7 +82,7 @@ func (ds *PGDatastore) UServer(tx *sql.Tx, server Server) error {
 
 	_, err := tx.Exec(sql, server.Name, server.Location, server.IPAddr, server.Port,
 		server.HashKey, server.PublicKey, server.Revision, server.PureInd, server.ImpureCvars,
-		server.ServerId)
+		server.ServerID)
 
 	if err != nil {
 		return err
