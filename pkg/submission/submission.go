@@ -82,10 +82,10 @@ type RawSubmission struct {
 	PlayerEvents []map[string]string
 
 	// humans who played in the match
-	Humans []*map[string]string
+	Humans []map[string]string
 
 	// bots who played in the match
-	Bots []*map[string]string
+	Bots []map[string]string
 
 	// weapons used during the match
 	WeaponsUsed map[string]struct{}
@@ -115,8 +115,8 @@ func NewRawSubmission(body io.Reader) (*RawSubmission, error) {
 		GameMeta:              make(map[string]string),
 		TeamEvents:            make([]map[string]string, 0),
 		PlayerEvents:          make([]map[string]string, 0),
-		Humans:                make([]*map[string]string, 0),
-		Bots:                  make([]*map[string]string, 0),
+		Humans:                make([]map[string]string, 0),
+		Bots:                  make([]map[string]string, 0),
 		WeaponsUsed:           make(map[string]struct{}, 0),
 		PlayerEventsByHashkey: make(map[string]*map[string]string, 0),
 		PlayerEventsByIndex:   make(map[int]*map[string]string, 0),
@@ -225,9 +225,9 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 			s.HumanFastestLap = true
 		}
 
-		s.Humans = append(s.Humans, &events)
+		s.Humans = append(s.Humans, events)
 	} else if !human && played {
-		s.Bots = append(s.Bots, &events)
+		s.Bots = append(s.Bots, events)
 	}
 
 	// reference by hashkey or player index
@@ -846,7 +846,10 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 
 // fillPlayers fills in the Players and PlayerHashKeys slices from the raw submission
 func (s *Submission) fillPlayers(rs *RawSubmission) error {
-	for _, events := range rs.PlayerEvents {
+	// Only consider events from humans or bots who actually played in the game.
+	playersInGame := append(rs.Humans, rs.Bots...)
+	
+	for _, events := range playersInGame {
 		hashkey := events["P"]
 
 		nick := "Anonymous Player"

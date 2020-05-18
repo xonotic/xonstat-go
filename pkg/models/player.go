@@ -30,8 +30,8 @@ func (ds *PGDatastore) RPlayersByHashkeyMulti(hashkeys []string) (map[string]*Pl
 		var p Player
 		var hashkey string
 
-		err := rows.Scan(&p.PlayerID, &p.Nick, &p.StrippedNick, &p.Location, &p.EmailAddr, &p.ActiveInd, 
-			&p.CreateDt, &hashkey)
+		err := rows.Scan(&p.PlayerID, &p.Nick, &p.StrippedNick, &p.Location, &p.EmailAddr, 
+			&p.ActiveInd, &p.CreateDt, &hashkey)
 
 		if err != nil {
 			return nil, err
