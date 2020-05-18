@@ -536,10 +536,7 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 	}
 
 	if durationSecsStr, ok := rs.GameMeta["D"]; ok {
-		if durationSecs, err := strconv.ParseFloat(durationSecsStr, 32); err == nil {
-			d := time.Duration(durationSecs * 1000) * time.Millisecond
-			s.Game.Duration = &d
-		}
+		s.Game.Duration = durationFromString(durationSecsStr, 1.0)
 	} else {
 		return ErrInvalidGameMeta
 	}
@@ -683,7 +680,8 @@ func floatFromString(value string) *float64 {
 
 // durationFromString converts a string representing some multiple of seconds to a duration.
 // Adjust the divisor argument to account for the scale of the raw value (sometimes raw values
-// are reported in hundredths of seconds, etc).
+// are reported in hundredths of seconds, etc). A divisor of 1.0 is if the input string represents
+// a value in seconds.
 func durationFromString(value string, divisor float64) *time.Duration {
 	floatVal, err := strconv.ParseFloat(value, 32)
 	if err != nil {
@@ -691,7 +689,7 @@ func durationFromString(value string, divisor float64) *time.Duration {
 	}
 
 	seconds := floatVal / divisor
-	duration, err := time.ParseDuration(fmt.Sprintf("%.2fs", seconds))
+	duration, err := time.ParseDuration(fmt.Sprintf("%fs", seconds))
 	if err != nil {
 		return nil
 	}
@@ -751,15 +749,9 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	}
 	pgs.Score = &score
 
-	alivetimeSecs := 0
 	if alivetimeStr, ok := events["alivetime"]; ok {
-		alivetimeFloat, err := strconv.ParseFloat(alivetimeStr, 64)
-		if err == nil {
-			alivetimeSecs = int(math.Round(alivetimeFloat))
-		}
+		pgs.AliveTime = durationFromString(alivetimeStr, 1.0)
 	}
-	alivetime := time.Duration(alivetimeSecs) * time.Second
-	pgs.AliveTime = &alivetime
 
 	if rankStr, ok := events["rank"]; ok {
 		pgs.Rank = intFromStringDefault(rankStr, 0)
