@@ -538,7 +538,7 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 	if durationSecsStr, ok := rs.GameMeta["D"]; ok {
 		if durationSecs, err := strconv.ParseFloat(durationSecsStr, 32); err == nil {
 			d := time.Duration(durationSecs) * time.Second
-			s.Game.Duration = sql.NullString{Valid: true, String: d.String()}
+			s.Game.Duration = &d
 		}
 	} else {
 		return ErrInvalidGameMeta

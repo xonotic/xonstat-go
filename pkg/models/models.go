@@ -11,7 +11,7 @@ type Game struct {
 	GameTypeCd string
 	ServerID   int
 	MapID      int
-	Duration   sql.NullString
+	Duration   *time.Duration // PostgreSQL interval
 	Winner     sql.NullInt64
 	MatchID    sql.NullString
 	Mod        sql.NullString

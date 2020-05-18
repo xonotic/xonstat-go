@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 // CGame inserts a Game record into the database.
@@ -19,13 +20,20 @@ func (ds *PGDatastore) CGame(tx *sql.Tx, game Game) (int64, error) {
 	}
 	gameID = seqVal
 
-	sql := `insert into games (game_id, game_type_cd, server_id, map_id, winner, match_id, mod,
-		start_dt)
-		values ($1, $2, $3, $4, $5, $6, $7, $8)`
+	// The pq library doesn't support time.Duration -> interval PG type, so we have to convert it 
+	// to a string. We'll do this with seconds-granularity, allowing fractional pieces too.
+	durationLiteral := "NULL"
+	if game.Duration != nil {
+		durationLiteral = fmt.Sprintf("'%f SECONDS'", game.Duration.Seconds())
+	}
 
-	// duration := fmt.Sprintf("%v", game.Duration)
-	_, err = tx.Exec(sql, seqVal, game.GameTypeCd, game.ServerID, game.MapID, game.Winner, game.MatchID,
-		game.Mod, game.StartDt)
+	sql := `insert into games (game_id, game_type_cd, server_id, map_id, winner, match_id, mod,
+		start_dt, duration)
+		values ($1, $2, $3, $4, $5, $6, $7, $8, %s)`
+
+	_, err = tx.Exec(fmt.Sprintf(sql, durationLiteral), seqVal, game.GameTypeCd, game.ServerID,
+		game.MapID, game.Winner, game.MatchID, game.Mod, game.StartDt)
+
 	if err != nil {
 		return gameID, err
 	}
