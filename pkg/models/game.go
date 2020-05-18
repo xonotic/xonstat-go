@@ -24,7 +24,7 @@ func (ds *PGDatastore) CGame(tx *sql.Tx, game Game) (int64, error) {
 	// to a string. We'll do this with seconds-granularity, allowing fractional pieces too.
 	durationLiteral := "NULL"
 	if game.Duration != nil {
-		durationLiteral = fmt.Sprintf("'%f SECONDS'", game.Duration.Seconds())
+		durationLiteral = fmt.Sprintf("'%d milliseconds'", game.Duration.Milliseconds())
 	}
 
 	sql := `insert into games (game_id, game_type_cd, server_id, map_id, winner, match_id, mod,
@@ -47,8 +47,9 @@ func scanGames(rows *sql.Rows) ([]*Game, error) {
 	var games []*Game
 	for rows.Next() {
 		var g Game
+		var durationStr string
 		err := rows.Scan(&g.GameID, &g.GameTypeCd, &g.ServerID, &g.MapID, &g.Winner,
-			&g.MatchID, &g.Mod, &g.StartDt)
+			&g.MatchID, &g.Mod, &g.StartDt, &durationStr)
 
 		if err != nil {
 			return nil, err

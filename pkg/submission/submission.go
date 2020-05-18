@@ -537,7 +537,7 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 
 	if durationSecsStr, ok := rs.GameMeta["D"]; ok {
 		if durationSecs, err := strconv.ParseFloat(durationSecsStr, 32); err == nil {
-			d := time.Duration(durationSecs) * time.Second
+			d := time.Duration(durationSecs * 1000) * time.Millisecond
 			s.Game.Duration = &d
 		}
 	} else {
