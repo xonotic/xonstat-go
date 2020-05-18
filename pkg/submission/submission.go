@@ -1089,6 +1089,23 @@ func CreateGame(tx *sql.Tx, db models.Datastore, rawGame *models.Game) error {
 	return nil
 }
 
+// GetOrCreatePlayers fetches existing players or creates new ones based upon the data
+// in the submission.
+func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[string]*models.Player, error) {
+	var hashkeys []string
+	for _, phk := range s.PlayerHashkeys {
+		hashkeys = append(hashkeys, phk.Hashkey)
+	}
+
+	playersByHashkey, err := db.RPlayersByHashkeyMulti(hashkeys)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("%v", playersByHashkey)
+
+	return nil, nil
+}
+
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
 // missing information (like primary key values) along the way.
 func Submit(s *Submission, db models.Datastore) error {
@@ -1110,6 +1127,11 @@ func Submit(s *Submission, db models.Datastore) error {
 	s.Game.MapID = m.MapID
 
 	err = CreateGame(tx, db, &s.Game)
+	if err != nil {
+		return err
+	}
+
+	_, err = GetOrCreatePlayers(tx, db, s)
 	if err != nil {
 		return err
 	}
