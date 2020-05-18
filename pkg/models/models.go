@@ -11,11 +11,11 @@ type Game struct {
 	GameTypeCd string
 	ServerID   int
 	MapID      int
-	Duration   *time.Duration
-	Winner     *int
-	MatchID    *string
-	Mod        *string
-	Players    []int
+	Duration   sql.NullString
+	Winner     sql.NullInt64
+	MatchID    sql.NullString
+	Mod        sql.NullString
+	Players    []sql.NullInt64
 	StartDt    time.Time
 	CreateDt   time.Time
 }

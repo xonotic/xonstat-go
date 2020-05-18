@@ -538,18 +538,18 @@ func (s *Submission) fillGame(rs *RawSubmission) error {
 	if durationSecsStr, ok := rs.GameMeta["D"]; ok {
 		if durationSecs, err := strconv.ParseFloat(durationSecsStr, 32); err == nil {
 			d := time.Duration(durationSecs) * time.Second
-			s.Game.Duration = &d
+			s.Game.Duration = sql.NullString{Valid: true, String: d.String()}
 		}
 	} else {
 		return ErrInvalidGameMeta
 	}
 
 	if matchID, ok := rs.GameMeta["I"]; ok {
-		s.Game.MatchID = &matchID
+		s.Game.MatchID = sql.NullString{Valid: true, String: matchID}
 	}
 
 	if mod, ok := rs.GameMeta["O"]; ok {
-		s.Game.Mod = &mod
+		s.Game.Mod = sql.NullString{Valid: true, String: mod}
 	}
 
 	// Category is not supported yet.
@@ -842,8 +842,8 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	}
 
 	// there is no "winning team" field, so we derive it
-	if wins {
-		s.Game.Winner = pgs.Team
+	if wins && pgs.Team != nil {
+		s.Game.Winner = sql.NullInt64{Valid: true, Int64: int64(*pgs.Team)}
 	}
 
 	s.PlayerGameStats = append(s.PlayerGameStats, *pgs)
@@ -1075,14 +1075,16 @@ func GetOrCreateMap(tx *sql.Tx, db models.Datastore, rawMap *models.Map) (*model
 // CreateGame creates a game record in the database, first checking if it exists using the MatchID.
 // We expect a game to be inserted upon each submission, so this method only returns an error.
 func CreateGame(tx *sql.Tx, db models.Datastore, rawGame *models.Game) error {
-	games, err := db.RGamesByMatchID(*rawGame.MatchID)
-	if err != nil {
-		return err
-	}
+	if rawGame.MatchID.Valid {
+		games, err := db.RGamesByMatchID(rawGame.MatchID.String)
+		if err != nil {
+			return err
+		}
 
-	if len(games) > 0 {
-		log.Printf("A game with match_id %s already exists in the database.", *rawGame.MatchID)
-		return fmt.Errorf("duplicate game found via match_id")
+		if len(games) > 0 {
+			log.Printf("A game with match_id %s already exists in the database.", rawGame.MatchID.String)
+			return fmt.Errorf("duplicate game found via match_id")
+		}
 	}
 
 	gameID, err := db.CGame(tx, *rawGame)
@@ -1103,15 +1105,17 @@ func Submit(s *Submission, db models.Datastore) error {
 		return err
 	}
 
-	_, err = GetOrCreateServer(tx, db, &s.Server)
+	server, err := GetOrCreateServer(tx, db, &s.Server)
 	if err != nil {
 		return err
 	}
+	s.Game.ServerID = server.ServerID
 
-	_, err = GetOrCreateMap(tx, db, &s.Map)
+	m, err := GetOrCreateMap(tx, db, &s.Map)
 	if err != nil {
 		return err
 	}
+	s.Game.MapID = m.MapID
 
 	err = CreateGame(tx, db, &s.Game)
 	if err != nil {
