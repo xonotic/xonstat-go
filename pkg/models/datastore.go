@@ -22,4 +22,7 @@ type Datastore interface {
 	// Game-oriented methods
 	CGame(tx *sql.Tx, game Game) (int64, error)
 	RGamesByMatchID(matchID string) ([]*Game, error)
+
+	// Player-oriented methods
+	RPlayersByHashkeyMulti(hashkeys []string) (map[string]*Player, error)
 }
