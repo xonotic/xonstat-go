@@ -135,16 +135,10 @@ func TestCategory(t *testing.T) {
 			t.Fatalf("Couldn't parse %s as a valid RawSubmission: %s", categoryTest.filename, err)
 		}
 
-		s, err := NewSubmission(rs)
-		if err != nil {
-			t.Fatalf("Couldn't parse %s into a Submission: %s", categoryTest.filename, err)
-		}
-
-		if s.Game.Category == nil {
-			t.Fatalf("nil Game.category for %s", categoryTest.filename)
-		} else if *s.Game.Category != categoryTest.category {
-			t.Fatalf("Incorrect Game.Category for %s: expected %s, got %s", categoryTest.filename,
-				categoryTest.category, *s.Game.Category)
+		category := gameCategory(rs)
+		if category != categoryTest.category {
+			t.Fatalf("Incorrect category for %s: expected %s, got %s", categoryTest.filename,
+				categoryTest.category, category)
 		}
 	}
 }
