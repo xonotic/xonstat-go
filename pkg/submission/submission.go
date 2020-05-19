@@ -323,8 +323,8 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	pgs.PlayerID = player.PlayerID
 	pgs.GameID = s.Game.GameID
 	pgs.CreateDt = s.CreateDt
-	pgs.Nick = player.Nick
-	pgs.StrippedNick = player.StrippedNick
+	pgs.Nick = &player.Nick.String
+	pgs.StrippedNick = &player.StrippedNick.String
 
 	// required fields
 	score := 0
@@ -458,8 +458,8 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 
 		player := models.Player{
 			PlayerID:     playerID,
-			Nick:         &nick,
-			StrippedNick: &strippedNick,
+			Nick:         sql.NullString{Valid: true, String: nick},
+			StrippedNick: sql.NullString{Valid: true, String: strippedNick},
 			ActiveInd:    true,
 			CreateDt:     s.CreateDt,
 		}
@@ -684,7 +684,11 @@ func CreateGame(tx *sql.Tx, db models.Datastore, rawGame *models.Game) error {
 
 // ShouldUpdatePlayer determines if the incoming data has a new piece of information
 // that should be persisted to the database with an update.
-func ShouldUpdatePlayer(rawPlayer, dbPlayer *models.Player) bool {
+func ShouldUpdatePlayer(incoming, existing *models.Player) bool {
+	if incoming.Nick.Valid && incoming.Nick.String != existing.Nick.String {
+		return true
+	}
+	// TODO: register a nick change, if that is something we still want...
 	return false
 }
 
@@ -692,8 +696,8 @@ func ShouldUpdatePlayer(rawPlayer, dbPlayer *models.Player) bool {
 // in the submission. This one is done in batch to reduce SQL calls.
 func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[string]*models.Player, error) {
 	// These records are fixed for bots and anons (untracked players) respectively
-	bot := models.Player{PlayerID: 1}
-	anon := models.Player{PlayerID: 2}
+	bot := models.Player{PlayerID: 1, Nick: sql.NullString{Valid: true, String: "bot"}}
+	anon := models.Player{PlayerID: 2, Nick: sql.NullString{Valid: true, String: "Anonymous Player"}}
 
 	// This is the final return value. All player records found or created in the database.
 	var playersByHashkey map[string]*models.Player

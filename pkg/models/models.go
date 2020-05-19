@@ -159,10 +159,10 @@ type PlayerWeaponStat struct {
 // Player is a bot or human that participated in a game at some point.
 type Player struct {
 	PlayerID     int
-	Nick         *string
-	StrippedNick *string
-	Location     *string
-	EmailAddr    *string
+	Nick         sql.NullString
+	StrippedNick sql.NullString
+	Location     sql.NullString
+	EmailAddr    sql.NullString
 	ActiveInd    bool
 	CreateDt     time.Time
 }
