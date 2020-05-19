@@ -444,10 +444,14 @@ type Submission struct {
 	CreateDt             time.Time
 
 	// References by player ID (initially the player events 'i' or index value) for easier processing
+	// TODO: verify that each of these is needed! If not, remove.
 	PlayersByID           map[int]*models.Player
 	PlayerHashkeysByID    map[int]*models.PlayerHashkey
 	PlayerGameStatsByID   map[int]*models.PlayerGameStat
 	PlayerWeaponStatsByID map[int][]*models.PlayerWeaponStat
+
+	// References by hashkey for easier processing
+	PlayersByHashkey map[string]*models.Player
 }
 
 // gameCategory determines the game's "category" field
@@ -878,6 +882,7 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 		}
 		s.Players = append(s.Players, player)
 		s.PlayersByID[playerID] = &player
+		s.PlayersByHashkey[hashkey] = &player
 
 		playerHashkey := models.PlayerHashkey{
 			PlayerID: playerID,
@@ -905,6 +910,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	playerHashkeysByIndex := make(map[int]*models.PlayerHashkey, 0)
 	playerGameStatsByIndex := make(map[int]*models.PlayerGameStat, 0)
 	playerWeaponStatsByIndex := make(map[int][]*models.PlayerWeaponStat, 0)
+	playersByHashkey := make(map[string]*models.Player, 0)
 
 	s := &Submission{
 		Players:               players,
@@ -918,6 +924,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 		PlayerHashkeysByID:    playerHashkeysByIndex,
 		PlayerGameStatsByID:   playerGameStatsByIndex,
 		PlayerWeaponStatsByID: playerWeaponStatsByIndex,
+		PlayersByHashkey:      playersByHashkey,
 	}
 
 	// one at a time, we fill the members
@@ -1092,21 +1099,58 @@ func CreateGame(tx *sql.Tx, db models.Datastore, rawGame *models.Game) error {
 	return nil
 }
 
+// ShouldUpdatePlayer determines if the incoming data has a new piece of information
+// that should be persisted to the database with an update.
+func ShouldUpdatePlayer(rawPlayer, dbPlayer *models.Player) bool {
+	return false
+}
+
 // GetOrCreatePlayers fetches existing players or creates new ones based upon the data
-// in the submission.
+// in the submission. This one is done in batch to reduce SQL calls.
 func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[string]*models.Player, error) {
-	var hashkeys []string
+	// These records are fixed for bots and anons (untracked players) respectively
+	bot := models.Player{PlayerID: 1}
+	anon := models.Player{PlayerID: 2}
+
+	// This is the final return value. All player records found or created in the database.
+	var playersByHashkey map[string]*models.Player
+
+	var hashkeys []string  // used for searching
+	var hashkeySet map[string]struct{}  // used for keeping track of who we haven't processed
 	for _, phk := range s.PlayerHashkeys {
-		hashkeys = append(hashkeys, phk.Hashkey)
+		if strings.HasPrefix(phk.Hashkey, "bot#") {
+			// bot
+			playersByHashkey[phk.Hashkey] = &bot
+		} else if strings.HasPrefix(phk.Hashkey, "player#") {
+			// untracked player
+			playersByHashkey[phk.Hashkey] = &anon
+		} else {
+			// human that we need to look for/create
+			hashkeys = append(hashkeys, phk.Hashkey)
+			hashkeySet[phk.Hashkey] = struct{}{}
+		}
 	}
 
-	playersByHashkey, err := db.RPlayersByHashkeyMulti(hashkeys)
+	playersByHashkeyDB, err := db.RPlayersByHashkeyMulti(hashkeys)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("%v", playersByHashkey)
+	log.Printf("%v", playersByHashkeyDB)
 
-	return nil, nil
+	for hashkey, dbPlayer := range playersByHashkeyDB {
+		rawPlayer := s.PlayersByHashkey[hashkey]
+		if ShouldUpdatePlayer(rawPlayer, dbPlayer) {
+			// process player record update with UPlayer()
+		}
+		// Update the struct in submission to reflect the new values from the DB (?)
+
+		delete(hashkeySet, hashkey)  // done processing this one
+	}
+
+	// remaining players in hashkeySet need to be created
+	// update submission to reflect the "real" values
+
+	return playersByHashkey, nil
 }
 
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
