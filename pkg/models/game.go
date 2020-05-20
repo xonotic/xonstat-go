@@ -43,13 +43,11 @@ func (ds *PGDatastore) CGame(tx *sql.Tx, game Game) (int64, error) {
 
 // scanGames is a helper function to parse full Game records out of a resultset.
 func scanGames(rows *sql.Rows) ([]*Game, error) {
-	// TODO: retrieve interval values back out as time.Duration-s
 	var games []*Game
 	for rows.Next() {
 		var g Game
-		var durationStr string
 		err := rows.Scan(&g.GameID, &g.GameTypeCd, &g.ServerID, &g.MapID, &g.Winner,
-			&g.MatchID, &g.Mod, &g.StartDt, &durationStr)
+			&g.MatchID, &g.Mod, &g.StartDt)
 
 		if err != nil {
 			return nil, err
@@ -63,6 +61,7 @@ func scanGames(rows *sql.Rows) ([]*Game, error) {
 
 // RGamesByMatchID retrives game records by their MatchID value.
 func (ds *PGDatastore) RGamesByMatchID(matchID string) ([]*Game, error) {
+	// TODO: retrieve the duration as a string, convert it back into a time.Duration
 	sql := `select game_id, game_type_cd, server_id, map_id, winner, match_id, mod, 
 	start_dt
 	from games
