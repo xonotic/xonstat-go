@@ -25,4 +25,5 @@ type Datastore interface {
 
 	// Player-oriented methods
 	RPlayersByHashkeyMulti(hashkeys []string) (map[string]*Player, error)
+	UPlayer(tx *sql.Tx, player Player) error
 }

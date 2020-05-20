@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 )
@@ -41,4 +42,18 @@ func (ds *PGDatastore) RPlayersByHashkeyMulti(hashkeys []string) (map[string]*Pl
 	}
 
 	return players, nil
+}
+
+// UPlayer updates a Player record in the database.
+func (ds *PGDatastore) UPlayer(tx *sql.Tx, player Player) error {
+	sql := `update players set nick=$1, stripped_nick=$2
+	where player_id = $3`
+
+	_, err := tx.Exec(sql, player.Nick, player.StrippedNick, player.PlayerID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -722,19 +722,26 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("%v", playersByHashkeyDB)
 
 	for hashkey, dbPlayer := range playersByHashkeyDB {
 		rawPlayer := s.PlayersByHashkey[hashkey]
 		if ShouldUpdatePlayer(rawPlayer, dbPlayer) {
-			// process player record update with UPlayer()
+			// Apply the update to the DB value...
+			dbPlayer.Nick = rawPlayer.Nick
+			dbPlayer.StrippedNick = rawPlayer.StrippedNick
+
+			// ...and save it to the database.
+			db.UPlayer(tx, *dbPlayer)
 		}
-		// Update the struct in submission to reflect the new values from the DB (?)
+
+		// Now the DB record contains all the correct info, update the Submission
+		// references accordingly.
+		*rawPlayer = *dbPlayer
 
 		delete(hashkeySet, hashkey)  // done processing this one
 	}
 
-	// remaining players in hashkeySet need to be created
+	// The remaining players in hashkeySet need to be created.
 	// update submission to reflect the "real" values
 
 	return playersByHashkey, nil
