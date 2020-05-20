@@ -6,6 +6,22 @@ import (
 	"strings"
 )
 
+// CPlayer inserts a Player record into the database.
+func (ds *PGDatastore) CPlayer(tx *sql.Tx, player Player) (int64, error) {
+	sql := `insert into players (nick, stripped_nick, location, email_addr) 
+	values ($1, $2, $3, $4) returning player_id`
+
+	row := tx.QueryRow(sql, player.Nick, player.StrippedNick, player.Location, player.EmailAddr)
+
+	var playerID int64
+	err := row.Scan(&playerID)
+	if err != nil {
+		return playerID, err
+	}
+
+	return playerID, nil
+}
+
 // RPlayersByHashkeyMulti finds multiple players by their hashkeys, returning back a map
 // indexed by the hashkey with player record pointers as values.
 func (ds *PGDatastore) RPlayersByHashkeyMulti(hashkeys []string) (map[string]*Player, error) {

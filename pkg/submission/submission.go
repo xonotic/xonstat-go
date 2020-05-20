@@ -700,10 +700,12 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 	anon := models.Player{PlayerID: 2, Nick: sql.NullString{Valid: true, String: "Anonymous Player"}}
 
 	// This is the final return value. All player records found or created in the database.
-	var playersByHashkey map[string]*models.Player
+	playersByHashkey := make(map[string]*models.Player)
 
 	var hashkeys []string  // used for searching
-	var hashkeySet map[string]struct{}  // used for keeping track of who we haven't processed
+	hashkeySet := make(map[string]struct{}, 0)  // used for keeping track of who we haven't processed
+
+	// Bots and untracked players need no fetches from the database.
 	for _, phk := range s.PlayerHashkeys {
 		if strings.HasPrefix(phk.Hashkey, "bot#") {
 			// bot
@@ -718,6 +720,8 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 		}
 	}
 
+	// Players that already exist are more complicated. We first fetch who we can,
+	// then update them if need be. 
 	playersByHashkeyDB, err := db.RPlayersByHashkeyMulti(hashkeys)
 	if err != nil {
 		return nil, err
@@ -734,15 +738,25 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 			db.UPlayer(tx, *dbPlayer)
 		}
 
-		// Now the DB record contains all the correct info, update the Submission
-		// references accordingly.
-		*rawPlayer = *dbPlayer
+		playersByHashkey[hashkey] = dbPlayer
 
 		delete(hashkeySet, hashkey)  // done processing this one
 	}
 
-	// The remaining players in hashkeySet need to be created.
-	// update submission to reflect the "real" values
+	// The remaining players left in hashkeySet need to be created.
+	for hashkey := range hashkeySet {
+		newPlayer := s.PlayersByHashkey[hashkey]
+
+		playerID, err := db.CPlayer(tx, *newPlayer)
+		if err != nil {
+			return nil, err
+		}
+
+		newPlayer.PlayerID = int(playerID)
+		playersByHashkey[hashkey] = newPlayer
+
+		log.Printf("Created player %d '%s'", playerID, newPlayer.StrippedNick.String)
+	}
 
 	return playersByHashkey, nil
 }
@@ -776,6 +790,9 @@ func Submit(s *Submission, db models.Datastore) error {
 	if err != nil {
 		return err
 	}
+
+	// TODO: we now have map of hashkey -> real player value, so need to update the submission
+	// with all of that info. 
 
 	err = tx.Commit()
 	if err != nil {
