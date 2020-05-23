@@ -8,6 +8,7 @@ import (
 
 // CPlayer inserts a Player record into the database.
 func (ds *PGDatastore) CPlayer(tx *sql.Tx, player Player) (int64, error) {
+	// TODO: add "Anonymous Player" processing here to append player ID to the nick.
 	sql := `insert into players (nick, stripped_nick, location, email_addr) 
 	values ($1, $2, $3, $4) returning player_id`
 

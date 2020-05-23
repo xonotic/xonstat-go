@@ -755,18 +755,13 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 		log.Printf("Created player %d '%s'", playerID, newPlayer.StrippedNick.String)
 	}
 
-	return playersByHashkey, nil
-}
-
-// UpdatePIDs updates the internal structures in the submission with the correct
-// values of players fetched from the database.
-func UpdatePIDs(s *Submission, playersByHashkey map[string]*models.Player) error {
+	// Reflect the new PIDs in the submission accordingly (at least for the next table being modified).
 	for hashkey, player := range playersByHashkey {
 		*s.PlayersByHashkey[hashkey] = *player
 		s.PlayerGameStatsByHashkey[hashkey].PlayerID = player.PlayerID
 	}
 
-	return nil
+	return playersByHashkey, nil
 }
 
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
@@ -794,12 +789,7 @@ func Submit(s *Submission, db models.Datastore) error {
 		return err
 	}
 
-	playersByHashkey, err := GetOrCreatePlayers(tx, db, s)
-	if err != nil {
-		return err
-	}
-
-	err = UpdatePIDs(s, playersByHashkey)
+	_, err = GetOrCreatePlayers(tx, db, s)
 	if err != nil {
 		return err
 	}
