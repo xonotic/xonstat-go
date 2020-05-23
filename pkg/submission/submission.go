@@ -26,15 +26,13 @@ type Submission struct {
 	PlayerGameAnticheats []models.PlayerGameAnticheat
 	CreateDt             time.Time
 
-	// References by player ID (initially the player events 'i' or index value) for easier processing
-	// TODO: verify that each of these is needed! If not, remove.
-	PlayersByID           map[int]*models.Player
-	PlayerHashkeysByID    map[int]*models.PlayerHashkey
-	PlayerGameStatsByID   map[int]*models.PlayerGameStat
-	PlayerWeaponStatsByID map[int][]*models.PlayerWeaponStat
+	// References by player index (initially the player events 'i' or index value) for easier processing
+	PlayersByIndex     map[int]*models.Player
 
 	// References by hashkey for easier processing
-	PlayersByHashkey map[string]*models.Player
+	PlayersByHashkey           map[string]*models.Player
+	PlayerGameStatsByHashkey   map[string]*models.PlayerGameStat
+	PlayerWeaponStatsByHashkey map[string][]*models.PlayerWeaponStat
 }
 
 // gameCategory determines the game's "category" field
@@ -287,6 +285,7 @@ func durationFromString(value string, divisor float64) *time.Duration {
 // fillPlayerWeaponStat populates a PlayerWeaponStat object from the events in the events map
 func (s *Submission) fillPlayerWeaponStat(weapon string, events map[string]string, player *models.Player) error {
 	var ws models.PlayerWeaponStat
+	hashkey := events["P"]
 	ws.WeaponCd = weapon
 	ws.CreateDt = s.Game.CreateDt
 
@@ -309,7 +308,7 @@ func (s *Submission) fillPlayerWeaponStat(weapon string, events map[string]strin
 	ws.Frags = intFromFloat(fmt.Sprintf("acc-%s-frags", weapon))
 
 	s.PlayerWeaponStats = append(s.PlayerWeaponStats, ws)
-	s.PlayerWeaponStatsByID[player.PlayerID] = append(s.PlayerWeaponStatsByID[player.PlayerID], &ws)
+	s.PlayerWeaponStatsByHashkey[hashkey] = append(s.PlayerWeaponStatsByHashkey[hashkey], &ws)
 
 	return nil
 }
@@ -318,6 +317,8 @@ func (s *Submission) fillPlayerWeaponStat(weapon string, events map[string]strin
 func (s *Submission) fillPlayerGameStat(events map[string]string, player *models.Player) error {
 	// an initialized pgstat based on the game type being played
 	pgs := models.NewPlayerGameStat(s.Game.GameTypeCd)
+
+	hashkey := events["P"]
 
 	// fields passed on from other objects
 	pgs.PlayerID = player.PlayerID
@@ -425,8 +426,7 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 		s.Game.Winner = sql.NullInt64{Valid: true, Int64: int64(*pgs.Team)}
 	}
 
-	s.PlayerGameStats = append(s.PlayerGameStats, *pgs)
-	s.PlayerGameStatsByID[pgs.PlayerID] = pgs
+	s.PlayerGameStatsByHashkey[hashkey] = pgs
 
 	return nil
 }
@@ -435,7 +435,7 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 func (s *Submission) fillPlayers(rs *RawSubmission) error {
 	// Only consider events from humans or bots who actually played in the game.
 	playersInGame := append(rs.Humans, rs.Bots...)
-	
+
 	for _, events := range playersInGame {
 		hashkey := events["P"]
 
@@ -451,29 +451,28 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 		nickQStr := qstr.QStr(nick)
 		strippedNick := nickQStr.Stripped()
 
-		playerID, err := strconv.Atoi(events["i"])
+		playerIndex, err := strconv.Atoi(events["i"])
 		if err != nil {
-			playerID = -1
+			playerIndex = -1
 		}
 
 		player := models.Player{
-			PlayerID:     playerID,
+			PlayerID:     playerIndex,
 			Nick:         sql.NullString{Valid: true, String: nick},
 			StrippedNick: sql.NullString{Valid: true, String: strippedNick},
 			ActiveInd:    true,
 			CreateDt:     s.CreateDt,
 		}
 		s.Players = append(s.Players, player)
-		s.PlayersByID[playerID] = &player
+		s.PlayersByIndex[playerIndex] = &player
 		s.PlayersByHashkey[hashkey] = &player
 
 		playerHashkey := models.PlayerHashkey{
-			PlayerID: playerID,
+			PlayerID: playerIndex,
 			Hashkey:  hashkey,
 			CreateDt: s.CreateDt,
 		}
 		s.PlayerHashkeys = append(s.PlayerHashkeys, playerHashkey)
-		s.PlayerHashkeysByID[playerID] = &playerHashkey
 
 		s.fillPlayerGameStat(events, &player)
 	}
@@ -490,24 +489,22 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	var teamGameStats []models.TeamGameStat
 	var playerGameAnticheats []models.PlayerGameAnticheat
 	playersByID := make(map[int]*models.Player, 0)
-	playerHashkeysByIndex := make(map[int]*models.PlayerHashkey, 0)
-	playerGameStatsByIndex := make(map[int]*models.PlayerGameStat, 0)
-	playerWeaponStatsByIndex := make(map[int][]*models.PlayerWeaponStat, 0)
+	playerWeaponStatsByHashkey := make(map[string][]*models.PlayerWeaponStat, 0)
 	playersByHashkey := make(map[string]*models.Player, 0)
+	playerGameStatsByHashkey := make(map[string]*models.PlayerGameStat, 0)
 
 	s := &Submission{
-		Players:               players,
-		PlayerHashkeys:        playerHashkeys,
-		PlayerGameStats:       playerGameStats,
-		PlayerWeaponStats:     playerWeaponStats,
-		TeamGameStats:         teamGameStats,
-		PlayerGameAnticheats:  playerGameAnticheats,
-		CreateDt:              time.Now().UTC(),
-		PlayersByID:           playersByID,
-		PlayerHashkeysByID:    playerHashkeysByIndex,
-		PlayerGameStatsByID:   playerGameStatsByIndex,
-		PlayerWeaponStatsByID: playerWeaponStatsByIndex,
-		PlayersByHashkey:      playersByHashkey,
+		Players:                    players,
+		PlayerHashkeys:             playerHashkeys,
+		PlayerGameStats:            playerGameStats,
+		PlayerWeaponStats:          playerWeaponStats,
+		TeamGameStats:              teamGameStats,
+		PlayerGameAnticheats:       playerGameAnticheats,
+		CreateDt:                   time.Now().UTC(),
+		PlayersByIndex:             playersByID,
+		PlayersByHashkey:           playersByHashkey,
+		PlayerGameStatsByHashkey:   playerGameStatsByHashkey,
+		PlayerWeaponStatsByHashkey: playerWeaponStatsByHashkey,
 	}
 
 	// one at a time, we fill the members
@@ -702,8 +699,8 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 	// This is the final return value. All player records found or created in the database.
 	playersByHashkey := make(map[string]*models.Player)
 
-	var hashkeys []string  // used for searching
-	hashkeySet := make(map[string]struct{}, 0)  // used for keeping track of who we haven't processed
+	var hashkeys []string                      // used for searching
+	hashkeySet := make(map[string]struct{}, 0) // used for keeping track of who we haven't processed
 
 	// Bots and untracked players need no fetches from the database.
 	for _, phk := range s.PlayerHashkeys {
@@ -721,7 +718,7 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 	}
 
 	// Players that already exist are more complicated. We first fetch who we can,
-	// then update them if need be. 
+	// then update them if need be.
 	playersByHashkeyDB, err := db.RPlayersByHashkeyMulti(hashkeys)
 	if err != nil {
 		return nil, err
@@ -740,7 +737,7 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 
 		playersByHashkey[hashkey] = dbPlayer
 
-		delete(hashkeySet, hashkey)  // done processing this one
+		delete(hashkeySet, hashkey) // done processing this one
 	}
 
 	// The remaining players left in hashkeySet need to be created.
@@ -759,6 +756,17 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 	}
 
 	return playersByHashkey, nil
+}
+
+// UpdatePIDs updates the internal structures in the submission with the correct
+// values of players fetched from the database.
+func UpdatePIDs(s *Submission, playersByHashkey map[string]*models.Player) error {
+	for hashkey, player := range playersByHashkey {
+		*s.PlayersByHashkey[hashkey] = *player
+		s.PlayerGameStatsByHashkey[hashkey].PlayerID = player.PlayerID
+	}
+
+	return nil
 }
 
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
@@ -786,13 +794,15 @@ func Submit(s *Submission, db models.Datastore) error {
 		return err
 	}
 
-	_, err = GetOrCreatePlayers(tx, db, s)
+	playersByHashkey, err := GetOrCreatePlayers(tx, db, s)
 	if err != nil {
 		return err
 	}
 
-	// TODO: we now have map of hashkey -> real player value, so need to update the submission
-	// with all of that info. 
+	err = UpdatePIDs(s, playersByHashkey)
+	if err != nil {
+		return err
+	}
 
 	err = tx.Commit()
 	if err != nil {
