@@ -27,4 +27,7 @@ type Datastore interface {
 	CPlayer(tx *sql.Tx, player Player) (int64, error)
 	RPlayersByHashkeyMulti(hashkeys []string) (map[string]*Player, error)
 	UPlayer(tx *sql.Tx, player Player) error
+
+	// PlayerGameStat-oriented methods
+	CPlayerGameStat(tx *sql.Tx, pgs PlayerGameStat) (int64, error)
 }
