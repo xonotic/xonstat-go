@@ -194,18 +194,15 @@ func (s *Submission) fillMap(rs *RawSubmission) error {
 
 // fillTeamStats fills in the stats attributable to teams
 func (s *Submission) fillTeamStats(rs *RawSubmission) error {
-	// helper function to return an int from a rounded float
-	var intFromFloat = func(value string) *int {
-		var intVal *int
-
+	// helper function to return a NULLable SQL int from a rounded float
+	var intFromFloat = func(value string) sql.NullInt32 {
 		floatVal, err := strconv.ParseFloat(value, 32)
 		if err != nil {
-			return intVal
+			return sql.NullInt32{Valid: false}
 		}
 		rounded := int(math.Round(floatVal))
-		intVal = &rounded
 
-		return intVal
+		return sql.NullInt32{Valid: true, Int32: int32(rounded)}
 	}
 
 	for _, events := range rs.TeamEvents {
@@ -237,30 +234,30 @@ func (s *Submission) fillTeamStats(rs *RawSubmission) error {
 }
 
 // intFromStringDefault converts a string to an int if possible, and if not returns a default value
-func intFromStringDefault(value string, defaultVal int) *int {
+func intFromStringDefault(value string, defaultVal int) int {
 	intVal, err := strconv.Atoi(value)
 	if err != nil {
-		return &defaultVal
+		return defaultVal
 	}
-	return &intVal
+	return intVal
 }
 
-// intFromString converts a string to an int if possible, and if not returns nil
-func intFromString(value string) *int {
+// intFromString converts a string to a NULLable SQL int
+func intFromString(value string) sql.NullInt32 {
 	intVal, err := strconv.Atoi(value)
 	if err != nil {
-		return nil
+		return sql.NullInt32{Valid: false}
 	}
-	return &intVal
+	return sql.NullInt32{Valid: true, Int32: int32(intVal)}
 }
 
-// floatFromString converts a string to an int if possible, and if not returns nil
-func floatFromString(value string) *float64 {
+// floatFromString converts a string to a NULLable SQL float
+func floatFromString(value string) sql.NullFloat64 {
 	floatVal, err := strconv.ParseFloat(value, 64)
 	if err != nil {
-		return nil
+		return sql.NullFloat64{Valid: false}
 	}
-	return &floatVal
+	return sql.NullFloat64{Valid: true, Float64: floatVal}
 }
 
 // durationFromString converts a string representing some multiple of seconds to a duration.
@@ -324,8 +321,8 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	pgs.PlayerID = player.PlayerID
 	pgs.GameID = s.Game.GameID
 	pgs.CreateDt = s.CreateDt
-	pgs.Nick = &player.Nick.String
-	pgs.StrippedNick = &player.StrippedNick.String
+	pgs.Nick = player.Nick
+	pgs.StrippedNick = player.StrippedNick
 
 	// required fields
 	score := 0
@@ -335,18 +332,21 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 			score = int(math.Round(scoreFloat))
 		}
 	}
-	pgs.Score = &score
+	pgs.Score = sql.NullInt32{Valid: true, Int32: int32(score)}
 
 	if alivetimeStr, ok := events["alivetime"]; ok {
 		pgs.AliveTime = durationFromString(alivetimeStr, 1.0)
 	}
 
 	if rankStr, ok := events["rank"]; ok {
-		pgs.Rank = intFromStringDefault(rankStr, 0)
+		pgs.Rank = sql.NullInt32{Valid: true, Int32: int32(intFromStringDefault(rankStr, 0))}
 	}
 
 	if scoreboardPosStr, ok := events["scoreboardpos"]; ok {
-		pgs.ScoreboardPos = intFromStringDefault(scoreboardPosStr, 0)
+		pgs.ScoreboardPos = sql.NullInt32 {
+			Valid: true, 
+			Int32: int32(intFromStringDefault(scoreboardPosStr, 0)),
+		}
 	}
 
 	wins := false
@@ -422,8 +422,8 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	}
 
 	// there is no "winning team" field, so we derive it
-	if wins && pgs.Team != nil {
-		s.Game.Winner = sql.NullInt64{Valid: true, Int64: int64(*pgs.Team)}
+	if wins && pgs.Team.Valid {
+		s.Game.Winner = sql.NullInt64{Valid: true, Int64: int64(pgs.Team.Int32)}
 	}
 
 	s.PlayerGameStatsByHashkey[hashkey] = pgs
@@ -784,12 +784,12 @@ func Submit(s *Submission, db models.Datastore) error {
 	}
 	s.Game.MapID = m.MapID
 
-	err = CreateGame(tx, db, &s.Game)
+	_, err = GetOrCreatePlayers(tx, db, s)
 	if err != nil {
 		return err
 	}
 
-	_, err = GetOrCreatePlayers(tx, db, s)
+	err = CreateGame(tx, db, &s.Game)
 	if err != nil {
 		return err
 	}

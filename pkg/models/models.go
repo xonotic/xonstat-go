@@ -53,32 +53,32 @@ type PlayerGameStat struct {
 	PlayerGameStatID int
 	PlayerID         int
 	GameID           int
-	Nick             *string
-	StrippedNick     *string
-	Team             *int
-	Rank             *int
-	AliveTime        *time.Duration
-	Kills            *int
-	Deaths           *int
-	Suicides         *int
-	Score            *int
-	Time             *time.Duration
-	Captures         *int
-	Pickups          *int
-	Drops            *int
-	Returns          *int
-	Collects         *int
-	Destroys         *int
-	Pushes           *int
-	CarrierFrags     *int
-	EloDelta         *float64
-	Fastest          *time.Duration
-	AvgLatency       *float64
-	TeamRank         *int
-	ScoreboardPos    *int
-	Laps             *int
-	Revivals         *int
-	Lives            *int
+	Nick             sql.NullString
+	StrippedNick     sql.NullString
+	Team             sql.NullInt32
+	Rank             sql.NullInt32
+	AliveTime        *time.Duration  // PostgreSQL interval
+	Kills            sql.NullInt32
+	Deaths           sql.NullInt32
+	Suicides         sql.NullInt32
+	Score            sql.NullInt32
+	Time             *time.Duration  // PostgreSQL interval
+	Captures         sql.NullInt32
+	Pickups          sql.NullInt32
+	Drops            sql.NullInt32
+	Returns          sql.NullInt32
+	Collects         sql.NullInt32
+	Destroys         sql.NullInt32
+	Pushes           sql.NullInt32
+	CarrierFrags     sql.NullInt32
+	EloDelta         sql.NullFloat64
+	Fastest          *time.Duration  // PostgreSQL interval
+	AvgLatency       sql.NullFloat64
+	TeamRank         sql.NullInt32
+	ScoreboardPos    sql.NullInt32
+	Laps             sql.NullInt32
+	Revivals         sql.NullInt32
+	Lives            sql.NullInt32
 	CreateDt         time.Time
 }
 
@@ -86,56 +86,69 @@ type PlayerGameStat struct {
 func NewPlayerGameStat(gameTypeCd string) *PlayerGameStat {
 	var pgs PlayerGameStat
 
-	score := 0
-	pgs.Score = &score
+	pgs.Score = sql.NullInt32{Valid: true, Int32: 0}
 
 	switch gameTypeCd {
 	case "as":
-		team, kills, deaths, suicides, collects := 0, 0, 0, 0, 0
-		pgs.Team, pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Collects = &team, &kills, &deaths,
-			&suicides, &collects
+		pgs.Team = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Kills = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Deaths = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Suicides = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Collects = sql.NullInt32{Valid: true, Int32: 0}
 
 	case "ca", "dm", "duel", "rune", "tdm":
-		kills, deaths, suicides := 0, 0, 0
-		pgs.Kills, pgs.Deaths, pgs.Suicides = &kills, &deaths, &suicides
+		pgs.Kills = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Deaths = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Suicides = sql.NullInt32{Valid: true, Int32: 0}
 
 	case "ctf":
-		kills, captures, pickups, drops, returns, carrierFrags := 0, 0, 0, 0, 0, 0
-		pgs.Kills, pgs.Captures, pgs.Pickups, pgs.Drops, pgs.Returns, pgs.CarrierFrags = &kills,
-			&captures, &pickups, &drops, &returns, &carrierFrags
+		pgs.Kills = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Captures = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Pickups = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Drops = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Returns = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.CarrierFrags = sql.NullInt32{Valid: true, Int32: 0}
 
 	case "cts":
-		deaths := 0
-		pgs.Deaths = &deaths
+		pgs.Deaths = sql.NullInt32{Valid: true, Int32: 0}
 
 	case "dom":
-		kills, deaths, suicides, pickups, drops := 0, 0, 0, 0, 0
-		pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Pickups, pgs.Drops = &kills, &deaths, &suicides,
-			&pickups, &drops
+		pgs.Kills = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Deaths = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Suicides = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Pickups = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Drops = sql.NullInt32{Valid: true, Int32: 0}
 
 	case "ft":
-		kills, deaths, suicides, revivals := 0, 0, 0, 0
-		pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Revivals = &kills, &deaths, &suicides, &revivals
+		pgs.Kills = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Deaths = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Suicides = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Revivals = sql.NullInt32{Valid: true, Int32: 0}
 
 	case "ka":
-		kills, deaths, suicides, pickups, carrierFrags := 0, 0, 0, 0, 0
-		pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Pickups, pgs.CarrierFrags = &kills, &deaths,
-			&suicides, &pickups, &carrierFrags
+		pgs.Kills = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Deaths = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Suicides = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Pickups = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.CarrierFrags = sql.NullInt32{Valid: true, Int32: 0}
 
 	case "kh":
-		kills, deaths, suicides, pickups, captures := 0, 0, 0, 0, 0
-		drops, pushes, destroys, carrierFrags := 0, 0, 0, 0
-
-		pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Pickups, pgs.Captures = &kills, &deaths,
-			&suicides, &pickups, &captures
-
-		pgs.Drops, pgs.Pushes, pgs.Destroys, pgs.CarrierFrags = &drops, &pushes, &destroys,
-			&carrierFrags
+		pgs.Kills = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Deaths = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Suicides = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Pickups = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Captures = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Drops = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Pushes = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Destroys = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.CarrierFrags = sql.NullInt32{Valid: true, Int32: 0}
 
 	case "nb":
-		kills, deaths, suicides, captures, drops := 0, 0, 0, 0, 0
-		pgs.Kills, pgs.Deaths, pgs.Suicides, pgs.Captures, pgs.Drops = &kills, &deaths,
-			&suicides, &captures, &drops
+		pgs.Kills = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Deaths = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Suicides = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Captures = sql.NullInt32{Valid: true, Int32: 0}
+		pgs.Drops = sql.NullInt32{Valid: true, Int32: 0}
 	}
 
 	return &pgs
@@ -183,9 +196,9 @@ type TeamGameStat struct {
 	TeamGameStatID int
 	GameID         int
 	Team           int
-	Score          *int
-	Rounds         *int
-	Caps           *int
+	Score          sql.NullInt32
+	Rounds         sql.NullInt32
+	Caps           sql.NullInt32
 	CreateDt       time.Time
 }
 
@@ -194,17 +207,14 @@ func NewTeamGameStat(gameTypeCd string) *TeamGameStat {
 	var tgs TeamGameStat
 
 	// All TeamGameStat records have a score
-	score := 0
-	tgs.Score = &score
+	tgs.Score = sql.NullInt32{Valid: true, Int32: 0}
 
 	switch gameTypeCd {
 	case "ca", "ft", "ka":
-		rounds := 0
-		tgs.Rounds = &rounds
+		tgs.Rounds = sql.NullInt32{Valid: true, Int32: 0}
 
 	case "ctf":
-		caps := 0
-		tgs.Caps = &caps
+		tgs.Caps = sql.NullInt32{Valid: true, Int32: 0}
 	}
 
 	return &tgs
