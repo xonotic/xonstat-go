@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"log/syslog"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -18,16 +20,19 @@ import (
 var logger *log.Logger
 
 func initLog() error {
-	writer, err := syslog.New(syslog.LOG_DEBUG, "xonstat")
+	syslogWriter, err := syslog.New(syslog.LOG_DEBUG, "xonstat")
 	if err != nil {
 		return err
 	}
-	defer writer.Close()
+	defer syslogWriter.Close()
 
-	logger = log.New(writer, "", log.Ldate|log.Ltime|log.LUTC)
+	// Multiplex log messages to syslog and standard out.
+	multiwriter := io.MultiWriter(syslogWriter, os.Stdout)
+
+	logger = log.New(multiwriter, "", log.Ldate|log.Ltime|log.LUTC)
 
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC)
-	log.SetOutput(writer)
+	log.SetOutput(multiwriter)
 
 	return nil
 }
