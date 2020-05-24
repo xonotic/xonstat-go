@@ -774,6 +774,32 @@ func CreatePlayerGameStats(tx *sql.Tx, db models.Datastore, s *Submission) error
 	return nil
 }
 
+// CreatePlayerWeaponStats inserts all of the weapon stat records to the database.
+func CreatePlayerWeaponStats(tx *sql.Tx, db models.Datastore, s *Submission) error {
+	for hashkey, pwsList := range s.PlayerWeaponStatsByHashkey {
+		for _, pws := range pwsList {
+			pws.PlayerID = s.PlayersByHashkey[hashkey].PlayerID
+			
+			// We don't store weapon information for bots.
+			if pws.PlayerID == 1 {
+				break
+			}
+
+			pws.GameID = s.Game.GameID
+			pws.PlayerGameStatID = s.PlayerGameStatsByHashkey[hashkey].PlayerGameStatID
+
+			pwsID, err := db.CPlayerWeaponStat(tx, *pws)
+			if err != nil {
+				return err
+			}
+
+			pws.PlayerWeaponStatID = int(pwsID)
+		}
+	}
+
+	return nil
+}
+
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
 // missing information (like primary key values) along the way.
 func Submit(s *Submission, db models.Datastore) error {
@@ -805,6 +831,11 @@ func Submit(s *Submission, db models.Datastore) error {
 	}
 
 	err = CreatePlayerGameStats(tx, db, s)
+	if err != nil {
+		return err
+	}
+
+	err = CreatePlayerWeaponStats(tx, db, s)
 	if err != nil {
 		return err
 	}

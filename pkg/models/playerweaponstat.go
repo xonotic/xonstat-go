@@ -18,7 +18,7 @@ func (ds *PGDatastore) CPlayerWeaponStat(tx *sql.Tx, pws PlayerWeaponStat) (int6
 
 	sql := `insert into player_weapon_stats (player_weapon_stats_id, player_id, game_id, 
 		player_game_stat_id, weapon_cd, actual, max, hit, fired, frags) 
-		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning player_weapon_stat_id`
+		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning player_weapon_stats_id`
 
 	_, err = tx.Exec(sql, pwsID, pws.PlayerID, pws.GameID, pws.PlayerGameStatID, pws.WeaponCd, 
 		pws.Actual, pws.Max, pws.Hit, pws.Fired, pws.Frags)
