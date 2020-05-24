@@ -426,6 +426,7 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 		s.Game.Winner = sql.NullInt64{Valid: true, Int64: int64(pgs.Team.Int32)}
 	}
 
+	s.PlayerGameStats = append(s.PlayerGameStats, *pgs)
 	s.PlayerGameStatsByHashkey[hashkey] = pgs
 
 	return nil
@@ -764,6 +765,19 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 	return playersByHashkey, nil
 }
 
+// CreatePlayerGameStats inserts all of the game stat records to the database.
+func CreatePlayerGameStats(tx *sql.Tx, db models.Datastore, s *Submission) error {
+	for _, pgs := range s.PlayerGameStats {
+		pgsID, err := db.CPlayerGameStat(tx, pgs)
+		if err != nil {
+			return err
+		}
+		pgs.PlayerGameStatID = int(pgsID)
+	}
+
+	return nil
+}
+
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
 // missing information (like primary key values) along the way.
 func Submit(s *Submission, db models.Datastore) error {
@@ -790,6 +804,11 @@ func Submit(s *Submission, db models.Datastore) error {
 	}
 
 	err = CreateGame(tx, db, &s.Game)
+	if err != nil {
+		return err
+	}
+
+	err = CreatePlayerGameStats(tx, db, s)
 	if err != nil {
 		return err
 	}
