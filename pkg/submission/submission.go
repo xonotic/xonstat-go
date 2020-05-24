@@ -750,6 +750,11 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 			return nil, err
 		}
 
+		err = db.CHashkey(tx, hashkey, playerID)
+		if err != nil {
+			return nil, err
+		}
+
 		newPlayer.PlayerID = int(playerID)
 		playersByHashkey[hashkey] = newPlayer
 
