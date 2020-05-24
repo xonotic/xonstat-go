@@ -29,7 +29,7 @@ type Datastore interface {
 	UPlayer(tx *sql.Tx, player Player) error
 
 	// Hashkey-oriented methods
-	CHashkey(tx *sql.Tx, hashkey string, playerID int64) error
+	CHashkey(tx *sql.Tx, hashkey PlayerHashkey) error
 
 	// PlayerGameStat-oriented methods
 	CPlayerGameStat(tx *sql.Tx, pgs PlayerGameStat) (int64, error)

@@ -19,9 +19,8 @@ type Submission struct {
 	Server               models.Server
 	Map                  models.Map
 	Players              []*models.Player
-	PlayerHashkeys       []models.PlayerHashkey
 	PlayerGameStats      []*models.PlayerGameStat
-	PlayerWeaponStats    []models.PlayerWeaponStat
+	PlayerWeaponStats    []*models.PlayerWeaponStat
 	TeamGameStats        []models.TeamGameStat
 	PlayerGameAnticheats []models.PlayerGameAnticheat
 	CreateDt             time.Time
@@ -304,7 +303,7 @@ func (s *Submission) fillPlayerWeaponStat(weapon string, events map[string]strin
 	ws.Actual = intFromFloat(fmt.Sprintf("acc-%s-hit", weapon))
 	ws.Frags = intFromFloat(fmt.Sprintf("acc-%s-frags", weapon))
 
-	s.PlayerWeaponStats = append(s.PlayerWeaponStats, ws)
+	s.PlayerWeaponStats = append(s.PlayerWeaponStats, &ws)
 	s.PlayerWeaponStatsByHashkey[hashkey] = append(s.PlayerWeaponStatsByHashkey[hashkey], &ws)
 
 	return nil
@@ -469,13 +468,6 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 		s.PlayersByIndex[playerIndex] = &player
 		s.PlayersByHashkey[hashkey] = &player
 
-		playerHashkey := models.PlayerHashkey{
-			PlayerID: playerIndex,
-			Hashkey:  hashkey,
-			CreateDt: s.CreateDt,
-		}
-		s.PlayerHashkeys = append(s.PlayerHashkeys, playerHashkey)
-
 		s.fillPlayerGameStat(events, &player)
 	}
 
@@ -485,9 +477,8 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 // NewSubmission converts a RawSubmission into a fully-formed one
 func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	players := make([]*models.Player, 0, len(rs.PlayerEvents))
-	playerHashkeys := make([]models.PlayerHashkey, 0, len(rs.PlayerEvents))
 	playerGameStats := make([]*models.PlayerGameStat, 0, len(rs.PlayerEvents))
-	var playerWeaponStats []models.PlayerWeaponStat
+	var playerWeaponStats []*models.PlayerWeaponStat
 	var teamGameStats []models.TeamGameStat
 	var playerGameAnticheats []models.PlayerGameAnticheat
 	playersByID := make(map[int]*models.Player, 0)
@@ -497,7 +488,6 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 
 	s := &Submission{
 		Players:                    players,
-		PlayerHashkeys:             playerHashkeys,
 		PlayerGameStats:            playerGameStats,
 		PlayerWeaponStats:          playerWeaponStats,
 		TeamGameStats:              teamGameStats,
@@ -705,17 +695,17 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 	hashkeySet := make(map[string]struct{}, 0) // used for keeping track of who we haven't processed
 
 	// Bots and untracked players need no fetches from the database.
-	for _, phk := range s.PlayerHashkeys {
-		if strings.HasPrefix(phk.Hashkey, "bot#") {
+	for hashkey := range s.PlayersByHashkey {
+		if strings.HasPrefix(hashkey, "bot#") {
 			// bot
-			playersByHashkey[phk.Hashkey] = &bot
-		} else if strings.HasPrefix(phk.Hashkey, "player#") {
+			playersByHashkey[hashkey] = &bot
+		} else if strings.HasPrefix(hashkey, "player#") {
 			// untracked player
-			playersByHashkey[phk.Hashkey] = &anon
+			playersByHashkey[hashkey] = &anon
 		} else {
 			// human that we need to look for/create
-			hashkeys = append(hashkeys, phk.Hashkey)
-			hashkeySet[phk.Hashkey] = struct{}{}
+			hashkeys = append(hashkeys, hashkey)
+			hashkeySet[hashkey] = struct{}{}
 		}
 	}
 
@@ -751,7 +741,7 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 			return nil, err
 		}
 
-		err = db.CHashkey(tx, hashkey, playerID)
+		err = db.CHashkey(tx, models.PlayerHashkey{Hashkey:hashkey, PlayerID: int(playerID)})
 		if err != nil {
 			return nil, err
 		}
