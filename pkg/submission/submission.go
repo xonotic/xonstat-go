@@ -18,16 +18,16 @@ type Submission struct {
 	Game                 models.Game
 	Server               models.Server
 	Map                  models.Map
-	Players              []models.Player
+	Players              []*models.Player
 	PlayerHashkeys       []models.PlayerHashkey
-	PlayerGameStats      []models.PlayerGameStat
+	PlayerGameStats      []*models.PlayerGameStat
 	PlayerWeaponStats    []models.PlayerWeaponStat
 	TeamGameStats        []models.TeamGameStat
 	PlayerGameAnticheats []models.PlayerGameAnticheat
 	CreateDt             time.Time
 
 	// References by player index (initially the player events 'i' or index value) for easier processing
-	PlayersByIndex     map[int]*models.Player
+	PlayersByIndex map[int]*models.Player
 
 	// References by hashkey for easier processing
 	PlayersByHashkey           map[string]*models.Player
@@ -319,6 +319,7 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 
 	// fields passed on from other objects
 	pgs.PlayerID = player.PlayerID
+	pgs.PlayerGameStatID = player.PlayerID
 	pgs.GameID = s.Game.GameID
 	pgs.CreateDt = s.CreateDt
 	pgs.Nick = player.Nick
@@ -343,8 +344,8 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	}
 
 	if scoreboardPosStr, ok := events["scoreboardpos"]; ok {
-		pgs.ScoreboardPos = sql.NullInt32 {
-			Valid: true, 
+		pgs.ScoreboardPos = sql.NullInt32{
+			Valid: true,
 			Int32: int32(intFromStringDefault(scoreboardPosStr, 0)),
 		}
 	}
@@ -426,7 +427,7 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 		s.Game.Winner = sql.NullInt64{Valid: true, Int64: int64(pgs.Team.Int32)}
 	}
 
-	s.PlayerGameStats = append(s.PlayerGameStats, *pgs)
+	s.PlayerGameStats = append(s.PlayerGameStats, pgs)
 	s.PlayerGameStatsByHashkey[hashkey] = pgs
 
 	return nil
@@ -464,7 +465,7 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 			ActiveInd:    true,
 			CreateDt:     s.CreateDt,
 		}
-		s.Players = append(s.Players, player)
+		s.Players = append(s.Players, &player)
 		s.PlayersByIndex[playerIndex] = &player
 		s.PlayersByHashkey[hashkey] = &player
 
@@ -483,9 +484,9 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 
 // NewSubmission converts a RawSubmission into a fully-formed one
 func NewSubmission(rs *RawSubmission) (*Submission, error) {
-	players := make([]models.Player, 0, len(rs.PlayerEvents))
+	players := make([]*models.Player, 0, len(rs.PlayerEvents))
 	playerHashkeys := make([]models.PlayerHashkey, 0, len(rs.PlayerEvents))
-	playerGameStats := make([]models.PlayerGameStat, 0, len(rs.PlayerEvents))
+	playerGameStats := make([]*models.PlayerGameStat, 0, len(rs.PlayerEvents))
 	var playerWeaponStats []models.PlayerWeaponStat
 	var teamGameStats []models.TeamGameStat
 	var playerGameAnticheats []models.PlayerGameAnticheat
@@ -773,7 +774,7 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 // CreatePlayerGameStats inserts all of the game stat records to the database.
 func CreatePlayerGameStats(tx *sql.Tx, db models.Datastore, s *Submission) error {
 	for _, pgs := range s.PlayerGameStats {
-		pgsID, err := db.CPlayerGameStat(tx, pgs)
+		pgsID, err := db.CPlayerGameStat(tx, *pgs)
 		if err != nil {
 			return err
 		}
