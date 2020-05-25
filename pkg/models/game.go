@@ -8,9 +8,6 @@ import (
 
 // CGame inserts a Game record into the database.
 func (ds *PGDatastore) CGame(tx *sql.Tx, game Game) (int64, error) {
-	// TODO: validate start_dt is set properly
-	// TODO: validate winner is set properly in Submission object before getting here
-	// TODO: validate players is set properly to an array type
 	var gameID int64
 
 	// The games table is partitioned, so the "returning" clause will not work like
