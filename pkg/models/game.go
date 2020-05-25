@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/lib/pq"
 	"database/sql"
 	"fmt"
 )
@@ -23,11 +24,11 @@ func (ds *PGDatastore) CGame(tx *sql.Tx, game Game) (int64, error) {
 	durationLiteral := durationToMSStr(game.Duration)
 
 	sql := `insert into games (game_id, game_type_cd, server_id, map_id, winner, match_id, mod,
-		start_dt, duration)
-		values ($1, $2, $3, $4, $5, $6, $7, $8, %s)`
+		start_dt, duration, players)
+		values ($1, $2, $3, $4, $5, $6, $7, $8, %s, $9)`
 
 	_, err = tx.Exec(fmt.Sprintf(sql, durationLiteral), seqVal, game.GameTypeCd, game.ServerID,
-		game.MapID, game.Winner, game.MatchID, game.Mod, game.StartDt)
+		game.MapID, game.Winner, game.MatchID, game.Mod, game.StartDt, pq.Array(game.Players))
 
 	if err != nil {
 		return gameID, err

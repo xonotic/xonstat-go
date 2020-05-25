@@ -667,6 +667,15 @@ func CreateGame(tx *sql.Tx, db models.Datastore, s *Submission) error {
 		}
 	}
 
+	// For easier queries later, we store the PIDs right on the game entry as an array.
+	var humansInGame []int
+	for _, player := range s.Players {
+		if player.PlayerID > 2 {
+			humansInGame = append(humansInGame, player.PlayerID)
+		}
+	}
+	s.Game.Players = humansInGame
+
 	gameID, err := db.CGame(tx, *s.Game)
 	if err != nil {
 		return err

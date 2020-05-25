@@ -15,7 +15,7 @@ type Game struct {
 	Winner     sql.NullInt64
 	MatchID    sql.NullString
 	Mod        sql.NullString
-	Players    []sql.NullInt64
+	Players    []int
 	StartDt    time.Time
 	CreateDt   time.Time
 }
