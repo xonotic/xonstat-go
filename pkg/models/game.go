@@ -20,12 +20,7 @@ func (ds *PGDatastore) CGame(tx *sql.Tx, game Game) (int64, error) {
 	}
 	gameID = seqVal
 
-	// The pq library doesn't support time.Duration -> interval PG type, so we have to convert it 
-	// to a string. We'll do this with seconds-granularity, allowing fractional pieces too.
-	durationLiteral := "NULL"
-	if game.Duration != nil {
-		durationLiteral = fmt.Sprintf("'%d milliseconds'", game.Duration.Milliseconds())
-	}
+	durationLiteral := durationToMSStr(game.Duration)
 
 	sql := `insert into games (game_id, game_type_cd, server_id, map_id, winner, match_id, mod,
 		start_dt, duration)
