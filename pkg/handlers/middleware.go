@@ -2,12 +2,19 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/spf13/viper"
 	"gitlab.com/antibody/xonstat/pkg/d0"
 )
+
+// ContextKey is a type for the keys in contexts.
+type ContextKey string
+
+// D0VerifyResultKey is the HTTP context key value used to store verification results in middleware functions.
+const D0VerifyResultKey ContextKey = "D0VerifyResult"
 
 // D0Verify is an HTTP middleware handler that checks if the content
 // of a request is d0_blind_id verified via its signature and POST body
@@ -41,6 +48,9 @@ func D0Verify(next http.Handler) http.Handler {
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		// Add the result to the context of the request so it can be used later.
+		ctx := context.WithValue(r.Context(), D0VerifyResultKey, result)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

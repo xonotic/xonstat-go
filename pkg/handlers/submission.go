@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 
+	"gitlab.com/antibody/xonstat/pkg/d0"
 	"gitlab.com/antibody/xonstat/pkg/submission"
 )
 
@@ -26,6 +28,15 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
 		return
+	}
+
+	// Pull the D0 verification information out, if it is present.
+	value := r.Context().Value(D0VerifyResultKey)
+    d0Result, ok := value.(d0.VerifyResult)
+	if ok {
+		if d0Result.IDFP != "" {
+			sub.Server.HashKey = sql.NullString{Valid: true, String: d0Result.IDFP}
+		}
 	}
 
 	err = submission.Submit(sub, ae.db)
