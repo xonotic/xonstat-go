@@ -8,19 +8,37 @@ import (
 
 // CPlayer inserts a Player record into the database.
 func (ds *PGDatastore) CPlayer(tx *sql.Tx, player Player) (int64, error) {
-	// TODO: add "Anonymous Player" processing here to append player ID to the nick.
-	sql := `insert into players (nick, stripped_nick, location, email_addr) 
-	values ($1, $2, $3, $4) returning player_id`
+	var pid int64
 
-	row := tx.QueryRow(sql, player.Nick, player.StrippedNick, player.Location, player.EmailAddr)
-
-	var playerID int64
-	err := row.Scan(&playerID)
+	seqVal, err := ds.nextSeqVal("players_player_id_seq")
 	if err != nil {
-		return playerID, err
+		return pid, err
+	}
+	pid = seqVal
+
+	if player.Nick.Valid && player.Nick.String == "Anonymous Player" {
+		player.Nick = sql.NullString {
+			Valid: true, 
+			String: fmt.Sprintf("Anonymous Player #%d", pid),
+		}
+
+		player.StrippedNick = sql.NullString {
+			Valid: true, 
+			String: fmt.Sprintf("Anonymous Player #%d", pid),
+		}
 	}
 
-	return playerID, nil
+	isql := `insert into players (player_id, nick, stripped_nick, location, email_addr) 
+	values ($1, $2, $3, $4, $5)`
+
+	_, err = tx.Exec(isql, pid, player.Nick, player.StrippedNick, player.Location, 
+		player.EmailAddr)
+
+    if err != nil {
+		return pid, err
+	}
+
+	return pid, nil
 }
 
 // RPlayersByHashkeyMulti finds multiple players by their hashkeys, returning back a map
