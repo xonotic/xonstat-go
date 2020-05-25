@@ -15,9 +15,9 @@ import (
 
 // Submission is a fully-formatted statistics POST request
 type Submission struct {
-	Game                 models.Game
-	Server               models.Server
-	Map                  models.Map
+	Game                 *models.Game
+	Server               *models.Server
+	Map                  *models.Map
 	Players              []*models.Player
 	PlayerGameStats      []*models.PlayerGameStat
 	PlayerWeaponStats    []*models.PlayerWeaponStat
@@ -476,6 +476,9 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 
 // NewSubmission converts a RawSubmission into a fully-formed one
 func NewSubmission(rs *RawSubmission) (*Submission, error) {
+	var game models.Game
+	var server models.Server
+	var _map models.Map
 	players := make([]*models.Player, 0, len(rs.PlayerEvents))
 	playerGameStats := make([]*models.PlayerGameStat, 0, len(rs.PlayerEvents))
 	var playerWeaponStats []*models.PlayerWeaponStat
@@ -487,6 +490,9 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	playerGameStatsByHashkey := make(map[string]*models.PlayerGameStat, 0)
 
 	s := &Submission{
+		Game:                       &game,
+		Server:                     &server,
+		Map:                        &_map,
 		Players:                    players,
 		PlayerGameStats:            playerGameStats,
 		PlayerWeaponStats:          playerWeaponStats,
@@ -648,25 +654,30 @@ func GetOrCreateMap(tx *sql.Tx, db models.Datastore, rawMap *models.Map) (*model
 
 // CreateGame creates a game record in the database, first checking if it exists using the MatchID.
 // We expect a game to be inserted upon each submission, so this method only returns an error.
-func CreateGame(tx *sql.Tx, db models.Datastore, rawGame *models.Game) error {
-	if rawGame.MatchID.Valid {
-		games, err := db.RGamesByMatchID(rawGame.MatchID.String)
+func CreateGame(tx *sql.Tx, db models.Datastore, s *Submission) error {
+	if s.Game.MatchID.Valid {
+		games, err := db.RGamesByMatchID(s.Game.MatchID.String)
 		if err != nil {
 			return err
 		}
 
 		if len(games) > 0 {
-			log.Printf("A game with match_id %s already exists in the database.", rawGame.MatchID.String)
+			log.Printf("A game with match_id %s already exists in the database.", s.Game.MatchID.String)
 			return fmt.Errorf("duplicate game found via match_id")
 		}
 	}
 
-	gameID, err := db.CGame(tx, *rawGame)
+	gameID, err := db.CGame(tx, *s.Game)
 	if err != nil {
 		return err
 	}
-	rawGame.GameID = int(gameID)
+	s.Game.GameID = int(gameID)
 	log.Printf("Created game %d.", gameID)
+
+	// Update the next record along the way.
+	for _, pgs := range s.PlayerGameStats {
+		pgs.GameID = int(gameID)
+	}
 
 	return nil
 }
@@ -741,7 +752,7 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 			return nil, err
 		}
 
-		err = db.CHashkey(tx, models.PlayerHashkey{Hashkey:hashkey, PlayerID: int(playerID)})
+		err = db.CHashkey(tx, models.PlayerHashkey{Hashkey: hashkey, PlayerID: int(playerID)})
 		if err != nil {
 			return nil, err
 		}
@@ -779,7 +790,7 @@ func CreatePlayerWeaponStats(tx *sql.Tx, db models.Datastore, s *Submission) err
 	for hashkey, pwsList := range s.PlayerWeaponStatsByHashkey {
 		for _, pws := range pwsList {
 			pws.PlayerID = s.PlayersByHashkey[hashkey].PlayerID
-			
+
 			// We don't store weapon information for bots.
 			if pws.PlayerID == 1 {
 				break
@@ -808,13 +819,13 @@ func Submit(s *Submission, db models.Datastore) error {
 		return err
 	}
 
-	server, err := GetOrCreateServer(tx, db, &s.Server)
+	server, err := GetOrCreateServer(tx, db, s.Server)
 	if err != nil {
 		return err
 	}
 	s.Game.ServerID = server.ServerID
 
-	m, err := GetOrCreateMap(tx, db, &s.Map)
+	m, err := GetOrCreateMap(tx, db, s.Map)
 	if err != nil {
 		return err
 	}
@@ -825,7 +836,7 @@ func Submit(s *Submission, db models.Datastore) error {
 		return err
 	}
 
-	err = CreateGame(tx, db, &s.Game)
+	err = CreateGame(tx, db, s)
 	if err != nil {
 		return err
 	}
