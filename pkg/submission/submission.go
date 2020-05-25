@@ -21,7 +21,7 @@ type Submission struct {
 	Players              []*models.Player
 	PlayerGameStats      []*models.PlayerGameStat
 	PlayerWeaponStats    []*models.PlayerWeaponStat
-	TeamGameStats        []models.TeamGameStat
+	TeamGameStats        []*models.TeamGameStat
 	PlayerGameAnticheats []models.PlayerGameAnticheat
 	CreateDt             time.Time
 
@@ -226,7 +226,7 @@ func (s *Submission) fillTeamStats(rs *RawSubmission) error {
 			}
 		}
 
-		s.TeamGameStats = append(s.TeamGameStats, *tgs)
+		s.TeamGameStats = append(s.TeamGameStats, tgs)
 	}
 
 	return nil
@@ -482,7 +482,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	players := make([]*models.Player, 0, len(rs.PlayerEvents))
 	playerGameStats := make([]*models.PlayerGameStat, 0, len(rs.PlayerEvents))
 	var playerWeaponStats []*models.PlayerWeaponStat
-	var teamGameStats []models.TeamGameStat
+	var teamGameStats []*models.TeamGameStat
 	var playerGameAnticheats []models.PlayerGameAnticheat
 	playersByID := make(map[int]*models.Player, 0)
 	playerWeaponStatsByHashkey := make(map[string][]*models.PlayerWeaponStat, 0)
@@ -811,6 +811,21 @@ func CreatePlayerWeaponStats(tx *sql.Tx, db models.Datastore, s *Submission) err
 	return nil
 }
 
+// CreateTeamGameStats inserts all of the team game stat records to the database.
+func CreateTeamGameStats(tx *sql.Tx, db models.Datastore, s *Submission) error {
+	for _, tgs := range s.TeamGameStats {
+		tgs.GameID = s.Game.GameID
+		tgsID, err := db.CTeamGameStat(tx, *tgs)
+		if err != nil {
+			return err
+		}
+
+		tgs.TeamGameStatID = int(tgsID)
+	}
+
+	return nil
+}
+
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
 // missing information (like primary key values) along the way.
 func Submit(s *Submission, db models.Datastore) error {
@@ -847,6 +862,11 @@ func Submit(s *Submission, db models.Datastore) error {
 	}
 
 	err = CreatePlayerWeaponStats(tx, db, s)
+	if err != nil {
+		return err
+	}
+
+	err = CreateTeamGameStats(tx, db, s)
 	if err != nil {
 		return err
 	}
