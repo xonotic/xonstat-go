@@ -11,6 +11,7 @@ import (
 
 	"gitlab.com/antibody/xonstat/pkg/d0"
 	"gitlab.com/antibody/xonstat/pkg/submission"
+	"github.com/spf13/viper"
 )
 
 // SubmissionHandler is the main stats submission handler. It takes stats submissions
@@ -26,6 +27,14 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 	rawSubmission, err := submission.NewRawSubmission(bodyReader)
 	if err != nil {
 		log.Printf("Error: %s", err)
+		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
+		return
+	}
+
+	minimumRequiredPlayers := viper.GetInt("MinimumRequiredPlayers")
+	if len(rawSubmission.Humans) < minimumRequiredPlayers {
+		log.Printf("Error: not enough players (want %d, found %d)", minimumRequiredPlayers, 
+			len(rawSubmission.Humans))
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
 		return
 	}

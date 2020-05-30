@@ -6,6 +6,9 @@ VerifyRequests = true
 D0BlindIDKeyGen = "/usr/local/bin/crypto-keygen-standalone"
 D0BlindIDPubKey = "~/key_0.d0pk"
 
+# How many (human) players are required to store matches
+MinimumRequiredPlayers = 2
+
 # Time limits controlling how much history is shown on various pages
 SummaryStatsDays = 30
 TopPlayersByTimeDays = 30
