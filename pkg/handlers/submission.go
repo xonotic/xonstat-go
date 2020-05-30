@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"bufio"
+	"bytes"
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -15,8 +17,13 @@ import (
 // from the servers as a signed POST request, parses them, and submits them to the
 // database.
 func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
-	body := bufio.NewReader(r.Body)
-	rawSubmission, err := submission.NewRawSubmission(body)
+	// Grab the body for later logging, if warranted.
+	body, _ := ioutil.ReadAll(r.Body)
+	r.Body.Close()
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
+	bodyReader := bufio.NewReader(r.Body)
+	rawSubmission, err := submission.NewRawSubmission(bodyReader)
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
@@ -38,6 +45,11 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 			sub.Server.HashKey = sql.NullString{Valid: true, String: d0Result.IDFP}
 		}
 	}
+
+	// If we've gotten here, it's likely that we have a valid submission, so we'll log it.
+	bodyLogMsg := fmt.Sprintf("\n----- BEGIN REQUEST BODY -----\n%s%s----- END REQUEST BODY -----\n\n",
+		fmt.Sprintf("IDFP %s\n", d0Result.IDFP), string(body))
+	log.Printf(bodyLogMsg)
 
 	err = submission.Submit(sub, ae.db)
 	if err != nil {

@@ -61,7 +61,7 @@ func (ds *PGDatastore) RPlayersByHashkeyMulti(hashkeys []string) (map[string]*Pl
 	}
 	defer rows.Close()
 
-	var players map[string]*Player
+	players := make(map[string]*Player)
 	for rows.Next() {
 		var p Player
 		var hashkey string
