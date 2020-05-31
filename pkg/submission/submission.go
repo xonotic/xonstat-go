@@ -845,38 +845,45 @@ func Submit(s *Submission, db models.Datastore) error {
 
 	server, err := GetOrCreateServer(tx, db, s.Server)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	s.Game.ServerID = server.ServerID
 
 	m, err := GetOrCreateMap(tx, db, s.Map)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	s.Game.MapID = m.MapID
 
 	_, err = GetOrCreatePlayers(tx, db, s)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
 	err = CreateGame(tx, db, s)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
 	err = CreatePlayerGameStats(tx, db, s)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
 	err = CreatePlayerWeaponStats(tx, db, s)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
 	err = CreateTeamGameStats(tx, db, s)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
