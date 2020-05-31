@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/spf13/viper"
-	"gitlab.com/antibody/xonstat/pkg/d0"
+	"gitlab.com/xonotic/xonstat/pkg/d0"
 )
 
 // ContextKey is a type for the keys in contexts.

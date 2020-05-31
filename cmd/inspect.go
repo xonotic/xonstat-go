@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"gitlab.com/antibody/xonstat/pkg/submission"
+	"gitlab.com/xonotic/xonstat/pkg/submission"
 	"github.com/spf13/cobra"
 )
 

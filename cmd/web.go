@@ -12,8 +12,8 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/antibody/xonstat/pkg/handlers"
-	"gitlab.com/antibody/xonstat/pkg/models"
+	"gitlab.com/xonotic/xonstat/pkg/handlers"
+	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
 // Global log for the application.

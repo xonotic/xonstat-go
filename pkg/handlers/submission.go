@@ -9,8 +9,8 @@ import (
 	"log"
 	"net/http"
 
-	"gitlab.com/antibody/xonstat/pkg/d0"
-	"gitlab.com/antibody/xonstat/pkg/submission"
+	"gitlab.com/xonotic/xonstat/pkg/d0"
+	"gitlab.com/xonotic/xonstat/pkg/submission"
 	"github.com/spf13/viper"
 )
 

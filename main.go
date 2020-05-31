@@ -1,6 +1,6 @@
 package main
 
-import "gitlab.com/antibody/xonstat/cmd"
+import "gitlab.com/xonotic/xonstat/cmd"
 
 func main() {
   cmd.Execute()

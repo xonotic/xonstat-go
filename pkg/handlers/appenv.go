@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"gitlab.com/antibody/xonstat/pkg/models"
+	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
 // AppEnv houses the runtime environment for the application. Database connections, cache, etc.

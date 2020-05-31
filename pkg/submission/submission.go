@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/antzucaro/qstr"
-	"gitlab.com/antibody/xonstat/pkg/models"
+	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
 // Submission is a fully-formatted statistics POST request
