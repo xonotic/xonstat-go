@@ -8,7 +8,7 @@ import (
 )
 
 // IdleConnections is the maximum number of idle connections we should maintain for the database.
-const IdleConnections = 5
+const IdleConnections = 10 
 
 // PGDatastore is an implementation of the Datastore interface for a Postgresql database.
 type PGDatastore struct {
