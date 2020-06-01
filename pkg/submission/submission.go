@@ -731,25 +731,27 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 
 	// Players that already exist are more complicated. We first fetch who we can,
 	// then update them if need be.
-	playersByHashkeyDB, err := db.RPlayersByHashkeyMulti(hashkeys)
-	if err != nil {
-		return nil, err
-	}
-
-	for hashkey, dbPlayer := range playersByHashkeyDB {
-		rawPlayer := s.PlayersByHashkey[hashkey]
-		if ShouldUpdatePlayer(rawPlayer, dbPlayer) {
-			// Apply the update to the DB value...
-			dbPlayer.Nick = rawPlayer.Nick
-			dbPlayer.StrippedNick = rawPlayer.StrippedNick
-
-			// ...and save it to the database.
-			db.UPlayer(tx, *dbPlayer)
+	if len(hashkeys) > 0 {
+		playersByHashkeyDB, err := db.RPlayersByHashkeyMulti(hashkeys)
+		if err != nil {
+			return nil, err
 		}
 
-		playersByHashkey[hashkey] = dbPlayer
+		for hashkey, dbPlayer := range playersByHashkeyDB {
+			rawPlayer := s.PlayersByHashkey[hashkey]
+			if ShouldUpdatePlayer(rawPlayer, dbPlayer) {
+				// Apply the update to the DB value...
+				dbPlayer.Nick = rawPlayer.Nick
+				dbPlayer.StrippedNick = rawPlayer.StrippedNick
 
-		delete(hashkeySet, hashkey) // done processing this one
+				// ...and save it to the database.
+				db.UPlayer(tx, *dbPlayer)
+			}
+
+			playersByHashkey[hashkey] = dbPlayer
+
+			delete(hashkeySet, hashkey) // done processing this one
+		}
 	}
 
 	// The remaining players left in hashkeySet need to be created.
