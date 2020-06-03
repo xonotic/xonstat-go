@@ -1,3 +1,6 @@
+build:
+	go build
+
 .PHONY: test
 test:
 	go test -cover -coverprofile=coverage.out ./...
@@ -7,3 +10,4 @@ coverage: test
 
 clean:
 	rm coverage.out
+	rm xonstat
