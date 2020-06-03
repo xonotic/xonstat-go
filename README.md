@@ -85,7 +85,7 @@ Roadmap items will have the `task` tag applied.
 ## Chat
 If you'd like to discuss this project or have a question about it, feel free to 
 drop by the `#xonotic` channel on Freenode's IRC network. Please take care to 
-follow IRC etiquette.
+follow [IRC etiquette][etiquette].
 
 ## License
 XonStat is licensed under the GNU GPLv3 license. See the `LICENSE.TXT` file
