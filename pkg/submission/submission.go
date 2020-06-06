@@ -681,7 +681,7 @@ func CreateGame(tx *sql.Tx, db models.Datastore, s *Submission) error {
 		return err
 	}
 	s.Game.GameID = int(gameID)
-	log.Printf("Created game %d.", gameID)
+	log.Printf("Created game %d from match %s.", gameID, s.Game.MatchID.String)
 
 	// Update the next record along the way.
 	for _, pgs := range s.PlayerGameStats {
@@ -746,6 +746,7 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 
 				// ...and save it to the database.
 				db.UPlayer(tx, *dbPlayer)
+				log.Printf("Updated player %d '%s'", dbPlayer.PlayerID, dbPlayer.StrippedNick.String)
 			}
 
 			playersByHashkey[hashkey] = dbPlayer
