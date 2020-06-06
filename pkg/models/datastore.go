@@ -39,4 +39,7 @@ type Datastore interface {
 
 	// TeamGameStat-oriented methods
 	CTeamGameStat(tx *sql.Tx, tgs TeamGameStat) (int64, error)
+
+	// PlayerGameFragMatrix-oriented methods
+	CPlayerGameFragMatrix(tx *sql.Tx, fm PlayerGameFragMatrix) error
 }

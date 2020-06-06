@@ -57,12 +57,12 @@ type PlayerGameStat struct {
 	StrippedNick     sql.NullString
 	Team             sql.NullInt32
 	Rank             sql.NullInt32
-	AliveTime        *time.Duration  // PostgreSQL interval
+	AliveTime        *time.Duration // PostgreSQL interval
 	Kills            sql.NullInt32
 	Deaths           sql.NullInt32
 	Suicides         sql.NullInt32
 	Score            sql.NullInt32
-	Time             *time.Duration  // PostgreSQL interval
+	Time             *time.Duration // PostgreSQL interval
 	Captures         sql.NullInt32
 	Pickups          sql.NullInt32
 	Drops            sql.NullInt32
@@ -72,7 +72,7 @@ type PlayerGameStat struct {
 	Pushes           sql.NullInt32
 	CarrierFrags     sql.NullInt32
 	EloDelta         sql.NullFloat64
-	Fastest          *time.Duration  // PostgreSQL interval
+	Fastest          *time.Duration // PostgreSQL interval
 	AvgLatency       sql.NullFloat64
 	TeamRank         sql.NullInt32
 	ScoreboardPos    sql.NullInt32
@@ -228,4 +228,13 @@ type PlayerGameAnticheat struct {
 	Key                   string
 	Value                 float64
 	CreateDt              time.Time
+}
+
+// PlayerGameFragMatrix is a matrix of "who fragged who" in a given match.
+type PlayerGameFragMatrix struct {
+	GameID           int
+	PlayerGameStatID int
+	PlayerID         int
+	PlayerIndex      int
+	Matrix           map[int]int
 }

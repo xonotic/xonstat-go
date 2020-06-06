@@ -26,7 +26,8 @@ type Submission struct {
 	CreateDt             time.Time
 
 	// References by player index (initially the player events 'i' or index value) for easier processing
-	PlayersByIndex map[int]*models.Player
+	PlayersByIndex    map[int]*models.Player
+	HashkeysByIndex   map[int]string
 	FragMatrixByIndex map[int]map[int]int
 
 	// References by hashkey for easier processing
@@ -311,7 +312,7 @@ func (s *Submission) fillPlayerWeaponStat(weapon string, events map[string]strin
 }
 
 // parseFragMatrix parses the opponent's player index and the number of frags this player
-// has made against them. For example: "kills-3 5" means that the current player (index unknown 
+// has made against them. For example: "kills-3 5" means that the current player (index unknown
 // to this function) has fragged the player identified by index value 3 a count of 5 times.
 func parseFragMatrix(key, value string) (int, int) {
 	opponentIndexStr := strings.Replace(key, "kills-", "", 1)
@@ -454,6 +455,7 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 
 	s.PlayerGameStats = append(s.PlayerGameStats, pgs)
 	s.PlayerGameStatsByHashkey[hashkey] = pgs
+	s.HashkeysByIndex[playerIndex] = hashkey
 
 	return nil
 }
@@ -513,6 +515,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	var teamGameStats []*models.TeamGameStat
 	var playerGameAnticheats []models.PlayerGameAnticheat
 	playersByIndex := make(map[int]*models.Player, 0)
+	hashkeysByIndex := make(map[int]string)
 	fragMatrixByIndex := make(map[int]map[int]int, 0)
 	playerWeaponStatsByHashkey := make(map[string][]*models.PlayerWeaponStat, 0)
 	playersByHashkey := make(map[string]*models.Player, 0)
@@ -529,6 +532,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 		PlayerGameAnticheats:       playerGameAnticheats,
 		CreateDt:                   time.Now().UTC(),
 		PlayersByIndex:             playersByIndex,
+		HashkeysByIndex:            hashkeysByIndex,
 		FragMatrixByIndex:          fragMatrixByIndex,
 		PlayersByHashkey:           playersByHashkey,
 		PlayerGameStatsByHashkey:   playerGameStatsByHashkey,
@@ -868,6 +872,36 @@ func CreateTeamGameStats(tx *sql.Tx, db models.Datastore, s *Submission) error {
 	return nil
 }
 
+// CreateFragMatrix inserts all of the frag matrix records to the database.
+func CreateFragMatrix(tx *sql.Tx, db models.Datastore, s *Submission) error {
+	switch s.Game.GameTypeCd {
+	case "as", "ca", "ctf", "dm", "dom", "ft", "freezetag", "ka", "kh", "rune", "tdm":
+	default:
+		return nil
+	}
+
+	for playerIndex, matrix := range s.FragMatrixByIndex {
+		hashkey := s.HashkeysByIndex[playerIndex]
+		pgsID := s.PlayerGameStatsByHashkey[hashkey].PlayerGameStatID
+		pid := s.PlayersByHashkey[hashkey].PlayerID
+
+		fm := models.PlayerGameFragMatrix{
+			GameID:           s.Game.GameID,
+			PlayerGameStatID: pgsID,
+			PlayerID:         pid,
+			PlayerIndex:      playerIndex,
+			Matrix:           matrix,
+		}
+
+		err := db.CPlayerGameFragMatrix(tx, fm)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
 // missing information (like primary key values) along the way.
 func Submit(s *Submission, db models.Datastore) error {
@@ -915,6 +949,12 @@ func Submit(s *Submission, db models.Datastore) error {
 	}
 
 	err = CreateTeamGameStats(tx, db, s)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = CreateFragMatrix(tx, db, s)
 	if err != nil {
 		tx.Rollback()
 		return err
