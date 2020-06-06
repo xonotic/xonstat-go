@@ -27,6 +27,7 @@ type Submission struct {
 
 	// References by player index (initially the player events 'i' or index value) for easier processing
 	PlayersByIndex map[int]*models.Player
+	FragMatrixByIndex map[int]map[int]int
 
 	// References by hashkey for easier processing
 	PlayersByHashkey           map[string]*models.Player
@@ -309,6 +310,24 @@ func (s *Submission) fillPlayerWeaponStat(weapon string, events map[string]strin
 	return nil
 }
 
+// parseFragMatrix parses the opponent's player index and the number of frags this player
+// has made against them. For example: "kills-3 5" means that the current player (index unknown 
+// to this function) has fragged the player identified by index value 3 a count of 5 times.
+func parseFragMatrix(key, value string) (int, int) {
+	opponentIndexStr := strings.Replace(key, "kills-", "", 1)
+	opponentIndex, err := strconv.Atoi(opponentIndexStr)
+	if err != nil {
+		return -1, -1
+	}
+
+	fragsAgainstOpponent, err := strconv.Atoi(value)
+	if err != nil {
+		return -1, -1
+	}
+
+	return opponentIndex, fragsAgainstOpponent
+}
+
 // fillPlayerGameStat fills in a single PlayerGameStat struct from the raw submission events
 func (s *Submission) fillPlayerGameStat(events map[string]string, player *models.Player) error {
 	// an initialized pgstat based on the game type being played
@@ -350,6 +369,8 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	}
 
 	wins := false
+
+	playerIndex, _ := strconv.Atoi(events["i"])
 
 	for key, value := range events {
 		switch key {
@@ -419,6 +440,11 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 
 			s.PlayerGameAnticheats = append(s.PlayerGameAnticheats, ac)
 		}
+
+		if strings.HasPrefix(key, "kills-") {
+			opponentIndex, fragsAgainstOpponent := parseFragMatrix(key, value)
+			s.FragMatrixByIndex[playerIndex][opponentIndex] = fragsAgainstOpponent
+		}
 	}
 
 	// there is no "winning team" field, so we derive it
@@ -464,8 +490,10 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 			ActiveInd:    true,
 			CreateDt:     s.CreateDt,
 		}
+
 		s.Players = append(s.Players, &player)
 		s.PlayersByIndex[playerIndex] = &player
+		s.FragMatrixByIndex[playerIndex] = make(map[int]int)
 		s.PlayersByHashkey[hashkey] = &player
 
 		s.fillPlayerGameStat(events, &player)
@@ -484,7 +512,8 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	var playerWeaponStats []*models.PlayerWeaponStat
 	var teamGameStats []*models.TeamGameStat
 	var playerGameAnticheats []models.PlayerGameAnticheat
-	playersByID := make(map[int]*models.Player, 0)
+	playersByIndex := make(map[int]*models.Player, 0)
+	fragMatrixByIndex := make(map[int]map[int]int, 0)
 	playerWeaponStatsByHashkey := make(map[string][]*models.PlayerWeaponStat, 0)
 	playersByHashkey := make(map[string]*models.Player, 0)
 	playerGameStatsByHashkey := make(map[string]*models.PlayerGameStat, 0)
@@ -499,7 +528,8 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 		TeamGameStats:              teamGameStats,
 		PlayerGameAnticheats:       playerGameAnticheats,
 		CreateDt:                   time.Now().UTC(),
-		PlayersByIndex:             playersByID,
+		PlayersByIndex:             playersByIndex,
+		FragMatrixByIndex:          fragMatrixByIndex,
 		PlayersByHashkey:           playersByHashkey,
 		PlayerGameStatsByHashkey:   playerGameStatsByHashkey,
 		PlayerWeaponStatsByHashkey: playerWeaponStatsByHashkey,
