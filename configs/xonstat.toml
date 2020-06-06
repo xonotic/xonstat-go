@@ -9,6 +9,12 @@ D0BlindIDPubKey = "~/key_0.d0pk"
 # How many (human) players are required to store matches
 MinimumRequiredPlayers = 2
 
+# Request logging
+RequestsLogFile = "xonstat-requests.log"
+RequestsLogMaxSize = 100
+RequestsMaxBackups = 5
+RequestsMaxAge = 14
+
 # Time limits controlling how much history is shown on various pages
 SummaryStatsDays = 30
 TopPlayersByTimeDays = 30

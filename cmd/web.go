@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/handlers"
 	"gitlab.com/xonotic/xonstat/pkg/models"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 // Global log for the application.
@@ -44,7 +45,15 @@ func web(port string) {
 		log.Fatal("Unable to initialize database connection.")
 	}
 
-	env := handlers.NewAppEnv(db)
+	requestLogger := lumberjack.Logger{
+		Filename:   viper.GetString("RequestsLogFile"),
+		MaxSize:    viper.GetInt("RequestsMaxSize"),
+		MaxBackups: viper.GetInt("RequestsMaxBackups"),
+		MaxAge:     viper.GetInt("RequestsMaxAge"),
+		Compress:   true,
+	}
+
+	env := handlers.NewAppEnv(db, &requestLogger)
 
 	r := chi.NewRouter()
 

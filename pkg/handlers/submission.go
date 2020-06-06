@@ -56,9 +56,9 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If we've gotten here, it's likely that we have a valid submission, so we'll log it.
-	bodyLogMsg := fmt.Sprintf("\n----- BEGIN REQUEST BODY -----\n%s%s----- END REQUEST BODY -----\n\n",
+	bodyLogMsg := fmt.Sprintf("----- BEGIN REQUEST BODY -----\n%s%s----- END REQUEST BODY -----\n\n",
 		fmt.Sprintf("IDFP %s\n", d0Result.IDFP), string(body))
-	log.Printf(bodyLogMsg)
+	ae.requestLogger.Write([]byte(bodyLogMsg))
 
 	err = submission.Submit(sub, ae.db)
 	if err != nil {
