@@ -85,7 +85,7 @@ var parseLogCmd = &cobra.Command{
 	Use:   "parseLog",
 	Short: "Parse XonStat submission POST request logs.",
 	Long: `Parse XonStat submission POST request log files into individual match files
-	for later inspection or even resubmission.`,
+for later inspection or resubmission.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		file, _ := cmd.Flags().GetString("file")
 		anonymize, _ := cmd.Flags().GetBool("anonymize")
@@ -105,5 +105,5 @@ func init() {
 	rootCmd.AddCommand(parseLogCmd)
 	parseLogCmd.Flags().StringP("file", "f", "", "log file")
 	parseLogCmd.Flags().BoolP("anonymize", "a", false, "anonymize player hashkeys")
-	parseLogCmd.Flags().StringP("match", "m", "", "extract only this match_id")
+	parseLogCmd.Flags().StringP("match", "m", "", "extract only this match ID")
 }
