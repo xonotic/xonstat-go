@@ -78,6 +78,33 @@ Flags:
 Global Flags:
   -c, --config string   config file (default is $HOME/.xonstat.toml)
 ```
+
+### Extract Submissions from Logs
+
+Sometimes stats submissions are interesting for one reason or another. In such scenarios it is
+useful to be able to extract its POST body from the log for examination or even resubmission.
+The `parseLog` subcommand is used for this purpose. Given a log file of request bodies, it can
+extract every available submission out of it, or it can extract a single submission body by its 
+match ID value ('I' line). In addition it can also anonymize the raw hashkeys provided to 
+preserve player privacy.
+
+```
+Parse XonStat submission POST request log files into individual match files
+for later inspection or even resubmission.
+
+Usage:
+  xonstat parseLog [flags]
+
+Flags:
+  -a, --anonymize      anonymize player hashkeys
+  -f, --file string    log file
+  -h, --help           help for parseLog
+  -m, --match string   extract only this match_id
+
+Global Flags:
+  -c, --config string   config file (default is $HOME/.xonstat.toml)
+```
+
 ## Roadmap and Issues
 Both roadmap items and issues are handled via the [GitLab issue tracker][issues].
 Roadmap items will have the `task` tag applied.
