@@ -105,6 +105,26 @@ Global Flags:
   -c, --config string   config file (default is $HOME/.xonstat.toml)
 ```
 
+### Submit Stats from Logs
+
+The `submit` subcommand takes an output file written from the `parseLog` 
+subcommand above and submits it to the stats server via the URL you provide. 
+
+```
+Submit stats requests from files.
+
+Usage:
+  xonstat submit [flags]
+
+Flags:
+  -f, --file string   submission request file
+  -h, --help          help for submit
+  -u, --url string    XonStat server submission URL (default "http://localhost:8080/stats/submit")
+
+Global Flags:
+  -c, --config string   config file (default is $HOME/.xonstat.toml)
+```
+
 ## Roadmap and Issues
 Both roadmap items and issues are handled via the [GitLab issue tracker][issues].
 Roadmap items will have the `task` tag applied.
