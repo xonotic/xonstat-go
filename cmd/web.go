@@ -65,13 +65,17 @@ func web(port string) {
 	middleware.DefaultLogger = middleware.RequestLogger(&formatter)
 	r.Use(middleware.Logger)
 
-	// Verify certain routes with do_blind_id.
+	// A subrouter that verifies all requests with d0_blind_id (if enabled).
+	d0r := chi.NewRouter()
+
 	if viper.GetBool("VerifyRequests") {
-		r.Use(handlers.D0Verify)
+		d0r.Use(handlers.D0Verify)
 	}
 
-	// Register all routes and handlers.
-	r.Post("/stats/submit", env.SubmissionHandler)
+	d0r.Post("/stats/submit", env.SubmissionHandler)
+	r.Mount("/", d0r)
+
+	// Register all "regular" routes and handlers.
 	r.Get("/summary", env.SummaryStatsHandler)
 
 	// Start the web application server on the specified port.
