@@ -72,6 +72,7 @@ func web(port string) {
 
 	// Register all routes and handlers.
 	r.Post("/stats/submit", env.SubmissionHandler)
+	r.Get("/summary", env.SummaryStatsHandler)
 
 	// Start the web application server on the specified port.
 	log.Printf("Starting XonStat web application server on port %s...", port)

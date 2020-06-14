@@ -238,3 +238,14 @@ type PlayerGameFragMatrix struct {
 	PlayerIndex      int
 	Matrix           map[int]int
 }
+
+// SummaryStat is a piece of the summary stat line at the top of the leaderboard page. It 
+// has a scope of either "all" or "day". Several of these are ultimately used to construct
+// a string like:
+// "Tracking X players and Y games (N dm; N ctf; N duel; N cts; N tdm; N other) since $DATE."
+type SummaryStat struct {
+	PlayerCount int
+	GameTypeCd string
+	GameCount int
+	RefreshDt time.Time
+}
