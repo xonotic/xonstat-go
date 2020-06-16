@@ -9,8 +9,8 @@ a PostgreSQL database.
 This repository is a port of the [original XonStat][xonstat] application to the Go
 programming language. 
 
-## Install
-`go get gitlab.com/xonotic/xonstat-go`
+## Clone
+`git clone git@gitlab.com:xonotic/xonstat-go.git`
 
 ## Build
 `make`
