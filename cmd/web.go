@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/docgen"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/handlers"
@@ -38,7 +39,7 @@ func initLog() error {
 	return nil
 }
 
-func web(port string) {
+func web(port string, printRoutes bool) {
 	dsn := viper.GetString("ConnStr")
 	db, err := models.NewPGDatastore(dsn)
 	if err != nil {
@@ -84,6 +85,15 @@ func web(port string) {
 	// Register all "regular" routes and handlers.
 	r.Get("/summary", env.SummaryStatsHandler)
 
+	if printRoutes {
+		opts := docgen.MarkdownOpts {
+			ProjectPath: "gitlab.com/xonotic/xonstat",
+			Intro: `XonStat API`,
+		}
+
+		fmt.Print(docgen.MarkdownRoutesDoc(r, opts))
+	}
+
 	// Start the web application server on the specified port.
 	log.Printf("Starting XonStat web application server on port %s...", port)
 	addr := fmt.Sprintf(":%s", port)
@@ -96,8 +106,9 @@ var webCmd = &cobra.Command{
 	Short: "Run the web application server",
 	Long:  `Run the XonStat web application server.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		port := cmd.Flag("port").Value.String()
-		web(port)
+		port, _ := cmd.Flags().GetString("port")
+		printRoutes, _ := cmd.Flags().GetBool("routes")
+		web(port, printRoutes)
 	},
 }
 
@@ -110,4 +121,5 @@ func init() {
 
 	rootCmd.AddCommand(webCmd)
 	webCmd.Flags().StringP("port", "p", "8080", "port number")
+	webCmd.Flags().BoolP("routes", "r", false, "print routing information")
 }
