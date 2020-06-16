@@ -68,16 +68,19 @@ func web(port string) {
 	middleware.DefaultLogger = middleware.RequestLogger(&formatter)
 	r.Use(middleware.Logger)
 
-	// A subrouter that verifies all requests with d0_blind_id (if enabled).
-	d0r := chi.NewRouter()
+	// Support for low-impact uptime testing from external services
+	heartbeat := middleware.Heartbeat("/ping")
+	r.Use(heartbeat)
 
-	if viper.GetBool("VerifyRequests") {
-		d0r.Use(handlers.D0Verify)
-	}
+	// Routing group that verifies all requests with d0_blind_id (if enabled).
+	r.Group(func(r chi.Router) {
+		if viper.GetBool("VerifyRequests") {
+			r.Use(handlers.D0Verify)
+		}
 
-	d0r.Post("/stats/submit", env.SubmissionHandler)
-	r.Mount("/", d0r)
-
+		r.Post("/stats/submit", env.SubmissionHandler)
+	})
+ 
 	// Register all "regular" routes and handlers.
 	r.Get("/summary", env.SummaryStatsHandler)
 
