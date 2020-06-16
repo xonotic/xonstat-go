@@ -60,6 +60,9 @@ func web(port string) {
 	// Save the real IP address from X-Forward-For and the like.
 	r.Use(middleware.RealIP)
 
+	// Recover from panics
+	r.Use(middleware.Recoverer)
+
 	// Log request metadata: the URI, the response, and how long it took.
 	formatter := middleware.DefaultLogFormatter{Logger: logger, NoColor: true}
 	middleware.DefaultLogger = middleware.RequestLogger(&formatter)
