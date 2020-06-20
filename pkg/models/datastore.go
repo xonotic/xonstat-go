@@ -48,4 +48,7 @@ type Datastore interface {
 
 	// Top Players by time played
 	RActivePlayers(limit, start int) ([]*ActivePlayer, error)
+
+	// Top Servers by aggregate play time
+	RActiveServers(limit, start int) ([]*ActiveServer, error)
 }

@@ -259,3 +259,13 @@ type ActivePlayer struct {
 	AliveTime time.Duration
 	CreateDt time.Time
 }
+
+// ActiveServer is a leaderboard item for a server's aggregate playing time over a specified 
+// time window.
+type ActiveServer struct {
+	SortOrder int
+	ServerID int
+	ServerName string
+	PlayTime time.Duration
+	CreateDt time.Time
+}
