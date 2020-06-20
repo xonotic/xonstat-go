@@ -42,4 +42,3 @@ XonStat API
 </details>
 
 Total # of routes: 3
-2020/06/20 15:03:10 Starting XonStat web application server on port 8080...
