@@ -47,3 +47,23 @@ func (ae *AppEnv) TopActiveHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(bytes)
 }
+
+// TopServersHandler retrieves information about the top active servers by player aggregate playtime
+func (ae *AppEnv) TopServersHandler(w http.ResponseWriter, r *http.Request) {
+	startStr := r.URL.Query().Get("start")
+	start, err := strconv.Atoi(startStr)
+	if err != nil {
+		start = 1
+	}
+
+	bytes, err := leaderboard.ActiveServersJSON(10, start, ae.db)
+	if err != nil {
+		log.Printf("Error: %s", err)
+		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(bytes)
+}

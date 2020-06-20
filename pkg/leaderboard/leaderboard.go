@@ -78,10 +78,39 @@ func ActivePlayersJSON(limit, start int, db models.Datastore) ([]byte, error) {
 
 		nick := qstr.QStr(ap.Nick)
 		resp.Nick = nick.Stripped()
-		resp.AliveTime = ap.AliveTime.String()
+		resp.AliveTime = models.DurationString(ap.AliveTime, true)
 
 		activePlayers = append(activePlayers, resp)
 	}
 
 	return json.Marshal(activePlayers)
+}
+
+// ActiveServersData retrieves the active servers
+func ActiveServersData(limit, start int, db models.Datastore) ([]*models.ActiveServer, error) {
+	return db.RActiveServers(limit, start)
+}
+
+// ActiveServersJSON returns active server stats in JSON form.
+func ActiveServersJSON(limit, start int, db models.Datastore) ([]byte, error) {
+	rawData, err := ActiveServersData(limit, start, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// the JSON response (a single entry in the list)
+	type Response struct {
+		Rank int `json:"rank"`
+		ServerID int `json:"server_id"`
+		ServerName string `json:"server_name"`
+		PlayTime string `json:"playtime"`
+	}
+
+	var activeServers []Response
+	for _, as := range rawData {
+		resp := Response{as.SortOrder, as.ServerID, as.ServerName, models.DurationString(as.PlayTime, true)}
+		activeServers = append(activeServers, resp)
+	}
+
+	return json.Marshal(activeServers)
 }

@@ -85,6 +85,7 @@ func web(port string, printRoutes bool) {
 	// Register all "regular" routes and handlers.
 	r.Get("/summary", env.SummaryStatsHandler)
 	r.Get("/topactive", env.TopActiveHandler)
+	r.Get("/topservers", env.TopServersHandler)
 
 	if printRoutes {
 		opts := docgen.MarkdownOpts {
