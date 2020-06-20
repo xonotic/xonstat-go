@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/antzucaro/qstr"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
@@ -46,4 +47,41 @@ func SummaryStatsJSON(scope string, db models.Datastore) ([]byte, error) {
 	}
 
 	return json.Marshal(Response{Players: players, Games: games, Scope: scope, LastRefreshed: lastRefreshed})
+}
+
+// ActivePlayersData retrieves the active players
+func ActivePlayersData(limit, start int, db models.Datastore) ([]*models.ActivePlayer, error) {
+	return db.RActivePlayers(limit, start)
+}
+
+// ActivePlayersJSON returns active player stats in JSON form.
+func ActivePlayersJSON(limit, start int, db models.Datastore) ([]byte, error) {
+	rawData, err := ActivePlayersData(limit, start, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// the JSON response (a single entry in the list)
+	type Response struct {
+		Rank int `json:"rank"`
+		PlayerID int `json:"player_id"`
+		Nick string `json:"nick"`
+		AliveTime string `json:"alivetime"`
+	}
+
+	var activePlayers []Response
+	for _, ap := range rawData {
+		var resp Response
+
+		resp.Rank = ap.SortOrder
+		resp.PlayerID = ap.PlayerID
+
+		nick := qstr.QStr(ap.Nick)
+		resp.Nick = nick.Stripped()
+		resp.AliveTime = ap.AliveTime.String()
+
+		activePlayers = append(activePlayers, resp)
+	}
+
+	return json.Marshal(activePlayers)
 }

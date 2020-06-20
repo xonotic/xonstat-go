@@ -249,3 +249,13 @@ type SummaryStat struct {
 	GameCount int
 	RefreshDt time.Time
 }
+
+// ActivePlayer is a leaderboard item for a player's playing time over a specified 
+// time window.
+type ActivePlayer struct {
+	SortOrder int
+	PlayerID int
+	Nick string
+	AliveTime time.Duration
+	CreateDt time.Time
+}

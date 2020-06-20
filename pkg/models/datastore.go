@@ -45,4 +45,7 @@ type Datastore interface {
 
 	// Summary stats by scope
 	RSummaryStats(scope string) ([]*SummaryStat, error)
+
+	// Top Players by time played
+	RActivePlayers(limit, start int) ([]*ActivePlayer, error)
 }
