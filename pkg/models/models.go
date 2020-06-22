@@ -269,3 +269,13 @@ type ActiveServer struct {
 	PlayTime time.Duration
 	CreateDt time.Time
 }
+
+// ActiveMap is a leaderboard item for the number of times a map was played over a specified
+// time window.
+type ActiveMap struct {
+	SortOrder int
+	MapID int
+	MapName string
+	Games int
+	CreateDt time.Time
+}

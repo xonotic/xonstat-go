@@ -86,6 +86,7 @@ func web(port string, printRoutes bool) {
 	r.Get("/summary", env.SummaryStatsHandler)
 	r.Get("/topactive", env.TopActiveHandler)
 	r.Get("/topservers", env.TopServersHandler)
+	r.Get("/topmaps", env.TopMapsHandler)
 
 	if printRoutes {
 		opts := docgen.MarkdownOpts {

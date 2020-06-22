@@ -114,3 +114,31 @@ func ActiveServersJSON(limit, start int, db models.Datastore) ([]byte, error) {
 
 	return json.Marshal(activeServers)
 }
+
+// ActiveMapsData retrieves the active maps
+func ActiveMapsData(limit, start int, db models.Datastore) ([]*models.ActiveMap, error) {
+	return db.RActiveMaps(limit, start)
+}
+
+// ActiveMapsJSON returns active map stats in JSON form.
+func ActiveMapsJSON(limit, start int, db models.Datastore) ([]byte, error) {
+	rawData, err := ActiveMapsData(limit, start, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// the JSON response (a single entry in the list)
+	type Response struct {
+		Rank int `json:"rank"`
+		MapID int `json:"map_id"`
+		MapName string `json:"map_name"`
+		Games int `json:"games"`
+	}
+
+	var activeMaps []Response
+	for _, am := range rawData {
+		activeMaps = append(activeMaps, Response{am.SortOrder, am.MapID, am.MapName, am.Games})
+	}
+
+	return json.Marshal(activeMaps)
+}
