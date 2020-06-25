@@ -1,6 +1,7 @@
 package models
 
 import (
+	"time"
 	"database/sql"
 )
 
@@ -54,4 +55,7 @@ type Datastore interface {
 
 	// Top Maps by times played
 	RActiveMaps(limit, start int) ([]*ActiveMap, error)
+
+	// RecentGames by various means
+	RRecentGames(serverID int, mapID int, playerID int, gameTypeCd string, cutoff time.Time, forcePlayerID bool, startGameID int, endGameID int, limit int) ([]*RecentGame, error)
 }

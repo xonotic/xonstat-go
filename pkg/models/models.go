@@ -279,3 +279,21 @@ type ActiveMap struct {
 	Games int
 	CreateDt time.Time
 }
+
+// RecentGame is an aggregated response for summary information from a match
+type RecentGame struct {
+	GameID int
+	GameTypeCd string
+	Winner string
+	StartDt time.Time
+	GameTypeDescr string
+	ServerID int
+	ServerName string
+	MapID int
+	MapName string
+	PlayerID int
+	Nick string
+	Rank int
+	Team int
+	EloDelta float64
+}
