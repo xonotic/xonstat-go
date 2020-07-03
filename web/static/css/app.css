@@ -1,0 +1,325 @@
+/* Fonts */
+@font-face {
+  font-family: 'Xolonium';
+  src: url('fonts/xolonium-regular.eot');
+  src: url('fonts/xolonium-regular.eot?#iefix') format('embedded-opentype'),
+       url('fonts/xolonium-regular.woff2') format('woff2'),
+       url('fonts/xolonium-regular.woff') format('woff'),
+       url('fonts/xolonium-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  background-color: #0F0F0F;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)) repeat scroll 0% 0%, url("img/bg.jpg") no-repeat fixed center center / cover black;
+  color: #9B9B9B;
+  font-family: Xolonium, sans-serif;
+}
+
+h1, h2, h3, h4, h5 {
+  color: #C3C3C3;
+  font-family: Xolonium, sans-serif;
+}
+
+p {
+  color: #C3C3C3;
+  font-size: 1.2rem;
+}
+
+hr {
+  border-color: #1b1b1b;
+}
+
+ul, ol, dl {
+  font-size: 1.1rem;
+}
+
+fieldset {
+  border: none;
+}
+
+table {
+  background: none repeat scroll 0px 0px rgba(0, 0, 0, 0.70);
+  border: 1px solid #436688;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+table tr td {
+  font-size: 10px;
+}
+
+table thead, table th {
+  background-color: #001021;
+}
+
+table td, table th {
+  border: 1px solid #436688;
+}
+
+table tr.even, table tr.alt, table tr:nth-of-type(2n) {
+  background: none;
+}
+
+table thead tr th, table thead tr td, table tr th, table tr td {
+  color: #D0D0D0;
+}
+
+.table-condensed {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.table-hover tr:hover {
+    background-color: #222;
+}
+
+.table-condensed th, .table-condensed td {
+  padding: 4px 5px;
+}
+
+.no-stretch {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-bar {
+  height: 50px;
+}
+
+.top-bar, .top-bar-section {
+  display: inline-block;
+}
+
+.top-bar .name h1 a {
+  color: rgb(200, 200, 200);
+  font-size: 1.1rem;
+  text-shadow: 0px 1px 1px rgba(200, 200, 200, 0.4);
+}
+
+.top-bar-section ul li {
+  background: none;
+}
+
+.top-bar-section ul li > a {
+  color: rgb(200, 200, 200);
+  font-family: Xolonium, sans-serif;
+  font-size: 1rem;
+  text-shadow: 0px 1px 1px rgba(200, 200, 200, 0.4);
+}
+
+.top-bar-section li:not(.has-form) a:not(.button) {
+  line-height: 50px;
+}
+
+.top-bar, .contain-to-grid {
+  background: linear-gradient( rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 95% );
+  margin-bottom: 15px;
+}
+
+.top-bar.expanded .title-area {
+  background: none;
+}
+
+.top-bar-section li:not(.has-form) a:not(.button) {
+  background: none;
+}
+
+.top-bar-section li:not(.has-form) a:not(.button):hover {
+ background: #333;
+}
+
+.panel {
+  background-color: #151515;
+  border-color: rgb(40, 40, 40);
+}
+
+.panel h1, .panel h2, .panel h3, .panel h4, .panel h5, .panel h6, .panel p, .panel li, .panel dl {
+  color: #777777;
+}
+
+.th {
+  box-shadow: 0 0 6px 1px rgba(0, 140, 186, 0.4);
+}
+
+.th:hover, .th:focus {
+  box-shadow: 0 0 6px 1px rgba(0, 140, 186, 0.7);
+}
+
+/* accordion overrides */
+.accordion .accordion-navigation, .accordion dd {
+  border: 1px solid #222222;
+  margin-bottom: 5px;
+}
+
+.accordion .accordion-navigation > a, .accordion dd > a {
+  background: none;
+  color: #C3C3C3;
+  font-family: Xolonium, sans-serif;
+  font-size: 0.8rem;
+}
+
+.accordion .accordion-navigation > .content.active, .accordion dd > .content.active {
+  background: none;
+}
+
+.accordion .accordion-navigation.active > a, .accordion .accordion-navigation > a:hover {
+  background: #242424;
+}
+
+ul.accordion {
+  margin-left: 0;
+}
+
+/* Footer */
+#footer {
+  background: linear-gradient( rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 95% );
+  font-family: sans-serif;
+  font-style: italic;
+  margin: 15px 0px 0px 0px;
+  padding-top: 5px;
+  width: 100%;
+}
+
+#footer p {
+  color: white;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+#footer ul {
+  font-size: 1rem;
+  list-style: none;
+  margin-left: 0;
+}
+
+#title {
+  color: #08C;
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  position: relative;
+  text-align: center;
+  text-shadow: 2px 2px 3px #333;
+}
+
+.statline {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  position: relative;
+  top: -10px;
+}
+
+.nostretch {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.button.tiny {
+  margin: 0;
+  padding: 0.5rem 1rem 0.5rem;
+}
+
+.tabs dd > a, .tabs .tab-title > a {
+  background: none;
+  color: #aaa;
+  padding: 1rem;
+}
+
+.tabs dd > a:hover, .tabs .tab-title > a:hover {
+  background-color: #1D1D1D;
+}
+
+.tabs dd.active a, .tabs .tab-title.active a {
+  background-color: #111;
+  color: #aaa;
+}
+
+.eloup {
+  color: #008000;
+}
+
+.elodown {
+  color: #BE0000;
+}
+
+.eloneutral {
+  color: gray;
+}
+
+.game {
+  margin-bottom: 1rem;
+}
+
+.game a {
+    color: #CCC;
+}
+
+.game a:hover {
+    color: #d95f00;
+    text-decoration: none;
+}
+
+.game tr {
+    background-color: #000;
+}
+
+.game tr.red {
+  background-color: #4d0000;
+}
+
+.game tr.blue {
+  background-color: #00004d;
+}
+
+.game tr.yellow {
+  background-color: #4d4d00;
+}
+
+.game tr.pink {
+  background-color: #4d004d;
+}
+
+.teamscore {
+  text-shadow: -1px -1px 0 #222;
+  font-weight: bold;
+}
+
+.teamscore .red {
+  color: #ad0000;
+}
+
+.teamscore .blue {
+  color: #0000ad;
+}
+
+.teamscore .yellow {
+  color: #adad00;
+}
+
+.teamscore .pink {
+  color: #ad00ad;
+}
+
+.player-score {
+  color: #FEFF3A;
+}
+
+.tabs-content {
+  margin-bottom: 0;
+}
+
+/* Tables with vertical headers */
+.rotated {
+  font-size: 10px;
+  font-weight: normal;
+  overflow: hidden;
+  white-space: nowrap;
+  writing-mode: vertical-lr;
+}
+
+td.bg {
+  background-color: #001021;
+}

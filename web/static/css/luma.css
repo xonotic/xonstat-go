@@ -1,0 +1,191 @@
+@font-face {
+  font-family: 'Luma';
+  src:  url('fonts/Luma.eot?wfmcs0');
+  src:  url('fonts/Luma.eot?wfmcs0#iefix') format('embedded-opentype'),
+    url('fonts/Luma.ttf?wfmcs0') format('truetype'),
+    url('fonts/Luma.woff?wfmcs0') format('woff'),
+    url('fonts/Luma.svg?wfmcs0#Luma') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="sprite-"], [class*=" sprite-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'Luma' !important;
+  speak: none;
+  font-size: 2rem;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.sprite-arc:before {
+  color: #7c9ceb;
+  content: "\e900";
+}
+.sprite-as:before {
+  content: "\e901";
+}
+.sprite-ca:before {
+  content: "\e902";
+}
+.sprite-crylink:before {
+  color: #ea6ff9;
+  content: "\e903";
+}
+.sprite-ctf:before {
+  content: "\e904";
+}
+.sprite-cts:before {
+  content: "\e905";
+}
+.sprite-dm:before {
+  content: "\e906";
+}
+.sprite-dom:before {
+  content: "\e907";
+}
+.sprite-duel:before {
+  content: "\e908";
+}
+.sprite-electro:before {
+  color: #6899f2;
+  content: "\e909";
+}
+.sprite-fireball:before {
+  color: #f0855f;
+  content: "\e90a";
+}
+.sprite-flak:before {
+  color: #e9be57;
+  content: "\e90b";
+}
+.sprite-ft:before {
+  content: "\e90c";
+}
+.sprite-grenadelauncher:before, .sprite-mortar:before {
+  color: #fd7865;
+  content: "\e90d";
+}
+.sprite-hagar:before {
+  color: #e39160;
+  content: "\e90e";
+}
+.sprite-hlac:before {
+  color: #e5965b;
+  content: "\e90f";
+}
+.sprite-okhmg:before {
+  color: #fd7865;
+  content: "\e911";
+}
+.sprite-hook:before {
+  color: #81f13d;
+  content: "\e912";
+}
+.sprite-inf:before {
+  content: "\e913";
+}
+.sprite-inv:before {
+  content: "\e914";
+}
+.sprite-jb:before {
+  content: "\e915";
+}
+.sprite-ka:before {
+  content: "\e916";
+}
+.sprite-kh:before {
+  content: "\e917";
+}
+.sprite-laser:before, .sprite-blaster:before {
+  color: #f7717b;
+  content: "\e918";
+}
+.sprite-lms:before {
+  content: "\e919";
+}
+.sprite-minelayer:before {
+  color: #fd7865;
+  content: "\e91a";
+}
+.sprite-minstanex:before, .sprite-vaporizer:before {
+  color: #978ed2;
+  content: "\e91b";
+}
+.sprite-nb:before {
+  content: "\e91c";
+}
+.sprite-nex:before, .sprite-vortex:before {
+  color: #75c3d5;
+  content: "\e91d";
+}
+.sprite-ons:before {
+  content: "\e91e";
+}
+.sprite-overall:before {
+  content: "\e91f";
+}
+.sprite-porto:before {
+  color: #6899f2;
+  content: "\e920";
+}
+.sprite-rc:before {
+  content: "\e921";
+}
+.sprite-rifle:before {
+  color: #e39160;
+  content: "\e922";
+}
+.sprite-rocketlauncher:before, .sprite-devastator:before {
+  color: #e9be57;
+  content: "\e923";
+}
+.sprite-okrpc:before {
+  color: #e9be57;
+  content: "\e925";
+}
+.sprite-seeker:before {
+  color: #f7717b;
+  content: "\e926";
+}
+.sprite-shockwave:before {
+  color: #77b38a;
+  content: "\e927";
+}
+.sprite-shotgun:before {
+  color: #849ba8;
+  content: "\e928";
+}
+.sprite-tdm:before {
+  content: "\e929";
+}
+.sprite-tuba:before {
+  color: #e9be57;
+  content: "\e92a";
+}
+.sprite-uzi:before, .sprite-machinegun:before {
+  color: #81f13d;
+  content: "\e92b";
+}
+.sprite-vip:before {
+  content: "\e92c";
+}
+.sprite-oknex:before {
+  color: #75c3d5;
+  content: "\e92f";
+}
+.sprite-okshotgun:before {
+  color: #849ba8;
+  content: "\e931";
+}
+.sprite-okmachinegun:before {
+  color: #81f13d;
+  content: "\e933";
+}
