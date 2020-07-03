@@ -284,16 +284,13 @@ type ActiveMap struct {
 type RecentGame struct {
 	GameID int
 	GameTypeCd string
-	Winner string
-	StartDt time.Time
 	GameTypeDescr string
 	ServerID int
 	ServerName string
 	MapID int
 	MapName string
-	PlayerID int
-	Nick string
-	Rank int
-	Team int
-	EloDelta float64
+	WinningTeam sql.NullInt32
+	WinningPlayerID int
+	WinningNick string
+	CreateDt time.Time
 }
