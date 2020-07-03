@@ -7,6 +7,8 @@ import (
 	"log/syslog"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -37,6 +39,27 @@ func initLog() error {
 	log.SetOutput(multiwriter)
 
 	return nil
+}
+
+// FileServer conveniently sets up a http.FileServer handler to serve
+// static files from a http.FileSystem.
+func FileServer(r chi.Router, path string, root http.FileSystem) {
+	if strings.ContainsAny(path, "{}*") {
+		panic("FileServer does not permit any URL parameters.")
+	}
+
+	if path != "/" && path[len(path)-1] != '/' {
+		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+
+	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+		rctx := chi.RouteContext(r.Context())
+		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
+		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
+		fs.ServeHTTP(w, r)
+	})
 }
 
 func web(port string, printRoutes bool) {
@@ -81,7 +104,7 @@ func web(port string, printRoutes bool) {
 
 		r.Post("/stats/submit", env.SubmissionHandler)
 	})
- 
+
 	// Register all "regular" routes and handlers.
 	r.Get("/summary", env.SummaryStatsHandler)
 	r.Get("/topactive", env.TopActiveHandler)
@@ -89,10 +112,15 @@ func web(port string, printRoutes bool) {
 	r.Get("/topmaps", env.TopMapsHandler)
 	r.Get("/games", env.RecentGamesHandler)
 
+	// Static files
+	cwd, _ := os.Getwd()
+	staticDir := http.Dir(filepath.Join(cwd, "web/static"))
+	FileServer(r, "/static", staticDir)
+
 	if printRoutes {
-		opts := docgen.MarkdownOpts {
+		opts := docgen.MarkdownOpts{
 			ProjectPath: "gitlab.com/xonotic/xonstat",
-			Intro: `XonStat API`,
+			Intro:       `XonStat API`,
 		}
 
 		fmt.Print(docgen.MarkdownRoutesDoc(r, opts))
