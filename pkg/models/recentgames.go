@@ -78,19 +78,24 @@ func (ds *PGDatastore) RRecentGames(serverID int, mapID int, playerID int,
 
 	// This section adds a useful time bound that greatly limits the numer of rows searched.
 	sqlBuf.WriteString(
-		fmt.Sprintf("and g.create_dt between $%d and $%d", placeholder, placeholder+1),
+		fmt.Sprintf("and g.create_dt between $%d and $%d ", placeholder, placeholder+1),
 	)
 
 	placeholder += 2
 	params = append(params, cutoff)
-	params = append(params, time.Now().UTC)
+	params = append(params, time.Now())
 
 	sqlBuf.WriteString("order by g.create_dt desc ")
 	sqlBuf.WriteString(fmt.Sprintf("limit $%d ", placeholder))
 	placeholder++
 	params = append(params, limit)
 
-	rows, err := ds.db.Query(sqlBuf.String(), params...)
+	sql := sqlBuf.String()
+
+	fmt.Println(sql)
+	fmt.Printf("%v\n", params)
+
+	rows, err := ds.db.Query(sql, params...)
 	if err != nil {
 		return nil, err
 	}

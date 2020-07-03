@@ -278,43 +278,24 @@ func (s *RawSubmission) hasRequiredMetadata() error {
 	return nil
 }
 
-func (s *RawSubmission) isSupportedGameType() error {
-	switch s.GameMeta["G"] {
-	case "as":
-		return nil
-	case "ca":
-		return nil
-	case "ctf":
-		return nil
-	case "cts":
-		return nil
-	case "dm":
-		return nil
-	case "dom":
-		return nil
-	case "duel":
-		return nil
-	case "ft":
-		return nil
-	case "freezetag":
-		return nil
-	case "ka":
-		return nil
-	case "keepaway":
-		return nil
-	case "kh":
-		return nil
-	case "nb":
-		return nil
-	case "nexball":
-		return nil
-	case "rune":
-		return nil
-	case "tdm":
-		return nil
+// IsSupportedGameType determines if XonStat supports the given game type
+func IsSupportedGameType(gameTypeCd string) bool {
+	switch gameTypeCd {
+	case "as", "ca", "ctf", "cts", "dm", "dom", "duel", "ft", "freezetag", "ka":
+		return true
+	case "keepaway", "kh", "nb", "nexball", "rune", "tdm":
+		return true
 	default:
+		return false
+	}
+}
+
+func (s *RawSubmission) isSupportedGameType() error {
+	if !IsSupportedGameType(s.GameMeta["G"]) {
 		return ErrUnsupportedGameType
 	}
+
+	return nil
 }
 
 // weaponFromKey extracts the weapon code from an accuracy event key (e.g. acc-blaster-cnt-fired -> blaster)
