@@ -13,7 +13,7 @@ import (
 	"github.com/go-chi/docgen"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/xonotic/xonstat/pkg/handlers"
+	"gitlab.com/xonotic/xonstat/internal/handlers"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
