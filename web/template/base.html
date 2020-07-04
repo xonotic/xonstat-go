@@ -1,0 +1,74 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="XonStat: Player statistics for the free and fast shooter Xonotic.">
+    <meta name="author" content="Ant 'Antibody' Zucaro">
+
+    <title>{{- block "subtitle" . -}}{{end}}XonStat: Player Statistics for Xonotic </title>
+
+    <link rel="shortcut icon" href="/static/favicon.ico">
+
+    {{block "css" .}}
+      {{- /* FOR DEVELOPMENT ONLY
+      ### <link href="/static/css/foundation.css" rel="stylesheet">
+      ### <link href="/static/css/font-awesome.min.css" rel="stylesheet">
+      ### <link href="/static/css/app.css" rel="stylesheet">
+      ### <link href="/static/css/luma.css" rel="stylesheet">
+      */ -}}
+      <link href="/static/css/xonstat.css" rel="stylesheet">
+    {{end}}
+
+    {{block "headjs" .}}
+      <script src="/static/js/vendor/modernizr.js"></script>
+    {{end}}
+  </head>
+
+  <body>
+    {{block "navigation" .}}
+      {{/* navigation partial here */}}
+    {{end}}
+
+    {{block "hero_unit" .}}
+    {{end}}
+
+    <div class="row">
+      <div class="small-12 columns">
+        <div id="title">
+          {{block "title" .}}
+          {{end}}
+        </div>
+
+        {{block "body" .}}
+        {{end}}
+
+      </div>
+    </div>
+
+    {{/* footer here */}}
+
+    {{block "js" .}}
+      <script type='text/javascript' src='/static/js/vendor/jquery-3.5.1.min.js'></script>
+      <script src="/static/js/foundation.min.js"></script>
+ 
+      {{block "foundation" .}}
+        <script>
+          $(document).foundation();
+        </script>
+      {{end}}
+    {{end}}
+
+    <!-- RELATIVE TIME CONVERSION -->
+    <script type="text/javascript">
+    $('.abstime').each(function(i,e){
+      var epoch = e.getAttribute('data-epoch');
+      var d = new Date(0);
+      d.setUTCSeconds(epoch);
+      e.setAttribute('title', d.toDateString() + ' ' + d.toTimeString());  
+    });
+    </script>
+  </body>
+</html>
+{{end}}

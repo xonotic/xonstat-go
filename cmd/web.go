@@ -77,7 +77,7 @@ func web(port string, printRoutes bool) {
 		Compress:   true,
 	}
 
-	env := handlers.NewAppEnv(db, &requestLogger)
+	env := handlers.NewAppEnv(db, &requestLogger, "web/template/*")
 
 	r := chi.NewRouter()
 
@@ -106,6 +106,7 @@ func web(port string, printRoutes bool) {
 	})
 
 	// Register all "regular" routes and handlers.
+	r.Get("/", env.LeaderboardHandler)
 	r.Get("/summary", env.SummaryStatsHandler)
 	r.Get("/topactive", env.TopActiveHandler)
 	r.Get("/topservers", env.TopServersHandler)
