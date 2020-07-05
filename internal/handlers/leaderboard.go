@@ -90,7 +90,7 @@ func (ae *AppEnv) TopMapsHandler(w http.ResponseWriter, r *http.Request) {
 
 // LeaderboardHandler is the main page of the site
 func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
-	err := ae.templates.ExecuteTemplate(w, "leaderboard.html", nil)
+	err := ae.templates.ExecuteTemplate(w, "leaderboard.page.html", nil)
     if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
