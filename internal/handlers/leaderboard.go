@@ -10,6 +10,7 @@ import (
 
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/models"
+	"golang.org/x/text/message"
 )
 
 // SummaryStatsHandler retrieves information about the summary stats
@@ -94,8 +95,12 @@ func (ae *AppEnv) TopMapsHandler(w http.ResponseWriter, r *http.Request) {
 // Assemble the stats line at the top of the leaderboard. Can accept either the "all" or "day"
 // scoped version of SummaryStat array.
 func makeStatLine(prefix string, summaryStats []*models.SummaryStat, suffix string) template.HTML {
-	// TODO: Add links to the game types when that handler/template is ready. 
+	// TODO: Add links to the game types when that handler/template is ready.
 	// Derive the URL if possible instead of hard coding it.
+
+	// This is used to get the commas in the output's numbers.
+	p := message.NewPrinter(message.MatchLanguage("en"))
+
 	if len(summaryStats) == 0 {
 		return ""
 	}
@@ -106,7 +111,7 @@ func makeStatLine(prefix string, summaryStats []*models.SummaryStat, suffix stri
 		totalGameCount += v.GameCount
 	}
 
-	// We can't show the counts for *all* game types, so we'll group all the ones past the top five 
+	// We can't show the counts for *all* game types, so we'll group all the ones past the top five
 	// into an "other" category.
 	var otherGameCount int
 	if len(summaryStats) > 5 {
@@ -116,7 +121,7 @@ func makeStatLine(prefix string, summaryStats []*models.SummaryStat, suffix stri
 	}
 
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%d players and %d games (", summaryStats[1].PlayerCount, totalGameCount))
+	buf.WriteString(p.Sprintf("%d players and %d games (", summaryStats[1].PlayerCount, totalGameCount))
 
 	// If for some reason we don't have 5 "top" game types...
 	topN := 5
@@ -125,15 +130,15 @@ func makeStatLine(prefix string, summaryStats []*models.SummaryStat, suffix stri
 	}
 
 	for i, v := range summaryStats[:topN] {
-		buf.WriteString(fmt.Sprintf("%d %s", v.GameCount, v.GameTypeCd))
+		buf.WriteString(p.Sprintf("%d %s", v.GameCount, v.GameTypeCd))
 
-		if i < topN -1 {
+		if i < topN-1 {
 			buf.WriteString("; ")
 		}
 	}
 
 	if otherGameCount > 0 {
-			buf.WriteString(fmt.Sprintf("; %d other", otherGameCount))
+		buf.WriteString(p.Sprintf("; %d other", otherGameCount))
 	}
 	buf.WriteString(")")
 
@@ -158,17 +163,17 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 
 	// The structure passed to the template.
 	type Data struct {
-		StatLine template.HTML
+		StatLine    template.HTML
 		DayStatLine template.HTML
 	}
 
 	data := Data{
-		StatLine: makeStatLine("", allSummaryStats, ""),
+		StatLine:    makeStatLine("", allSummaryStats, ""),
 		DayStatLine: makeStatLine("", daySummaryStats, ""),
 	}
 
 	err = ae.templates.ExecuteTemplate(w, "leaderboard.page.html", data)
-    if err != nil {
+	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
 		return
