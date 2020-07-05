@@ -2,6 +2,20 @@
 
 {{define "subtitle"}}Leaderboard - {{end}}
 
+{{define "hero_unit"}}
+  <div class="text-center">
+    <img src="/static/css/img/xonotic-logo.png" />
+    {{if eq .StatLine ""}}
+      <p class="statline">Tracking Xonotic statistics since October 2011.</p>
+    {{else}}
+      <p class="statline">Tracking {{.StatLine}} since October 2011.</p>
+    {{end}}
+    {{if ne .DayStatLine ""}}
+      <p class="statline">{{.DayStatLine}} in the past 24 hours.</p>
+    {{end}}
+  </div>
+{{end}}
+
 {{define "body"}}
 <h2>Leaderboard</h2>
 <p>There's nothing to see here yet!</p>
