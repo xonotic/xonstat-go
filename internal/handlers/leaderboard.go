@@ -7,11 +7,22 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/spf13/viper"
+	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"golang.org/x/text/message"
 )
+
+// These are essentially the NULL or "do not use" values for filter conditions
+const emptyServerID = -1
+const emptyMapID = -1
+const emptyPlayerID = -1
+const emptyGameTypeCd = ""
+const emptyStartGameID = -1
+const emptyEndGameID = -1
 
 // SummaryStatsHandler retrieves information about the summary stats
 func (ae *AppEnv) SummaryStatsHandler(w http.ResponseWriter, r *http.Request) {
@@ -172,6 +183,14 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	// Active maps by number of times played
 	activeMaps, _ := leaderboard.ActiveMapsData(10, 1, ae.db)
 
+	// Recent games
+	recentGamesDays := viper.GetInt("RecentGamesDays")
+	now := time.Now()
+	cutoff := now.AddDate(0, 0, -1 * recentGamesDays)
+
+	recentGames, _ := game.RecentGamesData(ae.db, emptyServerID, emptyMapID, emptyPlayerID, 
+		emptyGameTypeCd, cutoff, emptyStartGameID, emptyEndGameID, 20)
+
 	// The structure passed to the template.
 	type Data struct {
 		StatLine      template.HTML
@@ -179,6 +198,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 		ActivePlayers []leaderboard.ActivePlayerBase
 		ActiveServers []leaderboard.ActiveServerBase
 		ActiveMaps    []leaderboard.ActiveMapBase
+		RecentGames   []game.RecentGameBase
 	}
 
 	data := Data{
@@ -187,6 +207,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 		ActivePlayers: activePlayers,
 		ActiveServers: activeServers,
 		ActiveMaps:    activeMaps,
+		RecentGames:   recentGames,
 	}
 
 	err = ae.templates.ExecuteTemplate(w, "leaderboard.page.html", data)

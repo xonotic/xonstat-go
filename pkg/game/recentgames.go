@@ -2,22 +2,72 @@ package game
 
 import (
 	"encoding/json"
+	"html/template"
 	"time"
 
+	"github.com/antzucaro/qstr"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
 
+// RecentGameBase is the base type for recent games of any format (HTML, JSON, etc).
+type RecentGameBase struct {
+	GameID              int
+	GameTypeCd          string
+	GameTypeDescr       string
+	ServerID            int
+	ServerName          string
+	MapID               int
+	MapName             string
+	WinningTeam         int
+	WinningPlayerID     int
+	WinningNick         string
+	WinningNickStripped string
+	WinningNickHTML     template.HTML
+	CreateDt            time.Time
+}
+
 // RecentGamesData retrieves recent games data based on filter criteria
 func RecentGamesData(db models.Datastore, serverID int, mapID int, playerID int, gameTypeCd string,
-	cutoff time.Time, startGameID int, endGameID int, limit int) ([]*models.RecentGame, error) {
+	cutoff time.Time, startGameID int, endGameID int, limit int) ([]RecentGameBase, error) {
 
 	if gameTypeCd != "" && !submission.IsSupportedGameType(gameTypeCd) {
 		return nil, submission.ErrUnsupportedGameType
 	}
 
-	return db.RRecentGames(serverID, mapID, playerID, gameTypeCd, cutoff,
+	rawRecentGames, err := db.RRecentGames(serverID, mapID, playerID, gameTypeCd, cutoff,
 		startGameID, endGameID, limit)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var recentGames []RecentGameBase
+	for _, v := range rawRecentGames {
+		nick := qstr.QStr(v.WinningNick)
+		winningTeam := -1
+		if v.WinningTeam.Valid {
+			winningTeam = int(v.WinningTeam.Int32)
+		}
+		rg := RecentGameBase{
+			GameID:          v.GameID,
+			GameTypeCd:      v.GameTypeCd,
+			GameTypeDescr:   v.GameTypeDescr,
+			ServerID:        v.ServerID,
+			ServerName:      v.ServerName,
+			MapID:           v.MapID,
+			MapName:         v.MapName,
+			WinningTeam:     winningTeam,
+			WinningPlayerID: v.WinningPlayerID,
+			WinningNick:     nick.Stripped(),
+			WinningNickHTML: nick.HTML(),
+			CreateDt:        v.CreateDt,
+		}
+
+		recentGames = append(recentGames, rg)
+	}
+
+	return recentGames, err
 }
 
 // RecentGamesJSON returns recent games in JSON format
@@ -39,7 +89,7 @@ func RecentGamesJSON(db models.Datastore, serverID int, mapID int, playerID int,
 		ServerName      string `json:"server_name"`
 		MapID           int    `json:"map_id"`
 		MapName         string `json:"map_name"`
-		WinningTeam     *int32    `json:"winning_team"`
+		WinningTeam     int    `json:"winning_team"`
 		WinningPlayerID int    `json:"winning_player_id"`
 		WinningNick     string `json:"nick"`
 		CreateDt        string `json:"create_dt"`
@@ -48,22 +98,17 @@ func RecentGamesJSON(db models.Datastore, serverID int, mapID int, playerID int,
 	var rgs []Response
 	for _, rg := range rawData {
 		r := Response{
-			GameID: rg.GameID, 
-			GameTypeCd: rg.GameTypeCd, 
-			GameTypeDescr: rg.GameTypeDescr, 
-			ServerID: rg.ServerID, 
-			ServerName: rg.ServerName,
-			MapID: rg.MapID, 
-			MapName: rg.MapName, 
-			WinningPlayerID: rg.WinningPlayerID, 
-			WinningNick: rg.WinningNick,
-			CreateDt: rg.CreateDt.Format(time.RFC3339),
-		}
-
-		if rg.WinningTeam.Valid {
-			r.WinningTeam = &rg.WinningTeam.Int32
-		} else {
-			r.WinningTeam = nil
+			GameID:          rg.GameID,
+			GameTypeCd:      rg.GameTypeCd,
+			GameTypeDescr:   rg.GameTypeDescr,
+			ServerID:        rg.ServerID,
+			ServerName:      rg.ServerName,
+			MapID:           rg.MapID,
+			MapName:         rg.MapName,
+			WinningTeam:     rg.WinningTeam,
+			WinningPlayerID: rg.WinningPlayerID,
+			WinningNick:     rg.WinningNick,
+			CreateDt:        rg.CreateDt.Format(time.RFC3339),
 		}
 
 		rgs = append(rgs, r)
