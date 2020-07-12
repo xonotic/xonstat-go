@@ -169,12 +169,16 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	// Active servers by total accumulated player time on the server
 	activeServers, _ := leaderboard.ActiveServersData(10, 1, ae.db)
 
+	// Active maps by number of times played
+	activeMaps, _ := leaderboard.ActiveMapsData(10, 1, ae.db)
+
 	// The structure passed to the template.
 	type Data struct {
 		StatLine      template.HTML
 		DayStatLine   template.HTML
 		ActivePlayers []leaderboard.ActivePlayerBase
 		ActiveServers []leaderboard.ActiveServerBase
+		ActiveMaps    []leaderboard.ActiveMapBase
 	}
 
 	data := Data{
@@ -182,6 +186,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 		DayStatLine:   makeStatLine("", daySummaryStats, ""),
 		ActivePlayers: activePlayers,
 		ActiveServers: activeServers,
+		ActiveMaps:    activeMaps,
 	}
 
 	err = ae.templates.ExecuteTemplate(w, "leaderboard.page.html", data)

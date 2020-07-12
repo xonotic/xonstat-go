@@ -24,14 +24,14 @@ func SummaryStatsJSON(scope string, db models.Datastore) ([]byte, error) {
 	// the JSON response
 	type GameCounts struct {
 		GameTypeCd string `json:"game_type_cd"`
-		GameCount int `json:"num_games"`
+		GameCount  int    `json:"num_games"`
 	}
 
 	type Response struct {
-		Players int `json:"players"`
-		Games []GameCounts `json:"games"`
-		Scope string `json:"scope"`
-		LastRefreshed string `json:"last_refreshed"`
+		Players       int          `json:"players"`
+		Games         []GameCounts `json:"games"`
+		Scope         string       `json:"scope"`
+		LastRefreshed string       `json:"last_refreshed"`
 	}
 
 	var players int
@@ -50,8 +50,8 @@ func SummaryStatsJSON(scope string, db models.Datastore) ([]byte, error) {
 	return json.Marshal(Response{Players: players, Games: games, Scope: scope, LastRefreshed: lastRefreshed})
 }
 
-// ActivePlayerBase is the base type used to represent active players for all 
-// marshalled types (HTML/JSON/etc). 
+// ActivePlayerBase is the base type used to represent active players for all
+// marshalled types (HTML/JSON/etc).
 type ActivePlayerBase struct {
 	SortOrder    int
 	PlayerID     int
@@ -72,12 +72,12 @@ func ActivePlayersData(limit, start int, db models.Datastore) ([]ActivePlayerBas
 	for _, v := range rawActivePlayers {
 		nick := qstr.QStr(v.Nick)
 		ap := ActivePlayerBase{
-			SortOrder: v.SortOrder, 
-			PlayerID: v.PlayerID, 
-			Nick: nick,
-			HTMLNick: nick.HTML(), 
-			StrippedNick: nick.Stripped(), 
-			AliveTime: models.DurationString(v.AliveTime, true),
+			SortOrder:    v.SortOrder,
+			PlayerID:     v.PlayerID,
+			Nick:         nick,
+			HTMLNick:     nick.HTML(),
+			StrippedNick: nick.Stripped(),
+			AliveTime:    models.DurationString(v.AliveTime, true),
 		}
 		activePlayersHTML = append(activePlayersHTML, ap)
 	}
@@ -94,18 +94,18 @@ func ActivePlayersJSON(limit, start int, db models.Datastore) ([]byte, error) {
 
 	// the JSON response (a single entry in the list)
 	type Response struct {
-		Rank int `json:"rank"`
-		PlayerID int `json:"player_id"`
-		Nick string `json:"nick"`
+		Rank      int    `json:"rank"`
+		PlayerID  int    `json:"player_id"`
+		Nick      string `json:"nick"`
 		AliveTime string `json:"alivetime"`
 	}
 
 	var activePlayers []Response
 	for _, ap := range rawData {
-		resp := Response {
-			Rank: ap.SortOrder,
-			PlayerID: ap.PlayerID,
-			Nick: ap.StrippedNick,
+		resp := Response{
+			Rank:      ap.SortOrder,
+			PlayerID:  ap.PlayerID,
+			Nick:      ap.StrippedNick,
 			AliveTime: ap.AliveTime,
 		}
 
@@ -117,10 +117,10 @@ func ActivePlayersJSON(limit, start int, db models.Datastore) ([]byte, error) {
 
 // ActiveServerBase is the base type for marshalling active servers to other formats (HTML, JSON, etc).
 type ActiveServerBase struct {
-	SortOrder int
-	ServerID int
+	SortOrder  int
+	ServerID   int
 	ServerName string
-	PlayTime string
+	PlayTime   string
 }
 
 // ActiveServersData retrieves the active servers
@@ -132,11 +132,11 @@ func ActiveServersData(limit, start int, db models.Datastore) ([]ActiveServerBas
 
 	var activeServers []ActiveServerBase
 	for _, v := range rawActiveServers {
-		as := ActiveServerBase {
-			SortOrder: v.SortOrder,
-			ServerID: v.ServerID,
+		as := ActiveServerBase{
+			SortOrder:  v.SortOrder,
+			ServerID:   v.ServerID,
 			ServerName: v.ServerName,
-			PlayTime: models.DurationString(v.PlayTime, true),
+			PlayTime:   models.DurationString(v.PlayTime, true),
 		}
 		activeServers = append(activeServers, as)
 	}
@@ -153,19 +153,19 @@ func ActiveServersJSON(limit, start int, db models.Datastore) ([]byte, error) {
 
 	// the JSON response (a single entry in the list)
 	type Response struct {
-		Rank int `json:"rank"`
-		ServerID int `json:"server_id"`
+		Rank       int    `json:"rank"`
+		ServerID   int    `json:"server_id"`
 		ServerName string `json:"server_name"`
-		PlayTime string `json:"playtime"`
+		PlayTime   string `json:"playtime"`
 	}
 
 	var activeServers []Response
 	for _, as := range rawData {
 		resp := Response{
-			Rank: as.SortOrder, 
-			ServerID: as.ServerID, 
-			ServerName: as.ServerName, 
-			PlayTime: as.PlayTime,
+			Rank:       as.SortOrder,
+			ServerID:   as.ServerID,
+			ServerName: as.ServerName,
+			PlayTime:   as.PlayTime,
 		}
 		activeServers = append(activeServers, resp)
 	}
@@ -173,9 +173,34 @@ func ActiveServersJSON(limit, start int, db models.Datastore) ([]byte, error) {
 	return json.Marshal(activeServers)
 }
 
+// ActiveMapBase is the base type returned for all formats (HTML, JSON, etc.).
+type ActiveMapBase struct {
+	SortOrder int
+	MapID     int
+	MapName   string
+	Games     int
+}
+
 // ActiveMapsData retrieves the active maps
-func ActiveMapsData(limit, start int, db models.Datastore) ([]*models.ActiveMap, error) {
-	return db.RActiveMaps(limit, start)
+func ActiveMapsData(limit, start int, db models.Datastore) ([]ActiveMapBase, error) {
+	rawActiveMaps, err := db.RActiveMaps(limit, start)
+	if err != nil {
+		return nil, err
+	}
+
+	var activeMaps []ActiveMapBase
+	for _, v := range rawActiveMaps {
+		am := ActiveMapBase{
+			SortOrder: v.SortOrder,
+			MapID:     v.MapID,
+			MapName:   v.MapName,
+			Games:     v.Games,
+		}
+
+		activeMaps = append(activeMaps, am)
+	}
+
+	return activeMaps, nil
 }
 
 // ActiveMapsJSON returns active map stats in JSON form.
@@ -187,10 +212,10 @@ func ActiveMapsJSON(limit, start int, db models.Datastore) ([]byte, error) {
 
 	// the JSON response (a single entry in the list)
 	type Response struct {
-		Rank int `json:"rank"`
-		MapID int `json:"map_id"`
+		Rank    int    `json:"rank"`
+		MapID   int    `json:"map_id"`
 		MapName string `json:"map_name"`
-		Games int `json:"games"`
+		Games   int    `json:"games"`
 	}
 
 	var activeMaps []Response
