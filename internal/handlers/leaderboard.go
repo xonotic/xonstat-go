@@ -147,6 +147,7 @@ func makeStatLine(prefix string, summaryStats []*models.SummaryStat, suffix stri
 
 // LeaderboardHandler is the main page of the site
 func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
+	// The summary stat line for all activity tracked thus far.
 	allSummaryStats, err := leaderboard.SummaryStatsData("all", ae.db)
 	if err != nil {
 		log.Printf("Error: %s", err)
@@ -154,6 +155,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// The summary stat line typically for the past day's worth of activity.
 	daySummaryStats, err := leaderboard.SummaryStatsData("day", ae.db)
 	if err != nil {
 		log.Printf("Error: %s", err)
@@ -161,15 +163,25 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Active players by playing (alive) time.
+	activePlayers, _ := leaderboard.ActivePlayersData(10, 1, ae.db)
+
+	// Active servers by total accumulated player time on the server
+	activeServers, _ := leaderboard.ActiveServersData(10, 1, ae.db)
+
 	// The structure passed to the template.
 	type Data struct {
-		StatLine    template.HTML
-		DayStatLine template.HTML
+		StatLine      template.HTML
+		DayStatLine   template.HTML
+		ActivePlayers []leaderboard.ActivePlayerBase
+		ActiveServers []leaderboard.ActiveServerBase
 	}
 
 	data := Data{
-		StatLine:    makeStatLine("", allSummaryStats, ""),
-		DayStatLine: makeStatLine("", daySummaryStats, ""),
+		StatLine:      makeStatLine("", allSummaryStats, ""),
+		DayStatLine:   makeStatLine("", daySummaryStats, ""),
+		ActivePlayers: activePlayers,
+		ActiveServers: activeServers,
 	}
 
 	err = ae.templates.ExecuteTemplate(w, "leaderboard.page.html", data)
