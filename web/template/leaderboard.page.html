@@ -20,68 +20,17 @@
 <div class="row">
   <div class="small-12 large-4 columns">
     <h5>Most Active Players <a href="" title="See more player activity"><i class="fa fa-plus-circle"></i></a></h5>
-      <table class="table table-hover table-condensed">
-        <thead>
-          <tr>
-            <th class="small-2">#</th>
-            <th class="small-7">Nick</th>
-            <th class="small-3">Time</th>
-          </tr>
-        </thead>
-        <tbody>
-        {{range .ActivePlayers}}
-          <tr>
-            <td>{{.SortOrder}}</td>
-            <td class="no-stretch"><a href="" title="Go to the player info page for this player">{{.HTMLNick}}</a></td>
-            <td>{{.AliveTime}}</td>
-          </tr>
-        {{end}}
-        </tbody>
-      </table>
+    {{template "activeplayers.partial.html" .ActivePlayers}}
   </div>
 
   <div class="small-12 large-4 columns">
     <h5>Most Active Servers <a href="" title="See more server activity"><i class="fa fa-plus-circle"></i></a></h5>
-    <table class="table table-hover table-condensed">
-      <thead>
-        <tr>
-          <th class="small-2">#</th>
-          <th class="small-7">Server</th>
-          <th class="small-3" title="Total accumulated player time on the server">Time</th>
-        </tr>
-      </thead>
-      <tbody>
-      {{range .ActiveServers}}
-        <tr>
-          <td>{{.SortOrder}}</td>
-          <td class="no-stretch"><a href="" title="Go to the server info page for {{.ServerName}}">{{.ServerName}}</a></td>
-          <td>{{.PlayTime}}</td>
-        </tr>
-      {{end}}
-      </tbody>
-    </table>
+    {{template "activeservers.partial.html" .ActiveServers}}
   </div>
 
   <div class="small-12 large-4 columns">
     <h5>Most Active Maps <a href="" title="See more map activity"><i class="fa fa-plus-circle"></i></a></h5>
-    <table class="table table-hover table-condensed">
-      <thead>
-        <tr>
-          <th class="small-2">#</th>
-          <th class="small-7">Map</th>
-          <th class="small-3">Games</th>
-        </tr>
-      </thead>
-      <tbody>
-      {{range .ActiveMaps}}
-        <tr>
-          <td>{{.SortOrder}}</td>
-          <td class="no-stretch"><a href="" title="Go to the map info page for {{.MapName}}">{{.MapName}}</a></td>
-          <td>{{.Games}}</td>
-        </tr>
-      {{end}}
-      </tbody>
-    </table>
+    {{template "activemaps.partial.html" .ActiveMaps}}
   </div>
 
 </div>
@@ -90,36 +39,7 @@
 
   <div class="small-12 columns">
     <h5>Recent Games <a href=""><i class="fa fa-plus-circle"></i></a></h5>
-    <table class="table table-hover table-condensed">
-      <thead>
-        <tr>
-          <th class="small-1 text-center"></th>
-          <th class="small-1">Type</th>
-          <th class="show-for-medium-up small-3">Server</th>
-          <th class="show-for-medium-up small-2">Map</th>
-          <th class="show-for-large-up small-2">Time</th>
-          <th class="small-3">Winner</th>
-        </tr>
-      </thead>
-      <tbody>
-      {{range .RecentGames}}
-        <tr>
-          <td class="text-center"><a class="button tiny" href="" title="View detailed information about this game">view</a></td>
-          <td class="text-center"><span class="sprite sprite-{{.GameTypeCd}}" alt="{{.GameTypeCd}}" title="{{.GameTypeDescr}}"></span></td>
-          <td class="show-for-medium-up no-stretch"><a href="" title="Go to the detail page for this server">{{.ServerName}}</a></td>
-          <td class="show-for-medium-up"><a href="" title="Go to the map detail page for this map">{{.MapName}}</a></td>
-          <td class="show-for-large-up"><span class="abstime" data-epoch="" title="">fuzzy date</span></td>
-          <td class="no-stretch">
-            {{if gt .WinningPlayerID 2}}
-            <a href="" title="Go to the player info page for this player">{{.WinningNickHTML}}</a>
-            {{else}}
-            {{.WinningNickHTML}}
-            {{end}}
-          </td>
-        </tr>
-      {{end}}
-      </tbody>
-    </table>
+    {{template "recentgames.partial.html" .RecentGames}}
   </div>
 
 </div>
