@@ -13,14 +13,14 @@
     <link rel="shortcut icon" href="/static/favicon.ico">
 
     {{block "css" .}}
-      {{- /* TODO: 
       <link href="/static/css/foundation.css" rel="stylesheet">
       <link href="/static/css/font-awesome.min.css" rel="stylesheet">
       <link href="/static/css/app.css" rel="stylesheet">
       <link href="/static/css/luma.css" rel="stylesheet">
-      */ -}}
 
+      {{- /* 
       <link href="/static/css/xonstat.css" rel="stylesheet">
+      */ -}}
     {{end}}
 
     {{block "headjs" .}}
@@ -36,8 +36,8 @@
     {{block "hero_unit" .}}
     {{end}}
 
-    <div class="row">
-      <div class="small-12 columns">
+    <div class="grid-x grid-margin-x">
+      <div class="cell large-10 large-offset-1 small-12">
         <div id="title">
           {{block "title" .}}
           {{end}}

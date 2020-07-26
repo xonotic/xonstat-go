@@ -17,30 +17,27 @@
 {{end}}
 
 {{define "body"}}
-<div class="row">
-  <div class="small-12 large-4 columns">
+<div class="grid-x grid-padding-x">
+  <div class="cell small-12 large-4">
     <h5>Most Active Players <a href="" title="See more player activity"><i class="fa fa-plus-circle"></i></a></h5>
     {{template "activeplayers.partial.html" .ActivePlayers}}
   </div>
 
-  <div class="small-12 large-4 columns">
+  <div class="cell small-12 large-4">
     <h5>Most Active Servers <a href="" title="See more server activity"><i class="fa fa-plus-circle"></i></a></h5>
     {{template "activeservers.partial.html" .ActiveServers}}
   </div>
 
-  <div class="small-12 large-4 columns">
+  <div class="cell small-12 large-4">
     <h5>Most Active Maps <a href="" title="See more map activity"><i class="fa fa-plus-circle"></i></a></h5>
     {{template "activemaps.partial.html" .ActiveMaps}}
   </div>
-
 </div>
 
-<div class="row">
-
-  <div class="small-12 columns">
+<div class="grid-x grid-padding-x">
+  <div class="cell small-12">
     <h5>Recent Games <a href=""><i class="fa fa-plus-circle"></i></a></h5>
     {{template "recentgames.partial.html" .RecentGames}}
   </div>
-
 </div>
 {{end}}

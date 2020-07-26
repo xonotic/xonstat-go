@@ -39,13 +39,6 @@ fieldset {
   border: none;
 }
 
-table {
-  background: none repeat scroll 0px 0px rgba(0, 0, 0, 0.70);
-  border: 1px solid #436688;
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-
 table tr td {
   font-size: 10px;
 }
@@ -59,16 +52,15 @@ table td, table th {
 }
 
 table tr.even, table tr.alt, table tr:nth-of-type(2n) {
-  background: none;
+  background-color: #000;
 }
 
 table thead tr th, table thead tr td, table tr th, table tr td {
   color: #D0D0D0;
 }
 
-.table-condensed {
-  table-layout: fixed;
-  width: 100%;
+.table-hover tr {
+  background-color: #000;
 }
 
 .table-hover tr:hover {
