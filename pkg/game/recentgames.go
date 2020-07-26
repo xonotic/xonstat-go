@@ -25,6 +25,8 @@ type RecentGameBase struct {
 	WinningNickStripped string
 	WinningNickHTML     template.HTML
 	CreateDt            time.Time
+	CreateDtEpoch		int64
+	CreateDtUTCStr      string
 }
 
 // RecentGamesData retrieves recent games data based on filter criteria
@@ -62,6 +64,8 @@ func RecentGamesData(db models.Datastore, serverID int, mapID int, playerID int,
 			WinningNick:     nick.Stripped(),
 			WinningNickHTML: nick.HTML(),
 			CreateDt:        v.CreateDt,
+			CreateDtEpoch:   v.CreateDt.Unix(),
+			CreateDtUTCStr:  v.CreateDt.UTC().Format("Mon Jan 2 2006 15:04:05 MST"),
 		}
 
 		recentGames = append(recentGames, rg)

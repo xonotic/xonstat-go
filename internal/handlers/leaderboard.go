@@ -186,9 +186,9 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	// Recent games
 	recentGamesDays := viper.GetInt("RecentGamesDays")
 	now := time.Now()
-	cutoff := now.AddDate(0, 0, -1 * recentGamesDays)
+	cutoff := now.AddDate(0, 0, -1*recentGamesDays)
 
-	recentGames, _ := game.RecentGamesData(ae.db, emptyServerID, emptyMapID, emptyPlayerID, 
+	recentGames, _ := game.RecentGamesData(ae.db, emptyServerID, emptyMapID, emptyPlayerID,
 		emptyGameTypeCd, cutoff, emptyStartGameID, emptyEndGameID, 20)
 
 	// The structure passed to the template.
