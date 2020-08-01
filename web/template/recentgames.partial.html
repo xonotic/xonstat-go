@@ -16,7 +16,7 @@
           <td class="text-center"><span class="sprite sprite-{{.GameTypeCd}}" alt="{{.GameTypeCd}}" title="{{.GameTypeDescr}}"></span></td>
           <td class="show-for-medium no-stretch"><a href="" title="Go to the detail page for this server">{{.ServerName}}</a></td>
           <td class="show-for-medium"><a href="" title="Go to the map detail page for this map">{{.MapName}}</a></td>
-          <td class="show-for-large"><span class="abstime" data-epoch="{{.CreateDtEpoch}}" title="{{.CreateDtUTCStr}}">fuzzy date</span></td>
+          <td class="show-for-large"><span class="abstime" data-epoch="{{.CreateDtEpoch}}" title="{{.CreateDtUTCStr}}">{{.CreateDtFuzzy}}</span></td>
           <td class="no-stretch">
             {{if gt .WinningPlayerID 2}}
             <a href="" title="Go to the player info page for this player">{{.WinningNickHTML}}</a>
