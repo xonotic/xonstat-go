@@ -73,7 +73,7 @@ func RecentGamesData(db models.Datastore, serverID int, mapID int, playerID int,
 			WinningNickHTML: nick.HTML(),
 			CreateDt:        v.CreateDt,
 			CreateDtEpoch:   v.CreateDt.Unix(),
-			CreateDtUTCStr:  v.CreateDt.UTC().Format("Mon Jan 2 2006 15:04:05 MST"),
+			CreateDtUTCStr:  v.CreateDt.UTC().Format("Mon, 2 Jan 2006 15:04:05 MST"),
 			CreateDtFuzzy:   fuzzyDt.FromNow(),
 		}
 
