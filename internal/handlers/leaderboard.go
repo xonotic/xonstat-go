@@ -45,22 +45,54 @@ func (ae *AppEnv) SummaryStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 // TopActiveHandler retrieves information about the top active players by playing time
 func (ae *AppEnv) TopActiveHandler(w http.ResponseWriter, r *http.Request) {
+	acceptHeader := r.Header.Get("Accept")
+
 	startStr := r.URL.Query().Get("start")
 	start, err := strconv.Atoi(startStr)
 	if err != nil {
 		start = 1
 	}
 
-	bytes, err := leaderboard.ActivePlayersJSON(10, start, ae.db)
-	if err != nil {
-		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
-		return
-	}
+	if acceptHeader == "application/json" {
+		// JSON response
+		bytes, err := leaderboard.ActivePlayersJSON(10, start, ae.db)
+		if err != nil {
+			log.Printf("Error: %s", err)
+			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			return
+		}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(bytes)
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(bytes)
+	} else {
+		// HTML response
+		fmt.Println("HTML topactive")
+		activePlayers, err := leaderboard.ActivePlayersData(20, start, ae.db)
+		if err != nil {
+			log.Printf("Error: %s", err)
+			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			return
+		}
+
+		// The structure passed to the template.
+		type Data struct {
+			ActivePlayers []leaderboard.ActivePlayerBase
+			Start int
+		}
+
+		data := Data{
+			ActivePlayers: activePlayers,
+			Start: start,
+		}
+
+		err = ae.templates["activeplayers.page.html"].Execute(w, data)
+		if err != nil {
+			log.Printf("Error: %s", err)
+			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			return
+		}
+	}
 }
 
 // TopServersHandler retrieves information about the top active servers by player aggregate playtime
@@ -210,7 +242,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 		RecentGames:   recentGames,
 	}
 
-	err = ae.templates.ExecuteTemplate(w, "leaderboard.page.html", data)
+	err = ae.templates["leaderboard.page.html"].Execute(w, data)
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)

@@ -77,7 +77,7 @@ func web(port string, printRoutes bool) {
 		Compress:   true,
 	}
 
-	env := handlers.NewAppEnv(db, &requestLogger, "web/template/*")
+	env := handlers.NewAppEnv(db, &requestLogger)
 
 	r := chi.NewRouter()
 
