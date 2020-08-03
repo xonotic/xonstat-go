@@ -2,10 +2,11 @@
 
 {{define "subtitle"}}Active Players Index - {{end}}
 
+{{define "title"}}Active Players Index{{end}}
+
 {{define "body"}}
 <div class="grid-x grid-padding-x">
   <div class="cell small-12 large-4 large-offset-4">
-    <h5>Most Active Players <a href="" title="See more player activity"><i class="fa fa-plus-circle"></i></a></h5>
     {{template "activeplayers.partial.html" .ActivePlayers}}
   </div>
 </div>

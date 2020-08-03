@@ -1,0 +1,13 @@
+{{template "base" .}}
+
+{{define "subtitle"}}Active Maps Index - {{end}}
+
+{{define "title"}}Active Maps Index{{end}}
+
+{{define "body"}}
+<div class="grid-x grid-padding-x">
+  <div class="cell small-12 large-4 large-offset-4">
+    {{template "activemaps.partial.html" .ActiveMaps}}
+  </div>
+</div>
+{{end}}
