@@ -77,12 +77,23 @@ func (ae *AppEnv) TopActiveHandler(w http.ResponseWriter, r *http.Request) {
 		// The structure passed to the template.
 		type Data struct {
 			ActivePlayers []leaderboard.ActivePlayerBase
-			Start int
+			Start         int
+			Next          int
+			ShowMoreLink  bool
+		}
+
+		var next int
+		if len(activePlayers) > 0 {
+			next = activePlayers[len(activePlayers)-1].SortOrder + 1
+		} else {
+			next = 1
 		}
 
 		data := Data{
 			ActivePlayers: activePlayers,
-			Start: start,
+			Start:         start,
+			Next:          next,
+			ShowMoreLink:  len(activePlayers) == 20,
 		}
 
 		err = ae.templates["activeplayers.page.html"].Execute(w, data)
@@ -128,12 +139,14 @@ func (ae *AppEnv) TopServersHandler(w http.ResponseWriter, r *http.Request) {
 		// The structure passed to the template.
 		type Data struct {
 			ActiveServers []leaderboard.ActiveServerBase
-			Start int
+			Start         int
+			Next          int
 		}
 
 		data := Data{
 			ActiveServers: activeServers,
-			Start: start,
+			Start:         start,
+			Next:          activeServers[len(activeServers)-1].SortOrder + 1,
 		}
 
 		err = ae.templates["activeservers.page.html"].Execute(w, data)
@@ -179,12 +192,14 @@ func (ae *AppEnv) TopMapsHandler(w http.ResponseWriter, r *http.Request) {
 		// The structure passed to the template.
 		type Data struct {
 			ActiveMaps []leaderboard.ActiveMapBase
-			Start int
+			Start      int
+			Next       int
 		}
 
 		data := Data{
 			ActiveMaps: activeMaps,
-			Start: start,
+			Start:      start,
+			Next:       activeMaps[len(activeMaps)-1].SortOrder + 1,
 		}
 
 		err = ae.templates["activemaps.page.html"].Execute(w, data)
