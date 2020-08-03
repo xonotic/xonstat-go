@@ -7,7 +7,25 @@
 {{define "body"}}
 <div class="grid-x grid-padding-x">
   <div class="cell small-12 large-4 large-offset-4">
+  {{if eq (len .ActiveServers) 0 }}
+    {{if eq .Start 1}}
+    <h2 class="text-center">No active servers found. Yikes, get playing!</h2>
+    {{else}}
+    <h2 class="text-center">Sorry, no more servers!</h2>
+    {{end}}
+  {{else}}
     {{template "activeservers.partial.html" .ActiveServers}}
+  {{end}}
   </div>
+
+  {{if .ShowMoreLink}}
+  <div class="cell small-12 large-4 large-offset-4">
+    <a  href="{{urlFor "topservers"}}?start={{.Next}}" name="Next Page">Next <i class="fa fa-arrow-right"></i></a>
+  </div>
+  {{end}}
 </div>
+
+<div class="row">
+</div>
+
 {{end}}
