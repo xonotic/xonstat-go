@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/alehano/reverse"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/docgen"
@@ -106,12 +107,12 @@ func web(port string, printRoutes bool) {
 	})
 
 	// Register all "regular" routes and handlers.
-	r.Get("/", env.LeaderboardHandler)
-	r.Get("/summary", env.SummaryStatsHandler)
-	r.Get("/topactive", env.TopActiveHandler)
-	r.Get("/topservers", env.TopServersHandler)
-	r.Get("/topmaps", env.TopMapsHandler)
-	r.Get("/games", env.RecentGamesHandler)
+	r.Get(reverse.Add("leaderboard", "/"), env.LeaderboardHandler)
+	r.Get(reverse.Add("summary", "/summary"), env.SummaryStatsHandler)
+	r.Get(reverse.Add("topactive", "/topactive"), env.TopActiveHandler)
+	r.Get(reverse.Add("topservers", "/topservers"), env.TopServersHandler)
+	r.Get(reverse.Add("topmaps", "/topmaps"), env.TopMapsHandler)
+	r.Get(reverse.Add("games", "/games"), env.RecentGamesHandler)
 
 	// Static files
 	cwd, _ := os.Getwd()

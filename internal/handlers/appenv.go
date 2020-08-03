@@ -1,11 +1,14 @@
 package handlers
 
 import (
-	"gitlab.com/xonotic/xonstat/pkg/models"
 	"html/template"
 	"io"
 	"log"
 	"path/filepath"
+	"strings"
+
+	"github.com/alehano/reverse"
+	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
 // AppEnv houses the runtime environment for the application. Database connections, cache, etc.
@@ -19,31 +22,33 @@ type AppEnv struct {
 func loadTemplates(templateDir string) map[string]*template.Template {
 	templates := make(map[string]*template.Template)
 
-	// Layouts are the base files upon which lots of other ones are built.
-	layouts, err := filepath.Glob(filepath.Join(templateDir, "*layout*"))
+	baseTemplate := template.New("base")
+	baseTemplate.Funcs(template.FuncMap{"urlFor": reverse.Rev})
+
+	// Separate pages from partials and layouts
+	allFiles, err := filepath.Glob(filepath.Join(templateDir, "*html"))
 	if err != nil {
 		log.Print(err)
 	}
 
-	// Partials are little bits of reusable components.
-	partials, err := filepath.Glob(filepath.Join(templateDir, "*partial*"))
-	if err != nil {
-		log.Print(err)
+	var baseFilenames, pageFilenames []string
+	for _, t := range allFiles {
+		if strings.Contains(t, "page") {
+			pageFilenames = append(pageFilenames, t)
+		} else {
+			baseFilenames = append(baseFilenames, t)
+		}
 	}
 
-	// Pages are the ones that utilize the two types above, redefining pieces
-	// to form a whole, standalone page.
-	pages, err := filepath.Glob(filepath.Join(templateDir, "*page*"))
-	if err != nil {
-		log.Print(err)
-	}
+	for _, pageFilename := range pageFilenames {
+		basePageFilename := filepath.Base(pageFilename)
+		filenames := append([]string{pageFilename}, baseFilenames...)
 
-	baseFiles := append(layouts, partials...)
-
-	for _, page := range pages {
-		fileName := filepath.Base(page)
-		filenames := append([]string{page}, baseFiles...)
-		templates[fileName], err = template.ParseFiles(filenames...)
+		// If we don't clone the base template, the calls to ParseFiles are accumulated and will
+		// result in template compilation errors (e.g. leaderboard has a non-blank hero_unit that
+		// isn't present in other pages)
+		t, _ := baseTemplate.Clone()
+		templates[basePageFilename], err = t.ParseFiles(filenames...)
 		if err != nil {
 			log.Println(err)
 		}

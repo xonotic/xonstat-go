@@ -3,6 +3,7 @@ module gitlab.com/xonotic/xonstat
 go 1.14
 
 require (
+	github.com/alehano/reverse v0.0.0-20170809190552-bf1a1f8f8b82
 	github.com/antzucaro/qstr v0.0.0-20170524223403-585819fc85f4
 	github.com/go-chi/chi v4.1.1+incompatible
 	github.com/go-chi/docgen v1.0.5
