@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/alehano/reverse"
 	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
@@ -261,7 +262,7 @@ func makeStatLine(prefix string, summaryStats []*models.SummaryStat, suffix stri
 	}
 
 	for i, v := range summaryStats[:topN] {
-		buf.WriteString(p.Sprintf("%d %s", v.GameCount, v.GameTypeCd))
+		buf.WriteString(p.Sprintf("%d <a href=\"%s?game_type_cd=%s\">%s</a>", v.GameCount, reverse.Rev("games"), v.GameTypeCd, v.GameTypeCd))
 
 		if i < topN-1 {
 			buf.WriteString("; ")

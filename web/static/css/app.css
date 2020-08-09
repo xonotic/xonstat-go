@@ -216,12 +216,12 @@ ul.accordion {
 
 ul.gametype-list {
   color: #aaa;
+  display: inline-block;
   list-style: none;
 }
 
 .gametype-list li {
   float: left;
-  margin-bottom: 15px;
   padding: 15px;
 }
 
