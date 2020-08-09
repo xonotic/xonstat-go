@@ -33,7 +33,7 @@ type RecentGameBase struct {
 
 // RecentGamesData retrieves recent games data based on filter criteria
 func RecentGamesData(db models.Datastore, serverID int, mapID int, playerID int, gameTypeCd string,
-	cutoff time.Time, startGameID int, endGameID int, limit int) ([]RecentGameBase, error) {
+	cutoff *time.Time, startGameID int, endGameID int, limit int) ([]RecentGameBase, error) {
 
 	if gameTypeCd != "" && !submission.IsSupportedGameType(gameTypeCd) {
 		return nil, submission.ErrUnsupportedGameType
@@ -85,7 +85,7 @@ func RecentGamesData(db models.Datastore, serverID int, mapID int, playerID int,
 
 // RecentGamesJSON returns recent games in JSON format
 func RecentGamesJSON(db models.Datastore, serverID int, mapID int, playerID int, gameTypeCd string,
-	cutoff time.Time, startGameID int, endGameID int, limit int) ([]byte, error) {
+	cutoff *time.Time, startGameID int, endGameID int, limit int) ([]byte, error) {
 
 	rawData, err := RecentGamesData(db, serverID, mapID, playerID, gameTypeCd, cutoff,
 		startGameID, endGameID, limit)

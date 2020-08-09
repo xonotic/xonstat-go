@@ -1,0 +1,29 @@
+{{template "base" .}}
+
+{{define "subtitle"}}Game Index - {{end}}
+
+{{define "title"}}Game Index{{end}}
+
+{{define "body"}}
+<div class="grid-x grid-padding-x">
+  <div class="cell small-12">
+      <ul class="tabs">
+        {{range .GameTypeCds}}
+          <li class="text-center tab-title">
+            <a href="{{urlFor "games"}}?game_type_cd={{.}}" alt="{{.}}" title="Show only {{.}} games">
+              <span class="sprite sprite-{{.}}"></span><br />
+              {{.}} <br />
+            </a>
+          </li>
+          {{end}}
+        <br />
+      </ul>
+  </div>
+</div>
+
+<div class="grid-x grid-padding-x">
+  <div class="cell small-12">
+    {{template "recentgames.partial.html" .RecentGames}}
+  </div>
+</div>
+{{end}}

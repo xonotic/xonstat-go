@@ -309,7 +309,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	cutoff := now.AddDate(0, 0, -1*recentGamesDays)
 
 	recentGames, _ := game.RecentGamesData(ae.db, emptyServerID, emptyMapID, emptyPlayerID,
-		emptyGameTypeCd, cutoff, emptyStartGameID, emptyEndGameID, 20)
+		emptyGameTypeCd, &cutoff, emptyStartGameID, emptyEndGameID, 20)
 
 	// The structure passed to the template.
 	type Data struct {
