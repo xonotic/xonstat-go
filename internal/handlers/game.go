@@ -34,7 +34,7 @@ func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(recentGames)
 	} else {
 		// HTML response
-		gameTypeCds := []string{"overall","duel","ctf","dm","tdm","ca","kh","ft","lms","as","dom","nb","cts","rc"}
+		gameTypeCds := []string{"overall","duel","ctf","dm","tdm","ca","kh","ft","as","dom","nb","cts"}
 
 		recentGames, err := game.RecentGamesData(ae.db, -1, -1, -1, gameTypeCd, nil, -1, -1, 20)
 		if err != nil {
@@ -43,12 +43,19 @@ func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		activeGameTypeCd := "overall"
+		if gameTypeCd != "" {
+			activeGameTypeCd = gameTypeCd
+		}
+
 		type Data struct {
+			ActiveGameTypeCd string
 			GameTypeCds []string
 			RecentGames []game.RecentGameBase
 		}
 
 		data := Data{
+			ActiveGameTypeCd: activeGameTypeCd,
 			GameTypeCds: gameTypeCds,
 			RecentGames: recentGames,
 		}		

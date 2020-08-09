@@ -214,19 +214,27 @@ ul.accordion {
   padding: 0.5rem 1rem 0.5rem;
 }
 
-.tabs dd > a, .tabs .tab-title > a {
-  background: none;
+ul.gametype-list {
   color: #aaa;
-  padding: 1rem;
+  list-style: none;
 }
 
-.tabs dd > a:hover, .tabs .tab-title > a:hover {
-  background-color: #1D1D1D;
+.gametype-list li {
+  float: left;
+  margin-bottom: 15px;
+  padding: 15px;
 }
 
-.tabs dd.active a, .tabs .tab-title.active a {
+.gametype-list a {
+  color: #aaa;
+}
+
+.gametype-list li:hover {
+  background-color: #1d1d1d;
+}
+
+.gametype-list li.active {
   background-color: #111;
-  color: #aaa;
 }
 
 .eloup {
