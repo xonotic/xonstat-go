@@ -55,13 +55,13 @@ func (ds *PGDatastore) RRecentGames(serverID int, mapID int, playerID int,
 
 	// Useful for pagination in different ways.
 	if startGameID != -1 {
-		sqlBuf.WriteString(fmt.Sprintf("and g.game_id >= $%d ", placeholder))
+		sqlBuf.WriteString(fmt.Sprintf("and g.game_id <= $%d ", placeholder))
 		placeholder++
 		params = append(params, startGameID)
 	}
 
 	if endGameID != -1 {
-		sqlBuf.WriteString(fmt.Sprintf("and g.game_id <= $%d ", placeholder))
+		sqlBuf.WriteString(fmt.Sprintf("and g.game_id >= $%d ", placeholder))
 		placeholder++
 		params = append(params, endGameID)
 	}

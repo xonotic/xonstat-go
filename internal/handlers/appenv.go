@@ -23,7 +23,10 @@ func loadTemplates(templateDir string) map[string]*template.Template {
 	templates := make(map[string]*template.Template)
 
 	baseTemplate := template.New("base")
-	baseTemplate.Funcs(template.FuncMap{"urlFor": reverse.Rev})
+	baseTemplate.Funcs(template.FuncMap{
+		"urlFor": reverse.Rev,
+		"inc":    func(i int) int { return i + 1 },
+	})
 
 	// Separate pages from partials and layouts
 	allFiles, err := filepath.Glob(filepath.Join(templateDir, "*html"))

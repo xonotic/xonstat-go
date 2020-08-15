@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 
 	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/submission"
@@ -15,14 +17,25 @@ func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
 	// for the simple case for the leaderboard.
 	acceptHeader := r.Header.Get("Accept")
 
-	gameTypeCd := r.URL.Query().Get("game_type_cd")
+	params := r.URL.Query()
+
+	gameTypeCd := params.Get("game_type_cd")
 	if !submission.IsSupportedGameType(gameTypeCd) {
+		// It is not a supported game type. Use the default for the DB query and don't include it
+		// in the resulting query string.
 		gameTypeCd = ""
+		params.Del("game_type_cd")
+	}
+
+	startGameID, err := strconv.Atoi(params.Get("start_game_id"))
+	params.Del("start_game_id")
+	if err != nil {
+		startGameID = -1
 	}
 
 	if acceptHeader == "application/json" {
 		// JSON response
-		recentGames, err := game.RecentGamesJSON(ae.db, -1, -1, -1, gameTypeCd, nil, -1, -1, 20)
+		recentGames, err := game.RecentGamesJSON(ae.db, -1, -1, -1, gameTypeCd, nil, startGameID, -1, 20)
 		if err != nil {
 			log.Printf("Error: %s", err)
 			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
@@ -34,32 +47,38 @@ func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(recentGames)
 	} else {
 		// HTML response
-		gameTypeCds := []string{"overall","duel","ctf","dm","tdm","ca","kh","ft","as","dom","nb","cts"}
+		gameTypeCds := []string{"overall", "duel", "ctf", "dm", "tdm", "ca", "kh", "ft", "as", "dom", "nb", "cts"}
 
-		recentGames, err := game.RecentGamesData(ae.db, -1, -1, -1, gameTypeCd, nil, -1, -1, 20)
+		recentGames, err := game.RecentGamesData(ae.db, -1, -1, -1, gameTypeCd, nil, startGameID, -1, 20)
 		if err != nil {
 			log.Printf("Error: %s", err)
 			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
 			return
 		}
 
-		activeGameTypeCd := "overall"
-		if gameTypeCd != "" {
-			activeGameTypeCd = gameTypeCd
+		// Set the query string for pagination
+		if len(recentGames) > 0 {
+			params.Set("start_game_id", fmt.Sprintf("%d", recentGames[len(recentGames)-1].GameID-1))
 		}
 
+		nextQueryStr := template.URL(params.Encode())
+
 		type Data struct {
+			GameTypeCds      []string
 			ActiveGameTypeCd string
-			GameTypeCds []string
-			RecentGames []game.RecentGameBase
+			RecentGames      []game.RecentGameBase
+			ShowMoreLink     bool
+			NextQueryStr     template.URL
 		}
 
 		data := Data{
-			ActiveGameTypeCd: activeGameTypeCd,
-			GameTypeCds: gameTypeCds,
-			RecentGames: recentGames,
-		}		
-		
+			GameTypeCds:      gameTypeCds,
+			ActiveGameTypeCd: gameTypeCd,
+			RecentGames:      recentGames,
+			ShowMoreLink:     len(recentGames) == 20,
+			NextQueryStr:     nextQueryStr,
+		}
+
 		err = ae.templates["gameindex.page.html"].Execute(w, data)
 		if err != nil {
 			log.Printf("Error: %s", err)

@@ -24,9 +24,20 @@
   </div>
 </div>
 
+{{if gt (len .RecentGames) 0}}
 <div class="grid-x grid-padding-x">
   <div class="cell small-12">
     {{template "recentgames.partial.html" .RecentGames}}
   </div>
 </div>
+{{else}}
+    <h2 class="text-center">Sorry, no more games to show!</h2>
+{{end}}
+
+{{if .ShowMoreLink}}
+<div class="cell small-12">
+  <a  href="{{urlFor "games"}}?{{.NextQueryStr}}" name="Next Page">Next <i class="fa fa-arrow-right"></i></a>
+</div>
+{{end}}
+
 {{end}}
