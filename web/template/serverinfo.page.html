@@ -1,0 +1,31 @@
+{{template "base" .}}
+
+{{define "subtitle"}}Server Info - {{end}}
+
+{{define "title"}}Server Information{{end}}
+
+{{define "body"}}
+<div class="grid-x grid-padding-x">
+  <div class="cell small-12">
+    <h2>{{.Server.Name}}</h2>
+    <p>
+      {{if .Server.IPAddr}}
+        IP Address: 
+        {{if gt .Server.Port 0}}
+        {{.Server.IPAddr}}:{{.Server.Port}}
+        {{else}}
+        {{.Server.IPAddr}}
+        {{end}}
+        <br />
+      {{end}}
+
+      {{if .Server.Revision}}
+        Revision: {{.Server.Revision}}
+        <br />
+      {{end}}
+
+      Added <span class="abstime" data-epoch="{{.Server.CreateDtEpoch}}" title="{{.Server.CreateDtUTCStr}}">{{.Server.CreateDtFuzzy}}</span> <br />
+    </p>
+  </div>
+</div>
+{{end}}
