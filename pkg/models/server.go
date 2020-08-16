@@ -47,7 +47,7 @@ func (ds *PGDatastore) RServerByID(ID int) (*Server, error) {
 	sql := `select server_id, name, location, ip_addr, port, hashkey, public_key, revision, 
 	pure_ind, impure_cvars, elo_ind, active_ind, create_dt
 	from servers
-	where id = $1`
+	where server_id = $1`
 
 	rows, err := ds.db.Query(sql, ID)
 	if err != nil {
