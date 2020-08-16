@@ -12,6 +12,7 @@ type Datastore interface {
 
 	// Server-oriented methods
 	CServer(tx *sql.Tx, server Server) (int64, error)
+	RServerByID(ID int) (*Server, error)
 	RServersByHashkey(hashkey string) ([]*Server, error)
 	RServersByName(name string) ([]*Server, error)
 	UServer(tx *sql.Tx, server Server) error

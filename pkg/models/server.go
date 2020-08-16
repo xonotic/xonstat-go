@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 // CServer inserts a Server record into the database.
@@ -39,6 +40,27 @@ func scanServers(rows *sql.Rows) ([]*Server, error) {
 	}
 
 	return servers, nil
+}
+
+// RServerByID retrives a server record by its ID value.
+func (ds *PGDatastore) RServerByID(ID int) (*Server, error) {
+	sql := `select server_id, name, location, ip_addr, port, hashkey, public_key, revision, 
+	pure_ind, impure_cvars, elo_ind, active_ind, create_dt
+	from servers
+	where id = $1`
+
+	rows, err := ds.db.Query(sql, ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	servers, err := scanServers(rows)
+	if len(servers) != 1 {
+		return nil, fmt.Errorf("Unable to retrieve just one server")
+	}
+
+	return servers[0], nil
 }
 
 // RServersByHashkey retrives server records by their hashkey value.
