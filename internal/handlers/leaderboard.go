@@ -17,14 +17,6 @@ import (
 	"golang.org/x/text/message"
 )
 
-// These are essentially the NULL or "do not use" values for filter conditions
-const emptyServerID = -1
-const emptyMapID = -1
-const emptyPlayerID = -1
-const emptyGameTypeCd = ""
-const emptyStartGameID = -1
-const emptyEndGameID = -1
-
 // SummaryStatsHandler retrieves information about the summary stats
 func (ae *AppEnv) SummaryStatsHandler(w http.ResponseWriter, r *http.Request) {
 	scope := r.URL.Query().Get("scope")
@@ -309,8 +301,9 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	cutoff := now.AddDate(0, 0, -1*recentGamesDays)
 
-	recentGames, _ := game.RecentGamesData(ae.db, emptyServerID, emptyMapID, emptyPlayerID,
-		emptyGameTypeCd, &cutoff, emptyStartGameID, emptyEndGameID, 20)
+	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, game.EmptyMapID, 
+		game.EmptyPlayerID, game.EmptyGameTypeCd, &cutoff, game.EmptyStartGameID, 
+		game.EmptyEndGameID, 20)
 
 	// The structure passed to the template.
 	type Data struct {

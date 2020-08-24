@@ -8,6 +8,7 @@ import (
 	"github.com/antzucaro/qstr"
 	"github.com/nleeper/goment"
 	"github.com/spf13/viper"
+	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 )
@@ -29,6 +30,7 @@ type ServerInfoBase struct {
 	ActivePlayerScores []*models.ActivePlayerScore
 	ActivePlayers      []leaderboard.ActivePlayerBase
 	ActiveMaps         []*models.ActiveMap
+	RecentGames        []game.RecentGameBase
 }
 
 // ServerInfoData retrieves information about a given server.
@@ -39,14 +41,24 @@ func ServerInfoData(db models.Datastore, ID int) (*ServerInfoBase, error) {
 	}
 
 	now := time.Now()
-	cutoffDays := viper.GetInt("TopMapsByGamesDays")
-	cutoff := now.AddDate(0, 0, -1*cutoffDays)
 
-	activePlayerScores, err := db.RActivePlayerScores(ID, &cutoff, 10)
-	rawActivePlayers, _ := db.RActivePlayersByServer(ID, &cutoff, 10)
+	// Top players by accumulated score over the time period.
+	activePlayerScoresCutoff := now.AddDate(0, 0, -1*viper.GetInt("TopPlayersByScoreDays"))
+	activePlayerScores, err := db.RActivePlayerScores(ID, &activePlayerScoresCutoff, 10)
+
+	// Top players by alive time over the time period.
+	activePlayersCutoff := now.AddDate(0, 0, -1*viper.GetInt("TopPlayersByTimeDays"))
+	rawActivePlayers, _ := db.RActivePlayersByServer(ID, &activePlayersCutoff, 10)
 	activePlayers := leaderboard.ActivePlayerToActivePlayerBase(rawActivePlayers)
 
-	activeMaps, _ := db.RActiveMapsByServer(ID, &cutoff, 10)
+	// Top maps by times played over the time period.
+	activeMapsCutoff := now.AddDate(0, 0, -1*viper.GetInt("TopMapsByGamesDays"))
+	activeMaps, _ := db.RActiveMapsByServer(ID, &activeMapsCutoff, 10)
+
+	// Recent games played on this server.
+	recentGamesCutoff := now.AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
+	recentGames, _ := game.RecentGamesData(db, ID, game.EmptyMapID, game.EmptyPlayerID,
+		game.EmptyGameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20)
 
 	// Conversions.
 	name := qstr.QStr(rawServer.Name.String)
@@ -68,6 +80,7 @@ func ServerInfoData(db models.Datastore, ID int) (*ServerInfoBase, error) {
 		ActivePlayerScores: activePlayerScores,
 		ActivePlayers:      activePlayers,
 		ActiveMaps:         activeMaps,
+		RecentGames:        recentGames,
 	}, nil
 }
 

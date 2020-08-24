@@ -11,6 +11,24 @@ import (
 	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
 
+// EmptyServerID is a blank server ID value.
+const EmptyServerID = -1
+
+// EmptyMapID is a blank map ID value.
+const EmptyMapID = -1
+
+// EmptyPlayerID is a blank player ID value.
+const EmptyPlayerID = -1
+
+// EmptyGameTypeCd is a blank game type value.
+const EmptyGameTypeCd = ""
+
+// EmptyStartGameID is a blank starting game ID value.
+const EmptyStartGameID = -1
+
+// EmptyEndGameID is a blank ending game ID value.
+const EmptyEndGameID = -1
+
 // RecentGameBase is the base type for recent games of any format (HTML, JSON, etc).
 type RecentGameBase struct {
 	GameID              int

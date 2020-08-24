@@ -1,0 +1,28 @@
+    <table class="table-hover table-condensed">
+      <thead>
+        <tr>
+          <th class="small-1 text-center"></th>
+          <th class="small-1">Type</th>
+          <th class="show-for-medium small-3">Map</th>
+          <th class="show-for-large small-3">Time</th>
+          <th class="small-3">Winner</th>
+        </tr>
+      </thead>
+      <tbody>
+      {{range .}}
+        <tr>
+          <td class="text-center"><a class="button tiny" href="" title="View detailed information about this game">view</a></td>
+          <td class="text-center"><span class="sprite sprite-{{.GameTypeCd}}" alt="{{.GameTypeCd}}" title="{{.GameTypeDescr}}"></span></td>
+          <td class="show-for-medium"><a href="" title="Go to the map detail page for this map">{{.MapName}}</a></td>
+          <td class="show-for-large"><span class="abstime" data-epoch="{{.CreateDtEpoch}}" title="{{.CreateDtUTCStr}}">{{.CreateDtFuzzy}}</span></td>
+          <td class="no-stretch">
+            {{if gt .WinningPlayerID 2}}
+            <a href="" title="Go to the player info page for this player">{{.WinningNickHTML}}</a>
+            {{else}}
+            {{.WinningNickHTML}}
+            {{end}}
+          </td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
