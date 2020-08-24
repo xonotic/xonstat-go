@@ -1,22 +1,11 @@
 package models
 
 import (
+	"database/sql"
 	"time"
 )
 
-// RActiveMaps retrieves the active players from the "materialized view".
-func (ds *PGDatastore) RActiveMaps(limit, start int) ([]*ActiveMap, error) {
-	sql := `SELECT sort_order, map_id, map_name, games, create_dt
-	FROM active_maps_mv
-	WHERE sort_order >= $2
-	LIMIT $1`
-
-	rows, err := ds.db.Query(sql, limit, start)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
+func scanActiveMaps(rows *sql.Rows) ([]*ActiveMap, error) {
 	var activeMaps []*ActiveMap
 	for rows.Next() {
 		var am ActiveMap
@@ -31,10 +20,27 @@ func (ds *PGDatastore) RActiveMaps(limit, start int) ([]*ActiveMap, error) {
 	return activeMaps, nil
 }
 
+// RActiveMaps retrieves the active players from the "materialized view".
+func (ds *PGDatastore) RActiveMaps(limit, start int) ([]*ActiveMap, error) {
+	sql := `SELECT sort_order, map_id, map_name, games, create_dt
+	FROM active_maps_mv
+	WHERE sort_order >= $2
+	LIMIT $1`
+
+	rows, err := ds.db.Query(sql, limit, start)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanActiveMaps(rows)
+}
+
 // RActiveMapsByServer finds the most active maps played on a server over a given time period.
 func (ds *PGDatastore) RActiveMapsByServer(serverID int, cutoff *time.Time, limit int) ([]*ActiveMap, error) {
 	sql := `SELECT row_number() OVER (ORDER BY count(*) DESC) AS rank, 
-	games.map_id AS games_map_id, maps.name AS maps_name, count(*) AS times_played
+	games.map_id AS games_map_id, maps.name AS maps_name, count(*) AS times_played,
+	now() at time zone 'UTC' AS create_dt
 	FROM games, maps
 	WHERE maps.map_id = games.map_id 
 	AND games.server_id = $1 
@@ -49,17 +55,5 @@ func (ds *PGDatastore) RActiveMapsByServer(serverID int, cutoff *time.Time, limi
 	}
 	defer rows.Close()
 
-	var topMaps []*ActiveMap
-	for rows.Next() {
-		var tm ActiveMap
-		err := rows.Scan(&tm.SortOrder, &tm.MapID, &tm.MapName, &tm.Games)
-
-		if err != nil {
-			return nil, err
-		}
-
-		topMaps = append(topMaps, &tm)
-	}
-
-	return topMaps, nil
+	return scanActiveMaps(rows)
 }
