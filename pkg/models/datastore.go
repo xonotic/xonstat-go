@@ -59,4 +59,7 @@ type Datastore interface {
 
 	// RecentGames by various means
 	RRecentGames(serverID int, mapID int, playerID int, gameTypeCd string, cutoff *time.Time, startGameID int, endGameID int, limit int) ([]*RecentGame, error)
+
+	// Top maps by server
+	RServerTopMaps(serverID int, cutoff *time.Time, limit int) ([]*ActiveMap, error)
 }

@@ -24,6 +24,7 @@ type ServerInfoBase struct {
 	CreateDtEpoch  int64
 	CreateDtUTCStr string
 	CreateDtFuzzy  string
+	ActiveMaps     []*models.ActiveMap
 }
 
 // ServerInfoData retrieves information about a given server.
@@ -32,6 +33,10 @@ func ServerInfoData(db models.Datastore, ID int) (*ServerInfoBase, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	now := time.Now()
+	cutoff := now.AddDate(0, 0, -1*30)
+	activeMaps, err := db.RServerTopMaps(ID, &cutoff, 10)
 
 	// Conversions.
 	name := qstr.QStr(rawServer.Name.String)
@@ -50,6 +55,7 @@ func ServerInfoData(db models.Datastore, ID int) (*ServerInfoBase, error) {
 		CreateDtEpoch:  rawServer.CreateDt.Unix(),
 		CreateDtUTCStr: dtUTC.Format("Mon, 2 Jan 2006 15:04:05 MST"),
 		CreateDtFuzzy:  fuzzyDt.FromNow(),
+		ActiveMaps:     activeMaps,
 	}, nil
 }
 
@@ -62,23 +68,25 @@ func ServerInfoJSON(db models.Datastore, ID int) ([]byte, error) {
 
 	// the JSON response (a single entry in the list)
 	type Response struct {
-		ServerID  int    `json:"server_id"`
-		Name      string `json:"name"`
-		IPAddr    string `json:"ip_addr"`
-		Port      int    `json:"port"`
-		Revision  string `json:"revision"`
-		ActiveInd bool   `json:"active_ind"`
-		CreateDt  string `json:"create_dt"`
+		ServerID   int                 `json:"server_id"`
+		Name       string              `json:"name"`
+		IPAddr     string              `json:"ip_addr"`
+		Port       int                 `json:"port"`
+		Revision   string              `json:"revision"`
+		ActiveInd  bool                `json:"active_ind"`
+		CreateDt   string              `json:"create_dt"`
+		ActiveMaps []*models.ActiveMap `json:"active_maps"`
 	}
 
 	r := Response{
-		ServerID:  rawData.ServerID,
-		Name:      rawData.Name,
-		IPAddr:    rawData.IPAddr,
-		Port:      rawData.Port,
-		Revision:  rawData.Revision,
-		ActiveInd: rawData.ActiveInd,
-		CreateDt:  rawData.CreateDtUTCStr,
+		ServerID:   rawData.ServerID,
+		Name:       rawData.Name,
+		IPAddr:     rawData.IPAddr,
+		Port:       rawData.Port,
+		Revision:   rawData.Revision,
+		ActiveInd:  rawData.ActiveInd,
+		CreateDt:   rawData.CreateDtUTCStr,
+		ActiveMaps: rawData.ActiveMaps,
 	}
 
 	return json.Marshal(r)
