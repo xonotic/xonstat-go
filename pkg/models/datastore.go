@@ -59,6 +59,9 @@ type Datastore interface {
 	RActiveMaps(limit, start int) ([]*ActiveMap, error)
 	RActiveMapsByServer(serverID int, cutoff *time.Time, limit int) ([]*ActiveMap, error)
 
+	// Top scoring players by server
+	RActivePlayerScores(serverID int, cutoff *time.Time, limit int) ([]*ActivePlayerScore, error)
+
 	// RecentGames by various means
 	RRecentGames(serverID int, mapID int, playerID int, gameTypeCd string, cutoff *time.Time, startGameID int, endGameID int, limit int) ([]*RecentGame, error)
 }

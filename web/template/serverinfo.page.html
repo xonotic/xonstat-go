@@ -29,6 +29,15 @@
   </div>
 
   <div class="cell small-12 large-4">
+    {{if gt (len .Server.ActivePlayerScores) 0}}
+    <h5>Top Scoring Players</h5>
+    {{template "activeplayerscores.partial.html" .Server.ActivePlayerScores}}
+    {{else}}
+    <h5>No Recent Top Scoring Players</h5>
+    {{end}}
+  </div>
+
+  <div class="cell small-12 large-4">
     {{if gt (len .Server.ActivePlayers) 0}}
     <h5>Most Active Players</h5>
     {{template "activeplayers.partial.html" .Server.ActivePlayers}}
