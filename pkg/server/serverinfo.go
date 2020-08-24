@@ -38,7 +38,7 @@ func ServerInfoData(db models.Datastore, ID int) (*ServerInfoBase, error) {
 	now := time.Now()
 	cutoffDays := viper.GetInt("TopMapsByGamesDays")
 	cutoff := now.AddDate(0, 0, -1*cutoffDays)
-	activeMaps, err := db.RServerTopMaps(ID, &cutoff, 10)
+	activeMaps, err := db.RActiveMapsByServer(ID, &cutoff, 10)
 
 	// Conversions.
 	name := qstr.QStr(rawServer.Name.String)

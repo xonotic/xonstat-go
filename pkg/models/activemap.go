@@ -1,5 +1,9 @@
 package models
 
+import (
+	"time"
+)
+
 // RActiveMaps retrieves the active players from the "materialized view".
 func (ds *PGDatastore) RActiveMaps(limit, start int) ([]*ActiveMap, error) {
 	sql := `SELECT sort_order, map_id, map_name, games, create_dt
@@ -25,4 +29,37 @@ func (ds *PGDatastore) RActiveMaps(limit, start int) ([]*ActiveMap, error) {
 	}
 
 	return activeMaps, nil
+}
+
+// RActiveMapsByServer finds the most active maps played on a server over a given time period.
+func (ds *PGDatastore) RActiveMapsByServer(serverID int, cutoff *time.Time, limit int) ([]*ActiveMap, error) {
+	sql := `SELECT row_number() OVER (ORDER BY count(*) DESC) AS rank, 
+	games.map_id AS games_map_id, maps.name AS maps_name, count(*) AS times_played
+	FROM games, maps
+	WHERE maps.map_id = games.map_id 
+	AND games.server_id = $1 
+	AND games.create_dt > $2 
+	GROUP BY games.map_id, maps.name 
+	ORDER BY count(*) DESC
+	LIMIT $3`
+
+	rows, err := ds.db.Query(sql, serverID, cutoff, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var topMaps []*ActiveMap
+	for rows.Next() {
+		var tm ActiveMap
+		err := rows.Scan(&tm.SortOrder, &tm.MapID, &tm.MapName, &tm.Games)
+
+		if err != nil {
+			return nil, err
+		}
+
+		topMaps = append(topMaps, &tm)
+	}
+
+	return topMaps, nil
 }
