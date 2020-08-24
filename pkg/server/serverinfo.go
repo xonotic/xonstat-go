@@ -7,6 +7,7 @@ import (
 
 	"github.com/antzucaro/qstr"
 	"github.com/nleeper/goment"
+	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
@@ -35,7 +36,8 @@ func ServerInfoData(db models.Datastore, ID int) (*ServerInfoBase, error) {
 	}
 
 	now := time.Now()
-	cutoff := now.AddDate(0, 0, -1*30)
+	cutoffDays := viper.GetInt("TopMapsByGamesDays")
+	cutoff := now.AddDate(0, 0, -1*cutoffDays)
 	activeMaps, err := db.RServerTopMaps(ID, &cutoff, 10)
 
 	// Conversions.
@@ -67,6 +69,13 @@ func ServerInfoJSON(db models.Datastore, ID int) ([]byte, error) {
 	}
 
 	// the JSON response (a single entry in the list)
+	type ActiveMap struct {
+		Rank    int    `json:"rank"`
+		MapName string `json:"map_name"`
+		MapID   int    `json:"map_id"`
+		Games   int    `json:"games"`
+	}
+
 	type Response struct {
 		ServerID   int                 `json:"server_id"`
 		Name       string              `json:"name"`
@@ -75,7 +84,12 @@ func ServerInfoJSON(db models.Datastore, ID int) ([]byte, error) {
 		Revision   string              `json:"revision"`
 		ActiveInd  bool                `json:"active_ind"`
 		CreateDt   string              `json:"create_dt"`
-		ActiveMaps []*models.ActiveMap `json:"active_maps"`
+		ActiveMaps []ActiveMap `json:"active_maps"`
+	}
+
+	var am []ActiveMap
+	for _, v := range rawData.ActiveMaps {
+		am = append(am, ActiveMap{v.SortOrder, v.MapName, v.MapID, v.Games})
 	}
 
 	r := Response{
@@ -86,7 +100,7 @@ func ServerInfoJSON(db models.Datastore, ID int) ([]byte, error) {
 		Revision:   rawData.Revision,
 		ActiveInd:  rawData.ActiveInd,
 		CreateDt:   rawData.CreateDtUTCStr,
-		ActiveMaps: rawData.ActiveMaps,
+		ActiveMaps: am,
 	}
 
 	return json.Marshal(r)

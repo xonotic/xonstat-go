@@ -113,7 +113,7 @@ func web(port string, printRoutes bool) {
 	r.Get(reverse.Add("topservers", "/topservers"), env.TopServersHandler)
 	r.Get(reverse.Add("topmaps", "/topmaps"), env.TopMapsHandler)
 	r.Get(reverse.Add("games", "/games"), env.RecentGamesHandler)
-	r.Get(reverse.Add("server_info", "/server/{id:\\d+}"), env.ServerInfoHandler)
+	r.Get(reverse.Add("server_info", "/server/{id:\\d+}", "{id:\\d+}"), env.ServerInfoHandler)
 
 	// Static files
 	cwd, _ := os.Getwd()

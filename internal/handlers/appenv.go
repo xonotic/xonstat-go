@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -26,6 +27,7 @@ func loadTemplates(templateDir string) map[string]*template.Template {
 	baseTemplate.Funcs(template.FuncMap{
 		"urlFor": reverse.Rev,
 		"inc":    func(i int) int { return i + 1 },
+		"intToString":    func(i int) string { return fmt.Sprintf("%d", i) },
 	})
 
 	// Separate pages from partials and layouts
