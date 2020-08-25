@@ -44,7 +44,7 @@ func scanGames(rows *sql.Rows) ([]*Game, error) {
 		var durationSecs int
 
 		err := rows.Scan(&g.GameID, &g.GameTypeCd, &g.ServerID, &g.MapID, &g.Winner,
-			&g.MatchID, &g.Mod, &g.StartDt, &durationSecs)
+			&g.MatchID, &g.Mod, &g.CreateDt, &durationSecs)
 
 		d := time.Duration(durationSecs) * time.Second
 		g.Duration = &d
@@ -61,7 +61,7 @@ func scanGames(rows *sql.Rows) ([]*Game, error) {
 
 // RGamesByMatchID retrives game records by their MatchID value.
 func (ds *PGDatastore) RGamesByMatchID(matchID string) ([]*Game, error) {
-	sql := `select game_id, game_type_cd, server_id, map_id, winner, match_id, mod, start_dt,
+	sql := `select game_id, game_type_cd, server_id, map_id, winner, match_id, mod, create_dt,
 	cast(extract(epoch from duration) as integer) as duration
 	from games
 	where match_id = $1
@@ -77,7 +77,7 @@ func (ds *PGDatastore) RGamesByMatchID(matchID string) ([]*Game, error) {
 
 // RGameByID retrives a single game record by its ID value.
 func (ds *PGDatastore) RGameByID(gameID int) (*Game, error) {
-	sql := `select game_id, game_type_cd, server_id, map_id, winner, match_id, mod, start_dt,
+	sql := `select game_id, game_type_cd, server_id, map_id, winner, match_id, mod, create_dt,
 	cast(extract(epoch from duration) as integer) as duration
 	from games
 	where game_id = $1`
