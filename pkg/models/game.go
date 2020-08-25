@@ -1,9 +1,11 @@
 package models
 
 import (
-	"github.com/lib/pq"
 	"database/sql"
 	"fmt"
+	"time"
+
+	"github.com/lib/pq"
 )
 
 // CGame inserts a Game record into the database.
@@ -39,8 +41,13 @@ func scanGames(rows *sql.Rows) ([]*Game, error) {
 	var games []*Game
 	for rows.Next() {
 		var g Game
+		var durationSecs int
+
 		err := rows.Scan(&g.GameID, &g.GameTypeCd, &g.ServerID, &g.MapID, &g.Winner,
-			&g.MatchID, &g.Mod, &g.StartDt)
+			&g.MatchID, &g.Mod, &g.StartDt, &durationSecs)
+
+		d := time.Duration(durationSecs) * time.Second
+		g.Duration = &d
 
 		if err != nil {
 			return nil, err
@@ -54,9 +61,8 @@ func scanGames(rows *sql.Rows) ([]*Game, error) {
 
 // RGamesByMatchID retrives game records by their MatchID value.
 func (ds *PGDatastore) RGamesByMatchID(matchID string) ([]*Game, error) {
-	// TODO: retrieve the duration as a string, convert it back into a time.Duration
-	sql := `select game_id, game_type_cd, server_id, map_id, winner, match_id, mod, 
-	start_dt
+	sql := `select game_id, game_type_cd, server_id, map_id, winner, match_id, mod, start_dt,
+	cast(extract(epoch from duration) as integer) as duration
 	from games
 	where match_id = $1
 	order by create_dt`
@@ -67,4 +73,25 @@ func (ds *PGDatastore) RGamesByMatchID(matchID string) ([]*Game, error) {
 	}
 	defer rows.Close()
 	return scanGames(rows)
+}
+
+// RGameByID retrives a single game record by its ID value.
+func (ds *PGDatastore) RGameByID(gameID int) (*Game, error) {
+	sql := `select game_id, game_type_cd, server_id, map_id, winner, match_id, mod, start_dt,
+	cast(extract(epoch from duration) as integer) as duration
+	from games
+	where game_id = $1`
+
+	rows, err := ds.db.Query(sql, gameID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	games, err := scanGames(rows)
+	if err != nil || len(games) != 1 {
+		return nil, err
+	}
+
+	return games[0], nil
 }
