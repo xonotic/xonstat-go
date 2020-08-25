@@ -62,8 +62,8 @@ type ActivePlayerBase struct {
 }
 
 // ActivePlayerToActivePlayerBase converts a raw ActivePlayer model into a better format for presentation
-func ActivePlayerToActivePlayerBase(in []*models.ActivePlayer) []ActivePlayerBase {
-	var out []ActivePlayerBase
+func ActivePlayerToActivePlayerBase(in []*models.ActivePlayer) []*ActivePlayerBase {
+	var out []*ActivePlayerBase
 	for _, v := range in {
 		nick := qstr.QStr(v.Nick)
 		ap := ActivePlayerBase{
@@ -74,14 +74,14 @@ func ActivePlayerToActivePlayerBase(in []*models.ActivePlayer) []ActivePlayerBas
 			StrippedNick: nick.Stripped(),
 			AliveTime:    models.DurationString(v.AliveTime, true),
 		}
-		out = append(out, ap)
+		out = append(out, &ap)
 	}
 
 	return out
 }
 
 // ActivePlayersData retrieves the active players
-func ActivePlayersData(limit, start int, db models.Datastore) ([]ActivePlayerBase, error) {
+func ActivePlayersData(limit, start int, db models.Datastore) ([]*ActivePlayerBase, error) {
 	rawActivePlayers, err := db.RActivePlayers(limit, start)
 	if err != nil {
 		return nil, err

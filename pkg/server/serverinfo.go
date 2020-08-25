@@ -8,151 +8,141 @@ import (
 	"github.com/antzucaro/qstr"
 	"github.com/nleeper/goment"
 	"github.com/spf13/viper"
-	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
-// ServerInfoBase is the base type used to represent servers for all
-// marshalled types (HTML/JSON/etc).
-type ServerInfoBase struct {
-	ServerID           int
-	Name               string
-	NameHTML           template.HTML
-	IPAddr             string
-	Port               int
-	Revision           string
-	ActiveInd          bool
-	CreateDt           time.Time
-	CreateDtEpoch      int64
-	CreateDtUTCStr     string
-	CreateDtFuzzy      string
-	ActivePlayerScores []*models.ActivePlayerScore
-	ActivePlayers      []leaderboard.ActivePlayerBase
-	ActiveMaps         []*models.ActiveMap
-	RecentGames        []game.RecentGameBase
+// TopScorerBase is the base type for players on a server and their
+// accumulated score
+type TopScorerBase struct {
+	SortOrder    int
+	PlayerID     int
+	Nick         string
+	NickStripped string
+	NickHTML     template.HTML
+	Score        int
 }
 
-// ServerInfoData retrieves information about a given server.
-func ServerInfoData(db models.Datastore, ID int) (*ServerInfoBase, error) {
-	rawServer, err := db.RServerByID(ID)
+// TopScorerData returns view-agnostic data for the top scorers on a given server.
+func TopScorerData(db models.Datastore, serverID int) ([]*TopScorerBase, error) {
+	activePlayerScoresCutoff := time.Now().AddDate(0, 0, -1*viper.GetInt("TopPlayersByScoreDays"))
+	rawActivePlayerScores, err := db.RActivePlayerScores(serverID, &activePlayerScoresCutoff, 10)
 	if err != nil {
 		return nil, err
 	}
 
-	now := time.Now()
+	var topScorers []*TopScorerBase
+	for _, v := range rawActivePlayerScores {
+		nick := qstr.QStr(v.Nick)
+		ts := TopScorerBase{
+			SortOrder:    v.SortOrder,
+			PlayerID:     v.PlayerID,
+			Nick:         v.Nick,
+			NickStripped: nick.Stripped(),
+			NickHTML:     nick.HTML(),
+		}
 
-	// Top players by accumulated score over the time period.
-	activePlayerScoresCutoff := now.AddDate(0, 0, -1*viper.GetInt("TopPlayersByScoreDays"))
-	activePlayerScores, err := db.RActivePlayerScores(ID, &activePlayerScoresCutoff, 10)
+		topScorers = append(topScorers, &ts)
+	}
+	return topScorers, nil
+}
 
+// TopActivePlayersData returns view-agnostic data for the most active players on a given server.
+// NOTE: the base type returned here is shared with the leaderboard package.
+func TopActivePlayersData(db models.Datastore, serverID int) ([]*leaderboard.ActivePlayerBase, error) {
 	// Top players by alive time over the time period.
-	activePlayersCutoff := now.AddDate(0, 0, -1*viper.GetInt("TopPlayersByTimeDays"))
-	rawActivePlayers, _ := db.RActivePlayersByServer(ID, &activePlayersCutoff, 10)
+	activePlayersCutoff := time.Now().AddDate(0, 0, -1*viper.GetInt("TopPlayersByTimeDays"))
+	rawActivePlayers, err := db.RActivePlayersByServer(serverID, &activePlayersCutoff, 10)
+	if err != nil {
+		return nil, err
+	}
+
 	activePlayers := leaderboard.ActivePlayerToActivePlayerBase(rawActivePlayers)
+	return activePlayers, nil
+}
 
+// TopMapsData returns view-agnostic data for the most active maps on a given server by times played.
+// NOTE: there is no base type here (it is straight from model/query result) because no manipulation
+// or hiding is required.
+func TopMapsData(db models.Datastore, serverID int) ([]*models.ActiveMap, error) {
 	// Top maps by times played over the time period.
-	activeMapsCutoff := now.AddDate(0, 0, -1*viper.GetInt("TopMapsByGamesDays"))
-	activeMaps, _ := db.RActiveMapsByServer(ID, &activeMapsCutoff, 10)
+	activeMapsCutoff := time.Now().AddDate(0, 0, -1*viper.GetInt("TopMapsByGamesDays"))
+	activeMaps, err := db.RActiveMapsByServer(serverID, &activeMapsCutoff, 10)
+	if err != nil {
+		return nil, err
+	}
 
-	// Recent games played on this server.
-	recentGamesCutoff := now.AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
-	recentGames, _ := game.RecentGamesData(db, ID, game.EmptyMapID, game.EmptyPlayerID,
-		game.EmptyGameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20)
+	return activeMaps, nil
+}
+
+// InfoBase is the base type used to represent servers for all
+// marshalled types (HTML/JSON/etc).
+type InfoBase struct {
+	ServerID       int
+	Name           string
+	NameHTML       template.HTML
+	IPAddr         string
+	Port           int
+	Revision       string
+	ActiveInd      bool
+	CreateDt       time.Time
+	CreateDtEpoch  int64
+	CreateDtUTCStr string
+	CreateDtFuzzy  string
+}
+
+// InfoData retrieves information about a given server.
+func InfoData(db models.Datastore, serverID int) (*InfoBase, error) {
+	rawServer, err := db.RServerByID(serverID)
+	if err != nil {
+		return nil, err
+	}
 
 	// Conversions.
 	name := qstr.QStr(rawServer.Name.String)
 	dtUTC := rawServer.CreateDt.UTC()
 	fuzzyDt, _ := goment.New(dtUTC)
 
-	return &ServerInfoBase{
-		ServerID:           rawServer.ServerID,
-		Name:               rawServer.Name.String,
-		NameHTML:           name.HTML(),
-		IPAddr:             rawServer.IPAddr.String,
-		Port:               int(rawServer.Port.Int64),
-		Revision:           rawServer.Revision.String,
-		ActiveInd:          rawServer.ActiveInd,
-		CreateDt:           rawServer.CreateDt,
-		CreateDtEpoch:      rawServer.CreateDt.Unix(),
-		CreateDtUTCStr:     dtUTC.Format("Mon, 2 Jan 2006 15:04:05 MST"),
-		CreateDtFuzzy:      fuzzyDt.FromNow(),
-		ActivePlayerScores: activePlayerScores,
-		ActivePlayers:      activePlayers,
-		ActiveMaps:         activeMaps,
-		RecentGames:        recentGames,
+	return &InfoBase{
+		ServerID:       rawServer.ServerID,
+		Name:           rawServer.Name.String,
+		NameHTML:       name.HTML(),
+		IPAddr:         rawServer.IPAddr.String,
+		Port:           int(rawServer.Port.Int64),
+		Revision:       rawServer.Revision.String,
+		ActiveInd:      rawServer.ActiveInd,
+		CreateDt:       rawServer.CreateDt,
+		CreateDtEpoch:  rawServer.CreateDt.Unix(),
+		CreateDtUTCStr: dtUTC.Format("Mon, 2 Jan 2006 15:04:05 MST"),
+		CreateDtFuzzy:  fuzzyDt.FromNow(),
 	}, nil
 }
 
-// ServerInfoJSON returns server records as JSON.
-func ServerInfoJSON(db models.Datastore, ID int) ([]byte, error) {
-	rawData, err := ServerInfoData(db, ID)
+// InfoJSON returns server records as JSON.
+func InfoJSON(db models.Datastore, serverID int) ([]byte, error) {
+	rawData, err := InfoData(db, serverID)
 	if err != nil {
 		return nil, err
 	}
 
-	// the JSON response (a single entry in the list)
-	type ActivePlayerScore struct {
-		Rank     int    `json:"rank"`
-		PlayerID int    `json:"player_id"`
-		Nick     string `json:"nick"`
-		Score    int    `json:"score"`
-	}
-
-	type ActivePlayer struct {
-		Rank      int    `json:"rank"`
-		PlayerID  int    `json:"player_id"`
-		Nick      string `json:"nick"`
-		AliveTime string `json:"alivetime"`
-	}
-
-	type ActiveMap struct {
-		Rank    int    `json:"rank"`
-		MapName string `json:"map_name"`
-		MapID   int    `json:"map_id"`
-		Games   int    `json:"games"`
-	}
-
 	type Response struct {
-		ServerID           int                 `json:"server_id"`
-		Name               string              `json:"name"`
-		IPAddr             string              `json:"ip_addr"`
-		Port               int                 `json:"port"`
-		Revision           string              `json:"revision"`
-		ActiveInd          bool                `json:"active_ind"`
-		CreateDt           string              `json:"create_dt"`
-		ActivePlayerScores []ActivePlayerScore `json:"active_player_scores"`
-		ActivePlayers      []ActivePlayer      `json:"active_players"`
-		ActiveMaps         []ActiveMap         `json:"active_maps"`
-	}
-
-	var aps []ActivePlayerScore
-	for _, v := range rawData.ActivePlayerScores {
-		aps = append(aps, ActivePlayerScore{v.SortOrder, v.PlayerID, v.NickStripped, v.Score})
-	}
-
-	var am []ActiveMap
-	for _, v := range rawData.ActiveMaps {
-		am = append(am, ActiveMap{v.SortOrder, v.MapName, v.MapID, v.Games})
-	}
-
-	var ap []ActivePlayer
-	for _, v := range rawData.ActivePlayers {
-		nick := qstr.QStr(v.Nick)
-		ap = append(ap, ActivePlayer{v.SortOrder, v.PlayerID, nick.Stripped(), v.AliveTime})
+		ServerID  int    `json:"server_id"`
+		Name      string `json:"name"`
+		IPAddr    string `json:"ip_addr"`
+		Port      int    `json:"port"`
+		Revision  string `json:"revision"`
+		ActiveInd bool   `json:"active_ind"`
+		CreateDt  string `json:"create_dt"`
 	}
 
 	r := Response{
-		ServerID:           rawData.ServerID,
-		Name:               rawData.Name,
-		IPAddr:             rawData.IPAddr,
-		Port:               rawData.Port,
-		Revision:           rawData.Revision,
-		ActiveInd:          rawData.ActiveInd,
-		CreateDt:           rawData.CreateDtUTCStr,
-		ActivePlayerScores: aps,
-		ActivePlayers:      ap,
-		ActiveMaps:         am,
+		ServerID:  rawData.ServerID,
+		Name:      rawData.Name,
+		IPAddr:    rawData.IPAddr,
+		Port:      rawData.Port,
+		Revision:  rawData.Revision,
+		ActiveInd: rawData.ActiveInd,
+		CreateDt:  rawData.CreateDtUTCStr,
 	}
 
 	return json.Marshal(r)

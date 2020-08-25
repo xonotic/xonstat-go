@@ -1,19 +1,15 @@
 package models
 
 import (
-	"html/template"
 	"time"
-
-	"github.com/antzucaro/qstr"
 )
 
 // ActivePlayerScore is the sum score of an active player over a length of time.
 type ActivePlayerScore struct {
-	SortOrder    int
-	PlayerID     int
-	NickHTML     template.HTML
-	NickStripped string
-	Score        int
+	SortOrder int
+	PlayerID  int
+	Nick      string
+	Score     int
 }
 
 // RActivePlayerScores retrieves the top scoring players for a server over a given period of time.
@@ -38,18 +34,13 @@ func (ds *PGDatastore) RActivePlayerScores(serverID int, cutoff *time.Time, limi
 	defer rows.Close()
 
 	var activePlayerScores []*ActivePlayerScore
-	var rawNick string
 	for rows.Next() {
 		var aps ActivePlayerScore
 
-		err := rows.Scan(&aps.SortOrder, &aps.PlayerID, &rawNick, &aps.Score)
+		err := rows.Scan(&aps.SortOrder, &aps.PlayerID, &aps.Nick, &aps.Score)
 		if err != nil {
 			return nil, err
 		}
-
-		nick := qstr.QStr(rawNick)
-		aps.NickStripped = nick.Stripped()
-		aps.NickHTML = nick.HTML()
 
 		activePlayerScores = append(activePlayerScores, &aps)
 	}

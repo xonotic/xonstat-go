@@ -69,7 +69,7 @@ func (ae *AppEnv) TopActiveHandler(w http.ResponseWriter, r *http.Request) {
 
 		// The structure passed to the template.
 		type Data struct {
-			ActivePlayers []leaderboard.ActivePlayerBase
+			ActivePlayers []*leaderboard.ActivePlayerBase
 			Start         int
 			Next          int
 			ShowMoreLink  bool
@@ -309,7 +309,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	type Data struct {
 		StatLine      template.HTML
 		DayStatLine   template.HTML
-		ActivePlayers []leaderboard.ActivePlayerBase
+		ActivePlayers []*leaderboard.ActivePlayerBase
 		ActiveServers []leaderboard.ActiveServerBase
 		ActiveMaps    []leaderboard.ActiveMapBase
 		RecentGames   []game.RecentGameBase
