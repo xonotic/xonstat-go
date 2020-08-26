@@ -7,17 +7,18 @@ import (
 
 // Game is a single Xonotic match played.
 type Game struct {
-	GameID     int
-	GameTypeCd string
-	ServerID   int
-	MapID      int
-	Duration   *time.Duration // PostgreSQL interval
-	Winner     sql.NullInt64
-	MatchID    sql.NullString
-	Mod        sql.NullString
-	Players    []int
-	StartDt    time.Time
-	CreateDt   time.Time
+	GameID        int
+	GameTypeCd    string
+	GameTypeDescr string
+	ServerID      int
+	MapID         int
+	Duration      *time.Duration // PostgreSQL interval
+	Winner        sql.NullInt64
+	MatchID       sql.NullString
+	Mod           sql.NullString
+	Players       []int
+	StartDt       time.Time
+	CreateDt      time.Time
 }
 
 // Server is a Xonotic server which hosts games.
@@ -239,58 +240,58 @@ type PlayerGameFragMatrix struct {
 	Matrix           map[int]int
 }
 
-// SummaryStat is a piece of the summary stat line at the top of the leaderboard page. It 
+// SummaryStat is a piece of the summary stat line at the top of the leaderboard page. It
 // has a scope of either "all" or "day". Several of these are ultimately used to construct
 // a string like:
 // "Tracking X players and Y games (N dm; N ctf; N duel; N cts; N tdm; N other) since $DATE."
 type SummaryStat struct {
 	PlayerCount int
-	GameTypeCd string
-	GameCount int
-	RefreshDt time.Time
+	GameTypeCd  string
+	GameCount   int
+	RefreshDt   time.Time
 }
 
-// ActivePlayer is a leaderboard item for a player's playing time over a specified 
+// ActivePlayer is a leaderboard item for a player's playing time over a specified
 // time window.
 type ActivePlayer struct {
 	SortOrder int
-	PlayerID int
-	Nick string
+	PlayerID  int
+	Nick      string
 	AliveTime time.Duration
-	CreateDt time.Time
+	CreateDt  time.Time
 }
 
-// ActiveServer is a leaderboard item for a server's aggregate playing time over a specified 
+// ActiveServer is a leaderboard item for a server's aggregate playing time over a specified
 // time window.
 type ActiveServer struct {
-	SortOrder int
-	ServerID int
+	SortOrder  int
+	ServerID   int
 	ServerName string
-	PlayTime time.Duration
-	CreateDt time.Time
+	PlayTime   time.Duration
+	CreateDt   time.Time
 }
 
 // ActiveMap is a leaderboard item for the number of times a map was played over a specified
 // time window.
 type ActiveMap struct {
 	SortOrder int
-	MapID int
-	MapName string
-	Games int
-	CreateDt time.Time
+	MapID     int
+	MapName   string
+	Games     int
+	CreateDt  time.Time
 }
 
 // RecentGame is an aggregated response for summary information from a match
 type RecentGame struct {
-	GameID int
-	GameTypeCd string
-	GameTypeDescr string
-	ServerID int
-	ServerName string
-	MapID int
-	MapName string
-	WinningTeam sql.NullInt32
+	GameID          int
+	GameTypeCd      string
+	GameTypeDescr   string
+	ServerID        int
+	ServerName      string
+	MapID           int
+	MapName         string
+	WinningTeam     sql.NullInt32
 	WinningPlayerID int
-	WinningNick string
-	CreateDt time.Time
+	WinningNick     string
+	CreateDt        time.Time
 }
