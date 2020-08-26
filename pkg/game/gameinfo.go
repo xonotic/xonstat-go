@@ -1,8 +1,6 @@
 package game
 
 import (
-	"time"
-
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/server"
 )
@@ -12,7 +10,7 @@ type InfoBase struct {
 	GameID        int
 	GameTypeCd    string
 	GameTypeDescr string
-	Duration      time.Duration
+	Duration      *models.MultiDuration
 	Winner        int
 	MatchID       string
 	Mod           string
@@ -41,7 +39,7 @@ func InfoData(db models.Datastore, gameID int) (*InfoBase, error) {
 		GameID:        gameID,
 		GameTypeCd:    game.GameTypeCd,
 		GameTypeDescr: game.GameTypeDescr,
-		Duration:      *game.Duration,
+		Duration:      models.NewMultiDuration(*game.Duration),
 		Winner:        int(game.Winner.Int64),
 		MatchID:       game.MatchID.String,
 		Mod:           game.Mod.String,

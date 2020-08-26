@@ -113,3 +113,19 @@ func NewMultiDt(dt time.Time) (*MultiDt, error) {
 		Fuzzy:  fuzzy,
 	}, nil
 }
+
+// MultiDuration is like MultiDt, but for time.Duration-s.
+type MultiDuration struct {
+	Duration time.Duration
+	Short    string
+	Long     string
+}
+
+// NewMultiDuration creates a new MultiDuration.
+func NewMultiDuration(d time.Duration) *MultiDuration {
+	return &MultiDuration{
+		Duration: d,
+		Short:    DurationString(d, true),
+		Long:     DurationString(d, false),
+	}
+}

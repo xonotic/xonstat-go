@@ -13,7 +13,7 @@
       Played {{.CreateDt.Fuzzy}} <span class="abstime" data-epoch="{{.CreateDt.Epoch}}" title="{{.CreateDt.UTCStr}}"> <i class="fa fa-info-circle"></i></span><br />
       Server: <a href="{{urlFor "server_info" (intToString .Server.ServerID)}}" name="Server info page for {{.Server.Name}}">{{.Server.Name}}</a><br />
       {{if .Duration}}
-      TODO: Duration string here
+      Duration: <span>{{.Duration.Long}}</span>
       {{end}}
     </p>
   </div>
