@@ -3,7 +3,6 @@ package game
 import (
 	"time"
 
-	"github.com/nleeper/goment"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/server"
 )
@@ -16,10 +15,7 @@ type InfoBase struct {
 	Winner     int
 	MatchID    string
 	Mod        string
-	CreateDt   time.Time
-	CreateDtEpoch  int64
-	CreateDtUTCStr string
-	CreateDtFuzzy  string
+	CreateDt   *models.MultiDt
 	Server     *server.InfoBase
 }
 
@@ -35,20 +31,19 @@ func InfoData(db models.Datastore, gameID int) (*InfoBase, error) {
 		return nil, err
 	}
 
-	dtUTC := game.CreateDt.UTC()
-	fuzzyDt, _ := goment.New(dtUTC)
+	dt, err := models.NewMultiDt(game.CreateDt)
+	if err != nil {
+		return nil, err
+	}
 
 	return &InfoBase{
-		GameID: gameID,
+		GameID:     gameID,
 		GameTypeCd: game.GameTypeCd,
-		Duration: *game.Duration,
-		Winner: int(game.Winner.Int64),
-		MatchID: game.MatchID.String,
-		Mod: game.Mod.String,
-		CreateDt: game.CreateDt,
-		CreateDtEpoch:  game.CreateDt.Unix(),
-		CreateDtUTCStr: dtUTC.Format("Mon, 2 Jan 2006 15:04:05 MST"),
-		CreateDtFuzzy:  fuzzyDt.FromNow(),
-		Server: server,
+		Duration:   *game.Duration,
+		Winner:     int(game.Winner.Int64),
+		MatchID:    game.MatchID.String,
+		Mod:        game.Mod.String,
+		CreateDt:   dt,
+		Server:     server,
 	}, nil
 }

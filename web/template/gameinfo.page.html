@@ -10,7 +10,7 @@
     <h2>Game #{{.GameID}}</h2>
     <p>
       <span class="sprite sprite-{{.GameTypeCd}}"></span> TODO: Gametype description <br />
-      Played {{.CreateDtFuzzy}} <span class="abstime" data-epoch="{{.CreateDtEpoch}}" title="{{.CreateDtUTCStr}}"> <i class="fa fa-info-circle"></i></span><br />
+      Played {{.CreateDt.Fuzzy}} <span class="abstime" data-epoch="{{.CreateDt.Epoch}}" title="{{.CreateDt.UTCStr}}"> <i class="fa fa-info-circle"></i></span><br />
       Server: <a href="{{urlFor "server_info" (intToString .Server.ServerID)}}" name="Server info page for {{.Server.Name}}">{{.Server.Name}}</a><br />
       {{if .Duration}}
       TODO: Duration string here

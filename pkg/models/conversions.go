@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"time"
+
+	"github.com/nleeper/goment"
 )
 
 // durationToMSStr converts a pointer to a time.Duration into a string suitable for an INSERT.
-// The pq library doesn't support time.Duration -> interval PG type, so we have to convert it 
+// The pq library doesn't support time.Duration -> interval PG type, so we have to convert it
 // to a string. We'll do this with millisecond granularity, allowing fractional pieces too.
 func durationToMSStr(t *time.Duration) string {
 	durationLiteral := "NULL"
@@ -54,7 +56,7 @@ func DurationString(d time.Duration, short bool) string {
 			buffer.WriteString("1 hr")
 		}
 	} else if hours > 1 {
-		if short{
+		if short {
 			buffer.WriteString(fmt.Sprintf("%dh", hours))
 		} else {
 			buffer.WriteString(fmt.Sprintf("%d hrs", hours))
@@ -81,4 +83,33 @@ func DurationString(d time.Duration, short bool) string {
 		}
 	}
 	return buffer.String()
+}
+
+// MultiDt takes a normal time.Time object and converts it into several commonly-used values.
+type MultiDt struct {
+	Dt     time.Time
+	Epoch  int64
+	UTCStr string
+	Fuzzy  string
+}
+
+// NewMultiDt takes a time.Time and computes several commonly-used formats for it.
+func NewMultiDt(dt time.Time) (*MultiDt, error) {
+	dtUTC := dt.UTC()
+
+	fuzzyDt, err := goment.New(dtUTC)
+	if err != nil {
+		return nil, err
+	}
+
+	epoch := dt.Unix()
+	dtUTCStr := dtUTC.Format("Mon, 2 Jan 2006 15:04:05 MST")
+	fuzzy := fuzzyDt.FromNow()
+
+	return &MultiDt{
+		Dt:     dt,
+		Epoch:  epoch,
+		UTCStr: dtUTCStr,
+		Fuzzy:  fuzzy,
+	}, nil
 }
