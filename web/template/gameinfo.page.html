@@ -1,0 +1,21 @@
+{{template "base" .}}
+
+{{define "subtitle"}}Game Info - {{end}}
+
+{{define "title"}}Game Information{{end}}
+
+{{define "body"}}
+<div class="grid-x grid-padding-x">
+  <div class="cell small-12">
+    <h2>Game #{{.GameID}}</h2>
+    <p>
+      <span class="sprite sprite-{{.GameTypeCd}}"></span> TODO: Gametype description <br />
+      Played {{.CreateDtFuzzy}} <span class="abstime" data-epoch="{{.CreateDtEpoch}}" title="{{.CreateDtUTCStr}}"> <i class="fa fa-info-circle"></i></span><br />
+      Server: <a href="{{urlFor "server_info" (intToString .Server.ServerID)}}" name="Server info page for {{.Server.Name}}">{{.Server.Name}}</a><br />
+      {{if .Duration}}
+      TODO: Duration string here
+      {{end}}
+    </p>
+  </div>
+</div>
+{{end}}
