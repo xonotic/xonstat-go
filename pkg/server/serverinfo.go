@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/antzucaro/qstr"
-	"github.com/nleeper/goment"
 	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/models"
@@ -78,17 +77,14 @@ func TopMapsData(db models.Datastore, serverID int) ([]*models.ActiveMap, error)
 // InfoBase is the base type used to represent servers for all
 // marshalled types (HTML/JSON/etc).
 type InfoBase struct {
-	ServerID       int
-	Name           string
-	NameHTML       template.HTML
-	IPAddr         string
-	Port           int
-	Revision       string
-	ActiveInd      bool
-	CreateDt       time.Time
-	CreateDtEpoch  int64
-	CreateDtUTCStr string
-	CreateDtFuzzy  string
+	ServerID  int
+	Name      string
+	NameHTML  template.HTML
+	IPAddr    string
+	Port      int
+	Revision  string
+	ActiveInd bool
+	CreateDt  *models.MultiDt
 }
 
 // InfoData retrieves information about a given server.
@@ -100,21 +96,20 @@ func InfoData(db models.Datastore, serverID int) (*InfoBase, error) {
 
 	// Conversions.
 	name := qstr.QStr(rawServer.Name.String)
-	dtUTC := rawServer.CreateDt.UTC()
-	fuzzyDt, _ := goment.New(dtUTC)
+	dt, err := models.NewMultiDt(rawServer.CreateDt)
+	if err != nil {
+		return nil, err
+	}
 
 	return &InfoBase{
-		ServerID:       rawServer.ServerID,
-		Name:           rawServer.Name.String,
-		NameHTML:       name.HTML(),
-		IPAddr:         rawServer.IPAddr.String,
-		Port:           int(rawServer.Port.Int64),
-		Revision:       rawServer.Revision.String,
-		ActiveInd:      rawServer.ActiveInd,
-		CreateDt:       rawServer.CreateDt,
-		CreateDtEpoch:  rawServer.CreateDt.Unix(),
-		CreateDtUTCStr: dtUTC.Format("Mon, 2 Jan 2006 15:04:05 MST"),
-		CreateDtFuzzy:  fuzzyDt.FromNow(),
+		ServerID:  rawServer.ServerID,
+		Name:      rawServer.Name.String,
+		NameHTML:  name.HTML(),
+		IPAddr:    rawServer.IPAddr.String,
+		Port:      int(rawServer.Port.Int64),
+		Revision:  rawServer.Revision.String,
+		ActiveInd: rawServer.ActiveInd,
+		CreateDt:  dt,
 	}, nil
 }
 
@@ -142,7 +137,7 @@ func InfoJSON(db models.Datastore, serverID int) ([]byte, error) {
 		Port:      rawData.Port,
 		Revision:  rawData.Revision,
 		ActiveInd: rawData.ActiveInd,
-		CreateDt:  rawData.CreateDtUTCStr,
+		CreateDt:  rawData.CreateDt.UTCStr,
 	}
 
 	return json.Marshal(r)

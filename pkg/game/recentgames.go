@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/antzucaro/qstr"
-	"github.com/nleeper/goment"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
@@ -43,10 +42,7 @@ type RecentGameBase struct {
 	WinningNick         string
 	WinningNickStripped string
 	WinningNickHTML     template.HTML
-	CreateDt            time.Time
-	CreateDtEpoch       int64
-	CreateDtUTCStr      string
-	CreateDtFuzzy       string
+	CreateDt            *models.MultiDt
 }
 
 // RecentGamesData retrieves recent games data based on filter criteria
@@ -72,9 +68,9 @@ func RecentGamesData(db models.Datastore, serverID int, mapID int, playerID int,
 			winningTeam = int(v.WinningTeam.Int32)
 		}
 
-		fuzzyDt, err := goment.New(v.CreateDt.UTC())
+		dt, err := models.NewMultiDt(v.CreateDt)
 		if err != nil {
-			return recentGames, err
+			return nil, err
 		}
 
 		rg := RecentGameBase{
@@ -89,10 +85,7 @@ func RecentGamesData(db models.Datastore, serverID int, mapID int, playerID int,
 			WinningPlayerID: v.WinningPlayerID,
 			WinningNick:     nick.Stripped(),
 			WinningNickHTML: nick.HTML(),
-			CreateDt:        v.CreateDt,
-			CreateDtEpoch:   v.CreateDt.Unix(),
-			CreateDtUTCStr:  v.CreateDt.UTC().Format("Mon, 2 Jan 2006 15:04:05 MST"),
-			CreateDtFuzzy:   fuzzyDt.FromNow(),
+			CreateDt:        dt,
 		}
 
 		recentGames = append(recentGames, rg)
@@ -139,7 +132,7 @@ func RecentGamesJSON(db models.Datastore, serverID int, mapID int, playerID int,
 			WinningTeam:     rg.WinningTeam,
 			WinningPlayerID: rg.WinningPlayerID,
 			WinningNick:     rg.WinningNick,
-			CreateDt:        rg.CreateDt.Format(time.RFC3339),
+			CreateDt:        rg.CreateDt.Dt.Format(time.RFC3339),
 		}
 
 		rgs = append(rgs, r)
