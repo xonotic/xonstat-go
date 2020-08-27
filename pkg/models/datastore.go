@@ -25,6 +25,7 @@ type Datastore interface {
 	CGame(tx *sql.Tx, game Game) (int64, error)
 	RGamesByMatchID(matchID string) ([]*Game, error)
 	RGameByID(gameID int) (*Game, error)
+	RTeamGameStatsByGameID(gameID int) ([]*TeamGameStat, error)
 
 	// Player-oriented methods
 	CPlayer(tx *sql.Tx, player Player) (int64, error)

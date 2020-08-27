@@ -16,6 +16,7 @@ type InfoBase struct {
 	Mod           string
 	CreateDt      *models.MultiDt
 	Server        *server.InfoBase
+	TeamGameStats []*models.TeamGameStat
 }
 
 // InfoData returns the view-agnostic data for a given game by its ID.
@@ -35,6 +36,11 @@ func InfoData(db models.Datastore, gameID int) (*InfoBase, error) {
 		return nil, err
 	}
 
+	teamGameStats, err := db.RTeamGameStatsByGameID(gameID)
+	if err != nil {
+		return nil, err
+	}
+
 	return &InfoBase{
 		GameID:        gameID,
 		GameTypeCd:    game.GameTypeCd,
@@ -45,5 +51,6 @@ func InfoData(db models.Datastore, gameID int) (*InfoBase, error) {
 		Mod:           game.Mod.String,
 		CreateDt:      dt,
 		Server:        server,
+		TeamGameStats: teamGameStats,
 	}, nil
 }
