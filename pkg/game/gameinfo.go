@@ -7,16 +7,17 @@ import (
 
 // InfoBase is the view-agnostic representation of a Game.
 type InfoBase struct {
-	GameID        int
-	GameTypeCd    string
-	GameTypeDescr string
-	Duration      *models.MultiDuration
-	Winner        int
-	MatchID       string
-	Mod           string
-	CreateDt      *models.MultiDt
-	Server        *server.InfoBase
-	TeamGameStats []*models.TeamGameStat
+	GameID          int
+	GameTypeCd      string
+	GameTypeDescr   string
+	Duration        *models.MultiDuration
+	Winner          int
+	MatchID         string
+	Mod             string
+	CreateDt        *models.MultiDt
+	Server          *server.InfoBase
+	TeamGameStats   []*models.TeamGameStat
+	PlayerGameStats []*models.PlayerGameStat
 }
 
 // InfoData returns the view-agnostic data for a given game by its ID.
@@ -41,16 +42,22 @@ func InfoData(db models.Datastore, gameID int) (*InfoBase, error) {
 		return nil, err
 	}
 
+	playerGameStats, err := db.RPlayerGameStatsByGameID(gameID)
+	if err != nil {
+		return nil, err
+	}
+
 	return &InfoBase{
-		GameID:        gameID,
-		GameTypeCd:    game.GameTypeCd,
-		GameTypeDescr: game.GameTypeDescr,
-		Duration:      models.NewMultiDuration(*game.Duration),
-		Winner:        int(game.Winner.Int64),
-		MatchID:       game.MatchID.String,
-		Mod:           game.Mod.String,
-		CreateDt:      dt,
-		Server:        server,
-		TeamGameStats: teamGameStats,
+		GameID:          gameID,
+		GameTypeCd:      game.GameTypeCd,
+		GameTypeDescr:   game.GameTypeDescr,
+		Duration:        models.NewMultiDuration(*game.Duration),
+		Winner:          int(game.Winner.Int64),
+		MatchID:         game.MatchID.String,
+		Mod:             game.Mod.String,
+		CreateDt:        dt,
+		Server:          server,
+		TeamGameStats:   teamGameStats,
+		PlayerGameStats: playerGameStats,
 	}, nil
 }
