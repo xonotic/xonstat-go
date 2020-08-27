@@ -29,3 +29,43 @@ func (ds *PGDatastore) CPlayerWeaponStat(tx *sql.Tx, pws PlayerWeaponStat) (int6
 
 	return pwsID, nil
 }
+
+// scanPlayerWeaponStats is a helper function to parse full player weapon stat records out of a resultset.
+func scanPlayerWeaponStats(rows *sql.Rows) ([]*PlayerWeaponStat, error) {
+	var pws []*PlayerWeaponStat
+	for rows.Next() {
+		var s PlayerWeaponStat
+
+		err := rows.Scan(&s.PlayerWeaponStatID, &s.PlayerID, &s.GameID, &s.PlayerGameStatID, 
+			&s.WeaponCd, &s.Actual, &s.Max, &s.Hit, &s.Fired, &s.Frags)
+
+		if err != nil {
+			return nil, err
+		}
+
+		pws = append(pws, &s)
+	}
+
+	return pws, nil
+}
+
+// RPlayerWeaponStatsByGameID retrieves player weapon stat records by their game ID
+func (ds *PGDatastore) RPlayerWeaponStatsByGameID(gameID int) ([]*PlayerWeaponStat, error) {
+	sql := `select player_weapon_stats_id, player_id, game_id, player_game_stat_id, weapon_cd,
+	actual, max, hit, fired, frags
+	from player_weapon_stats
+	where game_id = $1`
+
+	rows, err := ds.db.Query(sql, gameID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	pgs, err := scanPlayerWeaponStats(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return pgs, nil
+}
