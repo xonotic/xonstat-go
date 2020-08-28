@@ -17,5 +17,33 @@
       {{end}}
     </p>
   </div>
+
+  {{if .TeamGameStats}}
+    {{range .TeamGameStats}}
+      <div class="grid-x grid-padding-x">
+
+        <div class="cell small-1 teamscore">
+
+          <div class="teamname {{.Color}}">
+            {{.ColorInitCap}}
+          </div>
+
+          <div class="{{.Color}}">
+            {{if eq $.GameTypeCd "ctf"}}
+              {{.Caps}}
+            {{else if eq $.GameTypeCd "ca"}}
+              {{.Rounds}}
+            {{else if eq $.GameTypeCd "nb"}}
+              {{.Caps}}
+            {{else}}
+              {{.Score}}
+            {{end}}
+          </div>
+        </div>
+
+      </div>
+    {{end}}
+  {{end}}
+
 </div>
 {{end}}
