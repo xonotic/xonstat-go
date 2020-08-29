@@ -3,8 +3,10 @@ package models
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"time"
 
+	"github.com/antzucaro/qstr"
 	"github.com/nleeper/goment"
 )
 
@@ -127,5 +129,22 @@ func NewMultiDuration(d time.Duration) *MultiDuration {
 		Duration: d,
 		Short:    DurationString(d, true),
 		Long:     DurationString(d, false),
+	}
+}
+
+// MultiNick provides some common formats for a player's nick.
+type MultiNick struct {
+	Nick         string
+	NickStripped string
+	NickHTML     template.HTML
+}
+
+// NewMultiNick creates a MultiNick
+func NewMultiNick(nick string) *MultiNick {
+	n := qstr.QStr(nick)
+	return &MultiNick{
+		Nick: nick,
+		NickStripped: n.Stripped(),
+		NickHTML: n.HTML(),
 	}
 }
