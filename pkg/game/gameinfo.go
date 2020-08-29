@@ -19,6 +19,22 @@ type TeamGameStatBase struct {
 	ColorInitCap   string
 }
 
+// TeamColorFromTeam takes a team number and converts it to its corresponding color
+func TeamColorFromTeam(team int) string {
+	color := "red"
+	if team == 5 {
+		color = "red"
+	} else if team == 14 {
+		color = "blue"
+	} else if team == 13 {
+		color = "yellow"
+	} else if team == 10 {
+		color = "pink"
+	}
+
+	return color
+}
+
 // NewTeamGameStatBase creates an instance of this class from the model type 
 // returned from the DB.
 func NewTeamGameStatBase(tgs *models.TeamGameStat) *TeamGameStatBase {
@@ -37,17 +53,7 @@ func NewTeamGameStatBase(tgs *models.TeamGameStat) *TeamGameStatBase {
 		caps = int(tgs.Caps.Int32)
 	}
 
-	color := "red"
-	if tgs.Team == 5 {
-		color = "red"
-	} else if tgs.Team == 14 {
-		color = "blue"
-	} else if tgs.Team == 13 {
-		color = "yellow"
-	} else if tgs.Team == 10 {
-		color = "pink"
-	}
-
+	color := TeamColorFromTeam(tgs.Team)
 	colorInitCap := strings.Title(color)
 
 	return &TeamGameStatBase{
