@@ -12,7 +12,7 @@
       <tbody>
       {{range .}}
         <tr>
-          <td class="text-center"><a class="button tiny" href="" title="View detailed information about this game">view</a></td>
+          <td class="text-center"><a class="button tiny" href="{{urlFor "game_info" (intToString .GameID)}}" title="View detailed information about this game">view</a></td>
           <td class="text-center"><span class="sprite sprite-{{.GameTypeCd}}" alt="{{.GameTypeCd}}" title="{{.GameTypeDescr}}"></span></td>
           <td class="show-for-medium no-stretch"><a href="{{urlFor "server_info" (intToString .ServerID)}}" title="Go to the detail page for this server">{{.ServerName}}</a></td>
           <td class="show-for-medium"><a href="" title="Go to the map detail page for this map">{{.MapName}}</a></td>
