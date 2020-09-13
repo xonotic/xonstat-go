@@ -23,7 +23,7 @@ type TeamGameStatBase struct {
 
 // TeamColorFromTeam takes a team number and converts it to its corresponding color
 func TeamColorFromTeam(team int) string {
-	color := "red"
+	color := ""
 	if team == 5 {
 		color = "red"
 	} else if team == 14 {
@@ -77,6 +77,7 @@ type PlayerGameStatBase struct {
 	GameID           int
 	Nick             *models.MultiNick
 	Team             int
+	Color            string
 	Rank             int
 	AliveTime        *models.MultiDuration
 	Kills            int
@@ -126,12 +127,15 @@ func NewPlayerGameStatBase(pgs *models.PlayerGameStat) *PlayerGameStatBase {
 		fastest = models.NewMultiDuration(noDuration)
 	}
 
+	color := TeamColorFromTeam(int(pgs.Team.Int32))
+
 	return &PlayerGameStatBase{
 		PlayerGameStatID: pgs.PlayerGameStatID,
 		PlayerID:         pgs.PlayerID,
 		GameID:           pgs.GameID,
 		Nick:             models.NewMultiNick(pgs.Nick.String),
 		Team:             int(pgs.Team.Int32),
+		Color:            color,
 		Rank:             int(pgs.Rank.Int32),
 		AliveTime:        alivetime,
 		Kills:            int(pgs.Kills.Int32),
@@ -161,18 +165,19 @@ func NewPlayerGameStatBase(pgs *models.PlayerGameStat) *PlayerGameStatBase {
 
 // GameInfoBase is the view-agnostic representation of a Game.
 type GameInfoBase struct {
-	GameID            int
-	GameTypeCd        string
-	GameTypeDescr     string
-	Duration          *models.MultiDuration
-	Winner            int
-	MatchID           string
-	Mod               string
-	CreateDt          *models.MultiDt
-	Server            *server.InfoBase
-	TeamGameStats     []*TeamGameStatBase
-	PlayerGameStats   []*PlayerGameStatBase
-	PlayerWeaponStats []*models.PlayerWeaponStat
+	GameID                int
+	GameTypeCd            string
+	GameTypeDescr         string
+	Duration              *models.MultiDuration
+	Winner                int
+	MatchID               string
+	Mod                   string
+	CreateDt              *models.MultiDt
+	Server                *server.InfoBase
+	TeamGameStats         []*TeamGameStatBase
+	PlayerGameStats       []*PlayerGameStatBase
+	PlayerGameStatsByTeam map[int][]*PlayerGameStatBase
+	PlayerWeaponStats     []*models.PlayerWeaponStat
 }
 
 // GameInfoData returns the view-agnostic data for a given game by its ID.
@@ -207,9 +212,18 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		return nil, err
 	}
 
+	// Create map entries for each team
 	var playerGameStats []*PlayerGameStatBase
+	playerGameStatsByTeam := make(map[int][]*PlayerGameStatBase)
+	for _, v := range teamGameStats {
+		playerGameStatsByTeam[v.Team] = make([]*PlayerGameStatBase, 0)
+	}
+
 	for _, v := range rawPlayerGameStats {
-		playerGameStats = append(playerGameStats, NewPlayerGameStatBase(v))
+		pgsb := NewPlayerGameStatBase(v)
+		playerGameStats = append(playerGameStats, pgsb)
+
+		playerGameStatsByTeam[pgsb.Team] = append(playerGameStatsByTeam[pgsb.Team], pgsb)
 	}
 
 	playerWeaponStats, err := db.RPlayerWeaponStatsByGameID(gameID)
@@ -218,17 +232,18 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 	}
 
 	return &GameInfoBase{
-		GameID:            gameID,
-		GameTypeCd:        game.GameTypeCd,
-		GameTypeDescr:     game.GameTypeDescr,
-		Duration:          models.NewMultiDuration(*game.Duration),
-		Winner:            int(game.Winner.Int64),
-		MatchID:           game.MatchID.String,
-		Mod:               game.Mod.String,
-		CreateDt:          dt,
-		Server:            server,
-		TeamGameStats:     teamGameStats,
-		PlayerGameStats:   playerGameStats,
-		PlayerWeaponStats: playerWeaponStats,
+		GameID:                gameID,
+		GameTypeCd:            game.GameTypeCd,
+		GameTypeDescr:         game.GameTypeDescr,
+		Duration:              models.NewMultiDuration(*game.Duration),
+		Winner:                int(game.Winner.Int64),
+		MatchID:               game.MatchID.String,
+		Mod:                   game.Mod.String,
+		CreateDt:              dt,
+		Server:                server,
+		TeamGameStats:         teamGameStats,
+		PlayerGameStats:       playerGameStats,
+		PlayerGameStatsByTeam: playerGameStatsByTeam,
+		PlayerWeaponStats:     playerWeaponStats,
 	}, nil
 }

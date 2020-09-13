@@ -1,4 +1,4 @@
-<table class="table-hover table-condensed small-10 medium-11">
+<table class="game table-hover table-condensed small-10 medium-11">
     <thead class="ctf">
         <tr>
             <th class="show-for-medium medium-1">Ping</th>
@@ -13,8 +13,8 @@
     </thead>
 
     <tbody>
-        {{range .PlayerGameStats}}
-        <tr>
+        {{range .}}
+        <tr class="{{.Color}}">
             {{if eq .AvgLatency 0}}
             <td class="show-for-medium medium-1 text-center">-</td>
             {{else}}
@@ -23,10 +23,10 @@
             <td class="small-5 medium-3 no-stretch">
                 {{if gt .PlayerID 2}}
                 <a href="" title="Go to the info page for this player">
-                    {{.Nick.NickHTML}}
+                    {{- .Nick.NickHTML -}}
                 </a>
                 {{else}}
-                    {{.Nick.NickHTML}}
+                    {{- .Nick.NickHTML -}}
                 {{end}}
             </td>
             <td class="show-for-medium">{{.Kills}}</td>
