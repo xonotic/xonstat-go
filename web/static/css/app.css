@@ -253,6 +253,10 @@ ul.gametype-list {
   margin-bottom: 1rem;
 }
 
+table.game {
+  table-layout: fixed;
+}
+
 .game a {
     color: #CCC;
 }

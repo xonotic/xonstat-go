@@ -15,22 +15,24 @@
     <tbody>
         {{range .}}
         <tr class="{{.Color}}">
-            {{if eq .AvgLatency 0}}
-            <td class="show-for-medium medium-1 text-center">-</td>
-            {{else}}
-            <td class="show-for-medium medium-1 text-center">{{.AvgLatency}}</td>
-            {{end}}
+            <td class="show-for-medium medium-1 text-center">
+                {{- if eq .AvgLatency 0 -}}
+                    -
+                {{else}}
+                    {{.AvgLatency}}
+                {{end}}
+            </td>
+
             <td class="small-5 medium-3 no-stretch">
                 {{if gt .PlayerID 2}}
-                <a href="" title="Go to the info page for this player">
-                    {{- .Nick.NickHTML -}}
-                </a>
+                <a href="" title="Go to the info page for this player"> {{- .Nick.NickHTML -}} </a>
                 {{else}}
                     {{- .Nick.NickHTML -}}
                 {{end}}
             </td>
+
             <td class="show-for-medium">{{.Kills}}</td>
-            <td>{{.Captures}}</td>
+            <td class="show-for-small">{{.Captures}}</td>
             <td class="show-for-medium">{{.Pickups}}</td>
             <td class="show-for-medium">{{.CarrierFrags}}</td>
             <td class="show-for-medium">{{.Returns}}</td>
