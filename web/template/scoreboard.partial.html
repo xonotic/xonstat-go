@@ -1,7 +1,6 @@
 {{if .TeamGameStats}}
 {{range .TeamGameStats}}
-<div class="grid-x grid-padding-x">
-    <div class="cell small-1 teamscore">
+    <div class="cell small-2 medium-1 teamscore">
 
         <div class="teamname {{.Color}}">
             {{.ColorInitCap}}
@@ -45,14 +44,11 @@
     {{else if eq $.GameTypeCd "tdm"}}
         {{template "scoreboard-tdm.partial.html" $}}
     {{end}}
-</div>
 {{end}}
 {{else}}
-    <div class="grid-x grid-padding-x">
     {{if eq $.GameTypeCd "dm"}}
         {{template "scoreboard-dm.partial.html" $}}
     {{else if eq $.GameTypeCd "duel"}}
         {{template "scoreboard-duel.partial.html" $}}
     {{end}}
-    </div>
 {{end}}

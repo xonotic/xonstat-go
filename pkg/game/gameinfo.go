@@ -1,6 +1,7 @@
 package game
 
 import (
+	"math"
 	"strings"
 	"time"
 
@@ -93,7 +94,7 @@ type PlayerGameStatBase struct {
 	CarrierFrags     int
 	EloDelta         float64
 	Fastest          *models.MultiDuration
-	AvgLatency       float64
+	AvgLatency       int
 	TeamRank         int
 	ScoreboardPos    int
 	Laps             int
@@ -148,7 +149,7 @@ func NewPlayerGameStatBase(pgs *models.PlayerGameStat) *PlayerGameStatBase {
 		CarrierFrags:     int(pgs.CarrierFrags.Int32),
 		EloDelta:         pgs.EloDelta.Float64,
 		Fastest:          fastest,
-		AvgLatency:       pgs.AvgLatency.Float64,
+		AvgLatency:       int(math.Round(pgs.AvgLatency.Float64)),
 		TeamRank:         int(pgs.Team.Int32),
 		ScoreboardPos:    int(pgs.ScoreboardPos.Int32),
 		Laps:             int(pgs.Laps.Int32),
