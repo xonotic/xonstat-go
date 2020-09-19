@@ -32,7 +32,7 @@
     {{else if eq $.GameTypeCd "freezetag"}}
         {{template "scoreboard-ft.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "kh"}}
-        {{template "scoreboard-kh.partial.html" $}}
+        {{template "scoreboard-kh.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "nb"}}
         {{template "scoreboard-nb.partial.html" $}}
     {{else if eq $.GameTypeCd "nexball"}}
