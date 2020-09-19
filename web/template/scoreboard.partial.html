@@ -28,7 +28,7 @@
     {{else if eq $.GameTypeCd "dom"}}
         {{template "scoreboard-dom.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "ft"}}
-        {{template "scoreboard-ft.partial.html" $}}
+        {{template "scoreboard-ft.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "freezetag"}}
         {{template "scoreboard-ft.partial.html" $}}
     {{else if eq $.GameTypeCd "ka"}}
