@@ -1,0 +1,41 @@
+<table class="game table-hover table-condensed small-10 medium-11">
+    <thead class="dom">
+        <tr>
+            <th class="show-for-medium medium-1">Ping</th>
+            <th class="small-5 medium-3">Nick</th>
+            <th class="show-for-medium medium-1">Kills</th>
+            <th class="show-for-medium medium-1">Deaths</th>
+            <th>Takes</th>
+            <th>Ticks</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {{range .}}
+        <tr class="{{.Color}}">
+            <td class="show-for-medium medium-1 text-center">
+                {{- if eq .AvgLatency 0 -}}
+                    -
+                {{else}}
+                    {{.AvgLatency}}
+                {{end}}
+            </td>
+
+            <td class="small-5 medium-3 no-stretch">
+                {{if gt .PlayerID 2}}
+                <a href="" title="Go to the info page for this player"> {{- .Nick.NickHTML -}} </a>
+                {{else}}
+                    {{- .Nick.NickHTML -}}
+                {{end}}
+            </td>
+
+            <td class="show-for-medium medium-1">{{.Kills}}</td>
+            <td class="show-for-medium medium-1">{{.Deaths}}</td>
+            <td>{{.Pickups}}</td>
+            <td>{{.Drops}}</td>
+            <td class="medium-1">{{.Score}}</td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>

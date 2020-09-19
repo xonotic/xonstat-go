@@ -26,7 +26,7 @@
     {{else if eq $.GameTypeCd "ctf"}}
         {{template "scoreboard-ctf.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "dom"}}
-        {{template "scoreboard-dom.partial.html" $}}
+        {{template "scoreboard-dom.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "ft"}}
         {{template "scoreboard-ft.partial.html" $}}
     {{else if eq $.GameTypeCd "freezetag"}}
