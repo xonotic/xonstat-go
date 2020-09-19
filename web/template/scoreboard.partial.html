@@ -22,7 +22,7 @@
     {{if eq $.GameTypeCd "as"}}
         {{template "scoreboard-as.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "ca"}}
-        {{template "scoreboard-ca.partial.html" $}}
+        {{template "scoreboard-ca.partial.html"  (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "ctf"}}
         {{template "scoreboard-ctf.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "dom"}}
