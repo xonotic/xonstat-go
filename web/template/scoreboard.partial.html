@@ -30,11 +30,7 @@
     {{else if eq $.GameTypeCd "ft"}}
         {{template "scoreboard-ft.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "freezetag"}}
-        {{template "scoreboard-ft.partial.html" $}}
-    {{else if eq $.GameTypeCd "ka"}}
-        {{template "scoreboard-ka.partial.html" $}}
-    {{else if eq $.GameTypeCd "keepaway"}}
-        {{template "scoreboard-ka.partial.html" $}}
+        {{template "scoreboard-ft.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "kh"}}
         {{template "scoreboard-kh.partial.html" $}}
     {{else if eq $.GameTypeCd "nb"}}
@@ -50,5 +46,9 @@
         {{template "scoreboard-dm.partial.html" $}}
     {{else if eq $.GameTypeCd "duel"}}
         {{template "scoreboard-duel.partial.html" $}}
+    {{else if eq $.GameTypeCd "ka"}}
+        {{template "scoreboard-ka.partial.html" $.PlayerGameStats}}
+    {{else if eq $.GameTypeCd "keepaway"}}
+        {{template "scoreboard-ka.partial.html" $.PlayerGameStats}}
     {{end}}
 {{end}}
