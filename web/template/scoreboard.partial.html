@@ -27,15 +27,11 @@
         {{template "scoreboard-ctf.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "dom"}}
         {{template "scoreboard-dom.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
-    {{else if eq $.GameTypeCd "ft"}}
-        {{template "scoreboard-ft.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
-    {{else if eq $.GameTypeCd "freezetag"}}
+    {{else if eq $.GameTypeCd "ft" "freezetag"}}
         {{template "scoreboard-ft.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "kh"}}
         {{template "scoreboard-kh.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
-    {{else if eq $.GameTypeCd "nb"}}
-        {{template "scoreboard-nb.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
-    {{else if eq $.GameTypeCd "nexball"}}
+    {{else if eq $.GameTypeCd "nb" "nexball"}}
         {{template "scoreboard-nb.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
     {{else if eq $.GameTypeCd "tdm"}}
         {{template "scoreboard-tdm.partial.html" (index $.PlayerGameStatsByTeam .Team)}}
@@ -43,12 +39,10 @@
 {{end}}
 {{else}}
     {{if eq $.GameTypeCd "dm"}}
-        {{template "scoreboard-dm.partial.html" $}}
+        {{template "scoreboard-dm.partial.html" $.PlayerGameStats}}
     {{else if eq $.GameTypeCd "duel"}}
-        {{template "scoreboard-duel.partial.html" $}}
-    {{else if eq $.GameTypeCd "ka"}}
-        {{template "scoreboard-ka.partial.html" $.PlayerGameStats}}
-    {{else if eq $.GameTypeCd "keepaway"}}
+        {{template "scoreboard-duel.partial.html" $.PlayerGameStats}}
+    {{else if eq $.GameTypeCd "ka" "keepaway"}}
         {{template "scoreboard-ka.partial.html" $.PlayerGameStats}}
     {{end}}
 {{end}}
