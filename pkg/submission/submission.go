@@ -872,6 +872,16 @@ func CreateTeamGameStats(tx *sql.Tx, db models.Datastore, s *Submission) error {
 	return nil
 }
 
+// ShouldDoFragMatrix determines if we're going to process frag matrix stuff or not.
+func ShouldDoFragMatrix(gameTypeCd string) bool {
+	switch gameTypeCd {
+	case "as", "ca", "ctf", "dm", "dom", "ft", "freezetag", "ka", "kh", "rune", "tdm":
+		return true
+	}
+
+	return false
+}
+
 // CreateFragMatrix inserts all of the frag matrix records to the database.
 func CreateFragMatrix(tx *sql.Tx, db models.Datastore, s *Submission) error {
 	switch s.Game.GameTypeCd {
@@ -954,10 +964,12 @@ func Submit(s *Submission, db models.Datastore) error {
 		return err
 	}
 
-	err = CreateFragMatrix(tx, db, s)
-	if err != nil {
-		tx.Rollback()
-		return err
+	if ShouldDoFragMatrix(s.Game.GameTypeCd) {
+		err = CreateFragMatrix(tx, db, s)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	err = tx.Commit()
