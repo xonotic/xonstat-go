@@ -48,6 +48,7 @@ type Datastore interface {
 
 	// PlayerGameFragMatrix-oriented methods
 	CPlayerGameFragMatrix(tx *sql.Tx, fm PlayerGameFragMatrix) error
+	RPlayerGameFragMatrixByGameID(gameID int) ([]*PlayerGameFragMatrix, error)
 
 	// Summary stats by scope
 	RSummaryStats(scope string) ([]*SummaryStat, error)

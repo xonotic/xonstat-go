@@ -7,6 +7,7 @@ import (
 
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/server"
+	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
 
 // TeamGameStatBase is the view agnostic representation of a team's stats
@@ -178,6 +179,7 @@ type GameInfoBase struct {
 	PlayerGameStats       []*PlayerGameStatBase
 	PlayerGameStatsByTeam map[int][]*PlayerGameStatBase
 	PlayerWeaponStats     []*models.PlayerWeaponStat
+	PlayerGameFragMatrix  []*models.PlayerGameFragMatrix
 }
 
 // GameInfoData returns the view-agnostic data for a given game by its ID.
@@ -231,6 +233,14 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		return nil, err
 	}
 
+	var fragMatrix []*models.PlayerGameFragMatrix
+	if submission.ShouldDoFragMatrix(game.GameTypeCd) {
+		fragMatrix, err = db.RPlayerGameFragMatrixByGameID(game.GameID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &GameInfoBase{
 		GameID:                gameID,
 		GameTypeCd:            game.GameTypeCd,
@@ -245,5 +255,6 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		PlayerGameStats:       playerGameStats,
 		PlayerGameStatsByTeam: playerGameStatsByTeam,
 		PlayerWeaponStats:     playerWeaponStats,
+		PlayerGameFragMatrix:  fragMatrix,
 	}, nil
 }
