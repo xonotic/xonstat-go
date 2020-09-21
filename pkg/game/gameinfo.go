@@ -179,7 +179,8 @@ type GameInfoBase struct {
 	PlayerGameStats       []*PlayerGameStatBase
 	PlayerGameStatsByTeam map[int][]*PlayerGameStatBase
 	PlayerWeaponStats     []*models.PlayerWeaponStat
-	PlayerGameFragMatrix  []*models.PlayerGameFragMatrix
+	ShowFragMatrix        bool
+	FragMatrix            map[int][]int
 }
 
 // GameInfoData returns the view-agnostic data for a given game by its ID.
@@ -233,12 +234,44 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		return nil, err
 	}
 
-	var fragMatrix []*models.PlayerGameFragMatrix
+	showFragMatrix := false
+	fragMatrix := make(map[int][]int)
+
 	if submission.ShouldDoFragMatrix(game.GameTypeCd) {
-		fragMatrix, err = db.RPlayerGameFragMatrixByGameID(game.GameID)
+		rawMatrix, err := db.RPlayerGameFragMatrixByGameID(game.GameID)
 		if err != nil {
 			return nil, err
 		}
+
+		// Map the matrix records to their player game stat records for easier display processing.
+		matrixByPGSID := make(map[int]*models.PlayerGameFragMatrix)
+		for _, v := range rawMatrix {
+			matrixByPGSID[v.PlayerGameStatID] = v
+		}
+
+		for _, fragger := range playerGameStats {
+			var cells []int
+			for _, victim := range playerGameStats {
+				if fragger.PlayerGameStatID == victim.PlayerGameStatID {
+					// TODO: This is where the fragger is equal to the victim. Use suicides here?
+					cells = append(cells, 0)
+				} else {
+					// Populate the cell for the intersection of the fragger and victim,
+					// i.e. how many times fragger has fragged the victim in the match.
+					fraggerMatrix := matrixByPGSID[fragger.PlayerGameStatID]
+					victimMatrix := matrixByPGSID[victim.PlayerGameStatID]
+
+					if frags, ok := fraggerMatrix.Matrix[victimMatrix.PlayerIndex]; ok {
+						cells = append(cells, frags)
+					} else {
+						cells = append(cells, 0)
+					}
+				}
+			}
+			fragMatrix[fragger.PlayerGameStatID] = cells
+		}
+
+		showFragMatrix = true
 	}
 
 	return &GameInfoBase{
@@ -255,6 +288,7 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		PlayerGameStats:       playerGameStats,
 		PlayerGameStatsByTeam: playerGameStatsByTeam,
 		PlayerWeaponStats:     playerWeaponStats,
-		PlayerGameFragMatrix:  fragMatrix,
+		ShowFragMatrix:        showFragMatrix,
+		FragMatrix:            fragMatrix,
 	}, nil
 }

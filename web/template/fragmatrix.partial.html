@@ -1,0 +1,18 @@
+<table class="table-hover table-condensed matrix">
+  <thead>
+    <th class="text-center"><i class="fa fa-question-circle" title="The rows are the fraggers, the columns are the victims"></i></th>
+    {{range .PlayerGameStats}}
+      <th><span class="rotated">{{.Nick.NickHTML}}</span></th>
+    {{end}}
+  </thead>
+
+  <!-- fraggers -->
+  {{range .PlayerGameStats}}
+    <tr>
+      <td class="bg">{{.Nick.NickHTML}}</td>
+      {{range (index $.FragMatrix .PlayerGameStatID)}}
+      <td>{{.}}</td>
+      {{end}}
+    </tr>
+  {{end}}
+</table>

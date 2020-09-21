@@ -257,6 +257,11 @@ table.game {
   table-layout: fixed;
 }
 
+table.matrix {
+  table-layout: fixed;
+  width: auto;
+}
+
 .game a {
     color: #CCC;
 }

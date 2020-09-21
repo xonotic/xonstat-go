@@ -20,5 +20,14 @@
 
   {{template "scoreboard.partial.html" .}}
 
+  {{if .ShowFragMatrix}}
+  <div class="grid-x grid-padding-x">
+    <div class="cell small-12">
+      <h3>Frag Matrix</h3>
+      {{template "fragmatrix.partial.html" .}}
+    </div>
+  </div>
+  {{end}}
+
 </div>
 {{end}}
