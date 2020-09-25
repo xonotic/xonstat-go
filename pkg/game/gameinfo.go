@@ -175,7 +175,8 @@ type GameInfoBase struct {
 	Mod                   string
 	CreateDt              *models.MultiDt
 	Server                *server.InfoBase
-	TeamGameStats         []*TeamGameStatBase
+	TeamGameStatsByTeam   map[int]*TeamGameStatBase
+	TeamOrdering          []int
 	PlayerGameStats       []*PlayerGameStatBase
 	PlayerGameStatsByTeam map[int][]*PlayerGameStatBase
 	PlayerWeaponStats     []*models.PlayerWeaponStat
@@ -205,9 +206,9 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		return nil, err
 	}
 
-	var teamGameStats []*TeamGameStatBase
+	teamGameStatsByTeam := make(map[int]*TeamGameStatBase)
 	for _, v := range rawTeamGameStats {
-		teamGameStats = append(teamGameStats, NewTeamGameStatBase(v))
+		teamGameStatsByTeam[v.Team] = NewTeamGameStatBase(v)
 	}
 
 	rawPlayerGameStats, err := db.RPlayerGameStatsByGameID(gameID)
@@ -218,13 +219,18 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 	// Create map entries for each team
 	var playerGameStats []*PlayerGameStatBase
 	playerGameStatsByTeam := make(map[int][]*PlayerGameStatBase)
-	for _, v := range teamGameStats {
+	for _, v := range teamGameStatsByTeam {
 		playerGameStatsByTeam[v.Team] = make([]*PlayerGameStatBase, 0)
 	}
 
+	var teamOrdering []int // so we know which team "won" since maps are not ordered
 	for _, v := range rawPlayerGameStats {
 		pgsb := NewPlayerGameStatBase(v)
 		playerGameStats = append(playerGameStats, pgsb)
+
+		if len(teamOrdering) == 0 || teamOrdering[len(teamOrdering)-1] != pgsb.Team {
+			teamOrdering = append(teamOrdering, pgsb.Team)
+		}
 
 		playerGameStatsByTeam[pgsb.Team] = append(playerGameStatsByTeam[pgsb.Team], pgsb)
 	}
@@ -284,7 +290,8 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		Mod:                   game.Mod.String,
 		CreateDt:              dt,
 		Server:                server,
-		TeamGameStats:         teamGameStats,
+		TeamGameStatsByTeam:   teamGameStatsByTeam,
+		TeamOrdering:          teamOrdering,
 		PlayerGameStats:       playerGameStats,
 		PlayerGameStatsByTeam: playerGameStatsByTeam,
 		PlayerWeaponStats:     playerWeaponStats,
