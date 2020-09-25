@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -166,22 +167,22 @@ func NewPlayerGameStatBase(pgs *models.PlayerGameStat) *PlayerGameStatBase {
 
 // GameInfoBase is the view-agnostic representation of a Game.
 type GameInfoBase struct {
-	GameID                int
-	GameTypeCd            string
-	GameTypeDescr         string
-	Duration              *models.MultiDuration
-	Winner                int
-	MatchID               string
-	Mod                   string
-	CreateDt              *models.MultiDt
-	Server                *server.InfoBase
-	TeamGameStatsByTeam   map[int]*TeamGameStatBase
-	TeamOrdering          []int
-	PlayerGameStats       []*PlayerGameStatBase
-	PlayerGameStatsByTeam map[int][]*PlayerGameStatBase
-	PlayerWeaponStats     []*models.PlayerWeaponStat
-	ShowFragMatrix        bool
-	FragMatrix            map[int][]int
+	GameID                   int
+	GameTypeCd               string
+	GameTypeDescr            string
+	Duration                 *models.MultiDuration
+	Winner                   int
+	MatchID                  string
+	Mod                      string
+	CreateDt                 *models.MultiDt
+	Server                   *server.InfoBase
+	TeamGameStatsByTeam      map[int]*TeamGameStatBase
+	TeamOrdering             []int
+	PlayerGameStats          []*PlayerGameStatBase
+	PlayerGameStatsByTeam    map[int][]*PlayerGameStatBase
+	PlayerWeaponStatsByPGSID map[int][]*models.PlayerWeaponStat
+	ShowFragMatrix           bool
+	FragMatrix               map[int][]int
 }
 
 // GameInfoData returns the view-agnostic data for a given game by its ID.
@@ -224,6 +225,7 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 	}
 
 	var teamOrdering []int // so we know which team "won" since maps are not ordered
+	weaponStatsByPGSID := make(map[int][]*models.PlayerWeaponStat)
 	for _, v := range rawPlayerGameStats {
 		pgsb := NewPlayerGameStatBase(v)
 		playerGameStats = append(playerGameStats, pgsb)
@@ -233,11 +235,16 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		}
 
 		playerGameStatsByTeam[pgsb.Team] = append(playerGameStatsByTeam[pgsb.Team], pgsb)
+		weaponStatsByPGSID[v.PlayerGameStatID] = make([]*models.PlayerWeaponStat, 0)
 	}
 
 	playerWeaponStats, err := db.RPlayerWeaponStatsByGameID(gameID)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, ws := range playerWeaponStats {
+		weaponStatsByPGSID[ws.PlayerGameStatID] = append(weaponStatsByPGSID[ws.PlayerGameStatID], ws)
 	}
 
 	showFragMatrix := false
@@ -267,6 +274,13 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 					fraggerMatrix := matrixByPGSID[fragger.PlayerGameStatID]
 					victimMatrix := matrixByPGSID[victim.PlayerGameStatID]
 
+					// Sometimes there are no entries for a given PGStatID. In these cases, 
+					// we treat that as a NULL intersection, assigning zero frags and moving on.
+					if fraggerMatrix == nil || victimMatrix == nil {
+						cells = append(cells, 0)
+						continue
+					}
+
 					if frags, ok := fraggerMatrix.Matrix[victimMatrix.PlayerIndex]; ok {
 						cells = append(cells, frags)
 					} else {
@@ -280,22 +294,24 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		showFragMatrix = true
 	}
 
+	fmt.Printf("%+v\n", weaponStatsByPGSID)
+
 	return &GameInfoBase{
-		GameID:                gameID,
-		GameTypeCd:            game.GameTypeCd,
-		GameTypeDescr:         game.GameTypeDescr,
-		Duration:              models.NewMultiDuration(*game.Duration),
-		Winner:                int(game.Winner.Int64),
-		MatchID:               game.MatchID.String,
-		Mod:                   game.Mod.String,
-		CreateDt:              dt,
-		Server:                server,
-		TeamGameStatsByTeam:   teamGameStatsByTeam,
-		TeamOrdering:          teamOrdering,
-		PlayerGameStats:       playerGameStats,
-		PlayerGameStatsByTeam: playerGameStatsByTeam,
-		PlayerWeaponStats:     playerWeaponStats,
-		ShowFragMatrix:        showFragMatrix,
-		FragMatrix:            fragMatrix,
+		GameID:                   gameID,
+		GameTypeCd:               game.GameTypeCd,
+		GameTypeDescr:            game.GameTypeDescr,
+		Duration:                 models.NewMultiDuration(*game.Duration),
+		Winner:                   int(game.Winner.Int64),
+		MatchID:                  game.MatchID.String,
+		Mod:                      game.Mod.String,
+		CreateDt:                 dt,
+		Server:                   server,
+		TeamGameStatsByTeam:      teamGameStatsByTeam,
+		TeamOrdering:             teamOrdering,
+		PlayerGameStats:          playerGameStats,
+		PlayerGameStatsByTeam:    playerGameStatsByTeam,
+		PlayerWeaponStatsByPGSID: weaponStatsByPGSID,
+		ShowFragMatrix:           showFragMatrix,
+		FragMatrix:               fragMatrix,
 	}, nil
 }
