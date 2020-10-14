@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -165,6 +164,98 @@ func NewPlayerGameStatBase(pgs *models.PlayerGameStat) *PlayerGameStatBase {
 	}
 }
 
+// PlayerWeaponStatBase is the view-agnostic weapon details of a single player weapon within a given game.
+type PlayerWeaponStatBase struct {
+	PlayerWeaponStatID int
+	PlayerID           int
+	GameID             int
+	PlayerGameStatID   int
+	WeaponCd           string
+	WeaponCdInitCaps   string
+	Actual             int
+	Max                int
+	PctTotalDamage     float32
+	Hit                int
+	Fired              int
+	PctAccuracy        float32
+	Frags              int
+	CreateDt           time.Time
+}
+
+// NewPlayerWeaponStatBaseList takes the list of weapon stats and returns back their view-ready versions.
+// NOTE: We take in a slice of weapon stats because we need to calculate percentage damage out of all
+// damage dealt by the player in that game. This requires all the damage info from the other weapons.
+func NewPlayerWeaponStatBaseList(pwsList []*models.PlayerWeaponStat) []*PlayerWeaponStatBase {
+	var pwsb []*PlayerWeaponStatBase
+	if len(pwsList) == 0 {
+		return pwsb
+	}
+
+	// Totals to support a total damage percentage and a special "meta" entry
+	var totalDamage, totalFrags, totalHits, totalFired int
+	for _, v := range pwsList {
+		totalDamage += v.Actual
+		totalFrags += v.Frags
+		totalHits += v.Hit
+		totalFired += v.Fired
+	}
+
+	if totalDamage <= 0 {
+		totalDamage = 1
+	}
+
+	if totalFired <= 0 {
+		totalFired = 1
+	}
+
+	for _, v := range pwsList {
+		if v.Fired <= 0 {
+			v.Fired = 1
+		}
+
+		pctTotalDamage := 100*(float32(v.Actual) / float32(totalDamage))
+		pctAccuracy := 100*(float32(v.Hit) / float32(v.Fired))
+
+		pwsb = append(pwsb, &PlayerWeaponStatBase{
+			PlayerWeaponStatID: v.PlayerWeaponStatID,
+			PlayerID:           v.PlayerID,
+			GameID:             v.GameID,
+			PlayerGameStatID:   v.PlayerGameStatID,
+			WeaponCd:           v.WeaponCd,
+			WeaponCdInitCaps:   strings.Title(v.WeaponCd),
+			Actual:             v.Actual,
+			Max:                v.Max,
+			PctTotalDamage:     pctTotalDamage,
+			Hit:                v.Hit,
+			Fired:              v.Fired,
+			PctAccuracy:        pctAccuracy,
+			Frags:              v.Frags,
+			CreateDt:           v.CreateDt,
+		})
+	}
+
+	// Last but not least, we'll add a "meta" entry for the total
+	pctTotalAccuracy := 100*(float32(totalHits) / float32(totalFired))
+	pwsb = append(pwsb, &PlayerWeaponStatBase{
+		PlayerWeaponStatID: -1,
+		PlayerID:           pwsList[0].PlayerID,
+		GameID:             pwsList[0].GameID,
+		PlayerGameStatID:   pwsList[0].PlayerGameStatID,
+		WeaponCd:           "total",
+		WeaponCdInitCaps:   "Total",
+		Actual:             totalDamage,
+		Max:                -1,
+		PctTotalDamage:     100.0,
+		Hit:                totalHits,
+		Fired:              totalFired,
+		PctAccuracy:        pctTotalAccuracy,
+		Frags:              totalFrags,
+		CreateDt:           pwsList[0].CreateDt,
+	})
+
+	return pwsb
+}
+
 // GameInfoBase is the view-agnostic representation of a Game.
 type GameInfoBase struct {
 	GameID                   int
@@ -180,7 +271,7 @@ type GameInfoBase struct {
 	TeamOrdering             []int
 	PlayerGameStats          []*PlayerGameStatBase
 	PlayerGameStatsByTeam    map[int][]*PlayerGameStatBase
-	PlayerWeaponStatsByPGSID map[int][]*models.PlayerWeaponStat
+	PlayerWeaponStatsByPGSID map[int][]*PlayerWeaponStatBase
 	ShowFragMatrix           bool
 	FragMatrix               map[int][]int
 }
@@ -230,6 +321,9 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		pgsb := NewPlayerGameStatBase(v)
 		playerGameStats = append(playerGameStats, pgsb)
 
+		// To determine the order in which teams should be shown, we iterate over the
+		// player game stats (which should be in scoreboardpos order) while keeping track
+		// of the distinct team IDs we see.
 		if len(teamOrdering) == 0 || teamOrdering[len(teamOrdering)-1] != pgsb.Team {
 			teamOrdering = append(teamOrdering, pgsb.Team)
 		}
@@ -238,6 +332,7 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		weaponStatsByPGSID[v.PlayerGameStatID] = make([]*models.PlayerWeaponStat, 0)
 	}
 
+	// Weapon stats processing
 	playerWeaponStats, err := db.RPlayerWeaponStatsByGameID(gameID)
 	if err != nil {
 		return nil, err
@@ -247,6 +342,13 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		weaponStatsByPGSID[ws.PlayerGameStatID] = append(weaponStatsByPGSID[ws.PlayerGameStatID], ws)
 	}
 
+	// Convert weapon stats to their *Base values.
+	weaponStatsBaseByPGSID := make(map[int][]*PlayerWeaponStatBase)
+	for pgsid, wsList := range weaponStatsByPGSID {
+		weaponStatsBaseByPGSID[pgsid] = NewPlayerWeaponStatBaseList(wsList)
+	}
+
+	// Frag matrix processing.
 	showFragMatrix := false
 	fragMatrix := make(map[int][]int)
 
@@ -274,7 +376,7 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 					fraggerMatrix := matrixByPGSID[fragger.PlayerGameStatID]
 					victimMatrix := matrixByPGSID[victim.PlayerGameStatID]
 
-					// Sometimes there are no entries for a given PGStatID. In these cases, 
+					// Sometimes there are no entries for a given PGStatID. In these cases,
 					// we treat that as a NULL intersection, assigning zero frags and moving on.
 					if fraggerMatrix == nil || victimMatrix == nil {
 						cells = append(cells, 0)
@@ -294,8 +396,6 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		showFragMatrix = true
 	}
 
-	fmt.Printf("%+v\n", weaponStatsByPGSID)
-
 	return &GameInfoBase{
 		GameID:                   gameID,
 		GameTypeCd:               game.GameTypeCd,
@@ -310,7 +410,7 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		TeamOrdering:             teamOrdering,
 		PlayerGameStats:          playerGameStats,
 		PlayerGameStatsByTeam:    playerGameStatsByTeam,
-		PlayerWeaponStatsByPGSID: weaponStatsByPGSID,
+		PlayerWeaponStatsByPGSID: weaponStatsBaseByPGSID,
 		ShowFragMatrix:           showFragMatrix,
 		FragMatrix:               fragMatrix,
 	}, nil
