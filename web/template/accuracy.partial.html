@@ -1,0 +1,29 @@
+<table class="table-hover table-condensed">
+  <thead>
+    <th class="small-2 medium-1"></th>
+    <th class="show-for-medium">Weapon</th>
+    <th class="show-for-medium">Frags</th>
+    <th>Accuracy</th>
+    <th>Damage</th>
+  </thead>
+
+  {{range .}}
+    {{if eq .WeaponCd "total"}}
+    <tr style="background-color: #222">
+      <td class="small-2 medium-1 text-center"></td>
+      <td class="show-for-medium">Total</td>
+      <td class="show-for-medium"><b>{{.Frags}}</b></td>
+      <td><b>{{.Hit}}/{{.Fired}} ({{printf "%.2f" .PctAccuracy}}%)</b></td>
+      <td><b>{{.Actual}}</b></td>
+    </tr>
+    {{else}}
+    <tr>
+      <td class="small-2 medium-1 text-center"><span class="sprite sprite-{{.WeaponCd}}"></span></td>
+      <td class="show-for-medium">{{.WeaponCdInitCaps}}</td>
+      <td class="show-for-medium">{{.Frags}}</td>
+      <td>{{.Hit}}/{{.Fired}} ({{printf "%.2f" .PctAccuracy}}%)</td>
+      <td>{{.Actual}} ({{printf "%.2f" .PctTotalDamage}}%)</td>
+    </tr>
+    {{end}}
+  {{end}}
+</table>
