@@ -10,6 +10,7 @@ D0BlindIDPubKey = "~/key_0.d0pk"
 MinimumRequiredPlayers = 2
 
 # Request logging
+RequestsLogAll = false
 RequestsLogFile = "xonstat-requests.log"
 RequestsLogMaxSize = 100
 RequestsMaxBackups = 5
