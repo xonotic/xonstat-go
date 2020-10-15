@@ -33,6 +33,9 @@ type RawSubmission struct {
 	// bots who played in the match
 	Bots []map[string]string
 
+	// humans who either spectated the entire match or forfeited before its end
+	NonParticipants []map[string]string
+
 	// weapons used during the match
 	WeaponsUsed map[string]struct{}
 
@@ -63,6 +66,7 @@ func NewRawSubmission(body io.Reader) (*RawSubmission, error) {
 		PlayerEvents:          make([]map[string]string, 0),
 		Humans:                make([]map[string]string, 0),
 		Bots:                  make([]map[string]string, 0),
+		NonParticipants:       make([]map[string]string, 0),
 		WeaponsUsed:           make(map[string]struct{}, 0),
 		PlayerEventsByHashkey: make(map[string]*map[string]string, 0),
 		PlayerEventsByIndex:   make(map[int]*map[string]string, 0),
@@ -150,6 +154,12 @@ func playedInGame(events map[string]string) bool {
 	return matches && scoreboardvalid
 }
 
+// joinedGame determines if the set of player events is for a player who joined the match
+func joinedGame(events map[string]string) bool {
+	_, joins := events["joins"]
+	return joins
+}
+
 // addPlayerEvents adds a set of player events to the running list and performs some bookkeeping for the same
 func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string, index int, firedWeapon, nonZeroScore, hasFastestLap bool) {
 	if len(events) <= 0 {
@@ -157,21 +167,28 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 	}
 
 	human := isHuman(events)
+	joined := joinedGame(events)
 	played := playedInGame(events)
-	if human && played {
-		if firedWeapon {
-			s.HumanFiredWeapon = true
-		}
+	if human {
+		if joined && !played {
+			// If they joined the match but didn't actually play/finish it, they 
+			// either spectated the whole time or forfeited (to be determined elsewhere).
+			s.NonParticipants = append(s.NonParticipants, events)
+		} else {
+			if firedWeapon {
+				s.HumanFiredWeapon = true
+			}
 
-		if nonZeroScore {
-			s.HumanNonZeroScore = true
-		}
+			if nonZeroScore {
+				s.HumanNonZeroScore = true
+			}
 
-		if hasFastestLap {
-			s.HumanFastestLap = true
-		}
+			if hasFastestLap {
+				s.HumanFastestLap = true
+			}
 
-		s.Humans = append(s.Humans, events)
+			s.Humans = append(s.Humans, events)
+		}
 	} else if !human && played {
 		s.Bots = append(s.Bots, events)
 	}
@@ -356,4 +373,3 @@ func (s *RawSubmission) validate() error {
 	}
 	return nil
 }
-
