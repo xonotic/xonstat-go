@@ -461,8 +461,16 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 
 // fillPlayers fills in the Players and PlayerHashKeys slices from the raw submission
 func (s *Submission) fillPlayers(rs *RawSubmission) error {
-	// Only consider events from humans or bots who actually played in the game.
+	// Keep track of the non-participants. They need to have player and hashkey records
+	// filled, but not anything else.
+	nonParticipants := make(map[string]struct{})
+	for _, events := range rs.NonParticipants {
+		nonParticipants[events["P"]] = struct{}{}
+	}
+
+	// Humans, Bots, and Non-Participants
 	playersInGame := append(rs.Humans, rs.Bots...)
+	playersInGame = append(playersInGame, rs.NonParticipants...)
 
 	for _, events := range playersInGame {
 		hashkey := events["P"]
@@ -493,11 +501,16 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 		}
 
 		s.Players = append(s.Players, &player)
-		s.PlayersByIndex[playerIndex] = &player
-		s.FragMatrixByIndex[playerIndex] = make(map[int]int)
 		s.PlayersByHashkey[hashkey] = &player
 
-		s.fillPlayerGameStat(events, &player)
+		// Do not fill out the other records for non-participants.
+		if _, ok := nonParticipants[hashkey]; ok {
+			// TODO: fill out non-participant records
+		} else {
+			s.PlayersByIndex[playerIndex] = &player
+			s.FragMatrixByIndex[playerIndex] = make(map[int]int)
+			s.fillPlayerGameStat(events, &player)
+		}
 	}
 
 	return nil
