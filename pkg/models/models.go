@@ -301,6 +301,7 @@ type PlayerGameNonParticipant struct {
 	PlayerGameNonParticipantID int
 	PlayerID         int
 	GameID           int
+	Status           string
 	Nick             sql.NullString
 	StrippedNick     sql.NullString
 	AliveTime        *time.Duration // PostgreSQL interval
