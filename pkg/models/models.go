@@ -295,3 +295,15 @@ type RecentGame struct {
 	WinningNick     string
 	CreateDt        time.Time
 }
+
+// PlayerGameNonParticipant houses people who were around for a match but didn't complete it.
+type PlayerGameNonParticipant struct {
+	PlayerGameNonParticipantID int
+	PlayerID         int
+	GameID           int
+	Nick             sql.NullString
+	StrippedNick     sql.NullString
+	AliveTime        *time.Duration // PostgreSQL interval
+	Score            sql.NullInt32
+	CreateDt         time.Time
+}
