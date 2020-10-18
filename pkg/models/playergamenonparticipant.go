@@ -20,10 +20,10 @@ func (ds *PGDatastore) CPlayerGameNonParticipant(tx *sql.Tx, pgnp PlayerGameNonP
 
 	aliveTimeLiteral := durationToMSStr(pgnp.AliveTime)
 
-	rawsql := `insert into player_game_stats (player_game_nonparticipants_id, player_id, game_id, 
+	rawsql := `insert into player_game_nonparticipants (player_game_nonparticipants_id, player_id, game_id, 
 		status, nick, stripped_nick, alivetime, score, create_dt) 
 		values ($1, $2, $3, $4, $5, $6, %s, $7, now() at time zone 'UTC') 
-		returning player_game_nonparticipant_id`
+		returning player_game_nonparticipants_id`
 
 	sql := fmt.Sprintf(rawsql, aliveTimeLiteral)
 

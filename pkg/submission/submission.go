@@ -3,6 +3,7 @@ package submission
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"math"
 	"strconv"
 	"strings"
@@ -18,6 +19,7 @@ type Submission struct {
 	Server               *models.Server
 	Map                  *models.Map
 	Players              []*models.Player
+	NonParticipants      []*models.PlayerGameNonParticipant
 	PlayerGameStats      []*models.PlayerGameStat
 	PlayerWeaponStats    []*models.PlayerWeaponStat
 	TeamGameStats        []*models.TeamGameStat
@@ -459,6 +461,42 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 	return nil
 }
 
+// fillNonParticipants fills in a single struct from the raw submission events
+func (s *Submission) fillNonParticipants(events map[string]string, player *models.Player) error {
+	// an initialized pgstat based on the game type being played
+	var pgnp models.PlayerGameNonParticipant
+
+	hashkey := events["P"]
+	playerIndex, _ := strconv.Atoi(events["i"])
+
+	// fields passed on from other objects
+	pgnp.PlayerID = player.PlayerID
+	pgnp.PlayerGameNonParticipantID = player.PlayerID
+	pgnp.GameID = s.Game.GameID
+	pgnp.CreateDt = s.CreateDt
+	pgnp.Nick = player.Nick
+	pgnp.StrippedNick = player.StrippedNick
+
+	// required fields
+	score := 0
+	if scoreStr, ok := events["total-score"]; ok {
+		scoreFloat, err := strconv.ParseFloat(scoreStr, 32)
+		if err == nil {
+			score = int(math.Round(scoreFloat))
+		}
+	}
+	pgnp.Score = sql.NullInt32{Valid: true, Int32: int32(score)}
+
+	if alivetimeStr, ok := events["alivetime"]; ok {
+		pgnp.AliveTime = durationFromString(alivetimeStr, 1.0)
+	}
+
+	s.NonParticipants = append(s.NonParticipants, &pgnp)
+	s.HashkeysByIndex[playerIndex] = hashkey
+
+	return nil
+}
+
 // fillPlayers fills in the Players and PlayerHashKeys slices from the raw submission
 func (s *Submission) fillPlayers(rs *RawSubmission) error {
 	// Keep track of the non-participants. They need to have player and hashkey records
@@ -505,7 +543,7 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 
 		// Do not fill out the other records for non-participants.
 		if _, ok := nonParticipants[hashkey]; ok {
-			// TODO: fill out non-participant records
+			s.fillNonParticipants(events, &player)
 		} else {
 			s.PlayersByIndex[playerIndex] = &player
 			s.FragMatrixByIndex[playerIndex] = make(map[int]int)
@@ -522,6 +560,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	var server models.Server
 	var _map models.Map
 	players := make([]*models.Player, 0, len(rs.PlayerEvents))
+	nonParticipants := make([]*models.PlayerGameNonParticipant, 0, len(rs.PlayerEvents))
 	playerGameStats := make([]*models.PlayerGameStat, 0, len(rs.PlayerEvents))
 	var playerWeaponStats []*models.PlayerWeaponStat
 	var teamGameStats []*models.TeamGameStat
@@ -538,6 +577,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 		Server:                     &server,
 		Map:                        &_map,
 		Players:                    players,
+		NonParticipants:            nonParticipants,
 		PlayerGameStats:            playerGameStats,
 		PlayerWeaponStats:          playerWeaponStats,
 		TeamGameStats:              teamGameStats,
@@ -556,6 +596,9 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// This helps with debugging requests that error out. 
+	log.Printf("Processing match %s", s.Game.MatchID.String)
 
 	err = s.fillServer(rs)
 	if err != nil {

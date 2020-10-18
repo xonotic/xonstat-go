@@ -174,7 +174,7 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 			// If they joined the match but didn't actually play/finish it, they 
 			// either spectated the whole time or forfeited (to be determined elsewhere).
 			s.NonParticipants = append(s.NonParticipants, events)
-		} else {
+		} else if joined && played {
 			if firedWeapon {
 				s.HumanFiredWeapon = true
 			}

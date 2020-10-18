@@ -253,7 +253,13 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 	// Reflect the new PIDs in the submission accordingly (at least for the next table being modified).
 	for hashkey, player := range playersByHashkey {
 		*s.PlayersByHashkey[hashkey] = *player
-		s.PlayerGameStatsByHashkey[hashkey].PlayerID = player.PlayerID
+
+		// Non-participants don't have game stats, so we have to check first here.
+		pgs, ok := s.PlayerGameStatsByHashkey[hashkey]
+		if ok {
+			pgs.PlayerID = player.PlayerID
+		}
+		// s.PlayerGameStatsByHashkey[hashkey].PlayerID = player.PlayerID
 	}
 
 	return playersByHashkey, nil
@@ -267,6 +273,19 @@ func CreatePlayerGameStats(tx *sql.Tx, db models.Datastore, s *Submission) error
 			return err
 		}
 		pgs.PlayerGameStatID = int(pgsID)
+	}
+
+	return nil
+}
+
+// CreateNonParticipants inserts all of the non-participant records to the database.
+func CreateNonParticipants(tx *sql.Tx, db models.Datastore, s *Submission) error {
+	for _, pgnp := range s.NonParticipants {
+		id, err := db.CPlayerGameNonParticipant(tx, *pgnp)
+		if err != nil {
+			return err
+		}
+		pgnp.PlayerGameNonParticipantID = int(id)
 	}
 
 	return nil
@@ -388,6 +407,12 @@ func Submit(s *Submission, db models.Datastore) error {
 	}
 
 	err = CreatePlayerGameStats(tx, db, s)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = CreateNonParticipants(tx, db, s)
 	if err != nil {
 		tx.Rollback()
 		return err
