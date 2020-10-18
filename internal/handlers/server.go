@@ -51,7 +51,7 @@ func (ae *AppEnv) ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		topActivePlayers, _ := server.TopActivePlayersData(ae.db, serverID)
 		topMapsPlayed, _ := server.TopMapsData(ae.db, serverID)
 
-		recentGamesCutoff := time.Now().AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
+		recentGamesCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
 		recentGames, _ := game.RecentGamesData(ae.db, serverID, game.EmptyMapID, game.EmptyPlayerID,
 			game.EmptyGameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20)
 

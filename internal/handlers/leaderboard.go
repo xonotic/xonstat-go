@@ -298,7 +298,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Recent games
 	recentGamesDays := viper.GetInt("RecentGamesDays")
-	now := time.Now()
+	now := time.Now().UTC()
 	cutoff := now.AddDate(0, 0, -1*recentGamesDays)
 
 	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, game.EmptyMapID, 

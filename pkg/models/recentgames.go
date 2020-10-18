@@ -74,7 +74,7 @@ func (ds *PGDatastore) RRecentGames(serverID int, mapID int, playerID int,
 
 		placeholder += 2
 		params = append(params, cutoff)
-		params = append(params, time.Now())
+		params = append(params, time.Now().UTC())
 	}
 
 	sqlBuf.WriteString("order by g.create_dt desc ")

@@ -24,7 +24,7 @@ type TopScorerBase struct {
 
 // TopScorerData returns view-agnostic data for the top scorers on a given server.
 func TopScorerData(db models.Datastore, serverID int) ([]*TopScorerBase, error) {
-	activePlayerScoresCutoff := time.Now().AddDate(0, 0, -1*viper.GetInt("TopPlayersByScoreDays"))
+	activePlayerScoresCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("TopPlayersByScoreDays"))
 	rawActivePlayerScores, err := db.RActivePlayerScores(serverID, &activePlayerScoresCutoff, 10)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func TopScorerData(db models.Datastore, serverID int) ([]*TopScorerBase, error) 
 // NOTE: the base type returned here is shared with the leaderboard package.
 func TopActivePlayersData(db models.Datastore, serverID int) ([]*leaderboard.ActivePlayerBase, error) {
 	// Top players by alive time over the time period.
-	activePlayersCutoff := time.Now().AddDate(0, 0, -1*viper.GetInt("TopPlayersByTimeDays"))
+	activePlayersCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("TopPlayersByTimeDays"))
 	rawActivePlayers, err := db.RActivePlayersByServer(serverID, &activePlayersCutoff, 10)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func TopActivePlayersData(db models.Datastore, serverID int) ([]*leaderboard.Act
 // or hiding is required.
 func TopMapsData(db models.Datastore, serverID int) ([]*models.ActiveMap, error) {
 	// Top maps by times played over the time period.
-	activeMapsCutoff := time.Now().AddDate(0, 0, -1*viper.GetInt("TopMapsByGamesDays"))
+	activeMapsCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("TopMapsByGamesDays"))
 	activeMaps, err := db.RActiveMapsByServer(serverID, &activeMapsCutoff, 10)
 	if err != nil {
 		return nil, err
