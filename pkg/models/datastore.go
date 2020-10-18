@@ -69,4 +69,8 @@ type Datastore interface {
 
 	// RecentGames by various means
 	RRecentGames(serverID int, mapID int, playerID int, gameTypeCd string, cutoff *time.Time, startGameID int, endGameID int, limit int) ([]*RecentGame, error)
+
+	// PlayerGameNonParticipant-oriented methods
+	CPlayerGameNonParticipant(tx *sql.Tx, pgnp PlayerGameNonParticipant) (int64, error)
+	RPlayerGameNonParticipantByGameID(gameID int) ([]*PlayerGameNonParticipant, error)
 }
