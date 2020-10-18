@@ -34,6 +34,7 @@ type Submission struct {
 	// References by hashkey for easier processing
 	PlayersByHashkey           map[string]*models.Player
 	PlayerGameStatsByHashkey   map[string]*models.PlayerGameStat
+	NonParticipantsByHashkey   map[string]*models.PlayerGameNonParticipant
 	PlayerWeaponStatsByHashkey map[string][]*models.PlayerWeaponStat
 }
 
@@ -487,11 +488,22 @@ func (s *Submission) fillNonParticipants(events map[string]string, player *model
 	}
 	pgnp.Score = sql.NullInt32{Valid: true, Int32: int32(score)}
 
+	zero := time.Duration(0 * time.Second)
 	if alivetimeStr, ok := events["alivetime"]; ok {
 		pgnp.AliveTime = durationFromString(alivetimeStr, 1.0)
+	} else {
+		pgnp.AliveTime = &zero
+	}
+
+	// Determine spectator or not purely by alivetime
+	if *pgnp.AliveTime > zero {
+		pgnp.Status = "forfeit"
+	} else {
+		pgnp.Status = "spectator"
 	}
 
 	s.NonParticipants = append(s.NonParticipants, &pgnp)
+	s.NonParticipantsByHashkey[hashkey] = &pgnp
 	s.HashkeysByIndex[playerIndex] = hashkey
 
 	return nil
@@ -545,7 +557,6 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 		if _, ok := nonParticipants[hashkey]; ok {
 			s.fillNonParticipants(events, &player)
 		} else {
-			s.PlayersByIndex[playerIndex] = &player
 			s.FragMatrixByIndex[playerIndex] = make(map[int]int)
 			s.fillPlayerGameStat(events, &player)
 		}
@@ -571,6 +582,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 	playerWeaponStatsByHashkey := make(map[string][]*models.PlayerWeaponStat, 0)
 	playersByHashkey := make(map[string]*models.Player, 0)
 	playerGameStatsByHashkey := make(map[string]*models.PlayerGameStat, 0)
+	nonParticipantsByHashkey := make(map[string]*models.PlayerGameNonParticipant, 0)
 
 	s := &Submission{
 		Game:                       &game,
@@ -588,6 +600,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 		FragMatrixByIndex:          fragMatrixByIndex,
 		PlayersByHashkey:           playersByHashkey,
 		PlayerGameStatsByHashkey:   playerGameStatsByHashkey,
+		NonParticipantsByHashkey:   nonParticipantsByHashkey,
 		PlayerWeaponStatsByHashkey: playerWeaponStatsByHashkey,
 	}
 

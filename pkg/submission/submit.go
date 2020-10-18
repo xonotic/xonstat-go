@@ -254,12 +254,15 @@ func GetOrCreatePlayers(tx *sql.Tx, db models.Datastore, s *Submission) (map[str
 	for hashkey, player := range playersByHashkey {
 		*s.PlayersByHashkey[hashkey] = *player
 
-		// Non-participants don't have game stats, so we have to check first here.
 		pgs, ok := s.PlayerGameStatsByHashkey[hashkey]
 		if ok {
 			pgs.PlayerID = player.PlayerID
 		}
-		// s.PlayerGameStatsByHashkey[hashkey].PlayerID = player.PlayerID
+
+		pgnp, ok := s.NonParticipantsByHashkey[hashkey]
+		if ok {
+			pgnp.PlayerID = player.PlayerID
+		}
 	}
 
 	return playersByHashkey, nil
@@ -281,6 +284,8 @@ func CreatePlayerGameStats(tx *sql.Tx, db models.Datastore, s *Submission) error
 // CreateNonParticipants inserts all of the non-participant records to the database.
 func CreateNonParticipants(tx *sql.Tx, db models.Datastore, s *Submission) error {
 	for _, pgnp := range s.NonParticipants {
+		pgnp.GameID = s.Game.GameID
+
 		id, err := db.CPlayerGameNonParticipant(tx, *pgnp)
 		if err != nil {
 			return err
