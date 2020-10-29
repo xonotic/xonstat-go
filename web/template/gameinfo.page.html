@@ -25,25 +25,61 @@
   {{template "scoreboard.partial.html" .}}
 </div>
 
-  {{if .ShowFragMatrix}}
-  <div class="grid-x grid-padding-x">
-    <div class="cell small-12">
-      <h3>Frag Matrix</h3>
-      {{template "fragmatrix.partial.html" .}}
-    </div>
+{{if .Forfeits}}
+<div class="grid-x grid-padding-x">
+  <div class="cell text-center">
+    <p>
+      <b>Forfeit:  </b>
+        {{range $index, $forfeit := .Forfeits}}
+          {{- if $index -}}, {{ end -}}
+          {{- if gt $forfeit.PlayerID 2 -}}
+            {{- $forfeit.Nick.NickHTML -}}
+          {{- else -}}
+            {{- $forfeit.Nick.NickHTML -}}
+          {{- end -}}
+        {{- end -}}
+    </p>
   </div>
-  {{end}}
+</div>
+{{end}}
 
-  <div class="grid-x grid-padding-x">
-    <div class="cell small-12 medium-9">
-      <h3>Weapons and Damage</h3>
-      {{range $pgstat := .PlayerGameStats}}
-        {{if gt $pgstat.PlayerID 1}}
-          <p>{{$pgstat.Nick.NickHTML}}:</p>
-          {{template "accuracy.partial.html" (index $.PlayerWeaponStatsByPGSID $pgstat.PlayerGameStatID)}}
+{{if .Spectators}}
+<div class="grid-x grid-padding-x text-center">
+  <div class="cell text-center">
+    <p>
+      <b>Spectators:  </b>
+        {{range $index, $spectator := .Spectators}}
+          {{- if $index -}}, {{ end -}}
+          {{- if gt $spectator.PlayerID 2 -}}
+            {{- $spectator.Nick.NickHTML -}}
+          {{else}}
+            {{- $spectator.Nick.NickHTML -}}
+          {{end}}
         {{end}}
-      {{end}}
-    </div>
+    </p>
   </div>
+</div>
+{{end}}
+
+{{if .ShowFragMatrix}}
+<div class="grid-x grid-padding-x">
+  <div class="cell small-12">
+    <h3>Frag Matrix</h3>
+    {{template "fragmatrix.partial.html" .}}
+  </div>
+</div>
+{{end}}
+
+<div class="grid-x grid-padding-x">
+  <div class="cell small-12 medium-9">
+    <h3>Weapons and Damage</h3>
+    {{range $pgstat := .PlayerGameStats}}
+      {{if gt $pgstat.PlayerID 1}}
+        <p>{{$pgstat.Nick.NickHTML}}:</p>
+        {{template "accuracy.partial.html" (index $.PlayerWeaponStatsByPGSID $pgstat.PlayerGameStatID)}}
+      {{end}}
+    {{end}}
+  </div>
+</div>
 
 {{end}}
