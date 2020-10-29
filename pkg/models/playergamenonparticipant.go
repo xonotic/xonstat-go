@@ -62,7 +62,7 @@ func scanPlayerGameNonParticipants(rows *sql.Rows) ([]*PlayerGameNonParticipant,
 
 // RPlayerGameNonParticipantsByGameID retrieves player game nonparticipant records by their game ID
 func (ds *PGDatastore) RPlayerGameNonParticipantsByGameID(gameID int) ([]*PlayerGameNonParticipant, error) {
-	sql := `select player_game_non_participants_id, player_id, game_id, status, nick, stripped_nick
+	sql := `select player_game_nonparticipants_id, player_id, game_id, status, nick, stripped_nick,
 	cast(coalesce(extract(epoch from alivetime), 0)*1000 as integer), score, create_dt
 	from player_game_nonparticipants
 	where game_id = $1
