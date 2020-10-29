@@ -213,8 +213,8 @@ func NewPlayerWeaponStatBaseList(pwsList []*models.PlayerWeaponStat) []*PlayerWe
 			v.Fired = 1
 		}
 
-		pctTotalDamage := 100*(float32(v.Actual) / float32(totalDamage))
-		pctAccuracy := 100*(float32(v.Hit) / float32(v.Fired))
+		pctTotalDamage := 100 * (float32(v.Actual) / float32(totalDamage))
+		pctAccuracy := 100 * (float32(v.Hit) / float32(v.Fired))
 
 		pwsb = append(pwsb, &PlayerWeaponStatBase{
 			PlayerWeaponStatID: v.PlayerWeaponStatID,
@@ -235,7 +235,7 @@ func NewPlayerWeaponStatBaseList(pwsList []*models.PlayerWeaponStat) []*PlayerWe
 	}
 
 	// Last but not least, we'll add a "meta" entry for the total
-	pctTotalAccuracy := 100*(float32(totalHits) / float32(totalFired))
+	pctTotalAccuracy := 100 * (float32(totalHits) / float32(totalFired))
 	pwsb = append(pwsb, &PlayerWeaponStatBase{
 		PlayerWeaponStatID: -1,
 		PlayerID:           pwsList[0].PlayerID,
@@ -254,6 +254,40 @@ func NewPlayerWeaponStatBaseList(pwsList []*models.PlayerWeaponStat) []*PlayerWe
 	})
 
 	return pwsb
+}
+
+// NonParticipantBase houses people who were around for a match but didn't complete it.
+type NonParticipantBase struct {
+	PlayerGameNonParticipantID int
+	PlayerID                   int
+	GameID                     int
+	Status                     string
+	Nick                       *models.MultiNick
+	AliveTime                  *models.MultiDuration
+	Score                      int32
+}
+
+// NewNonParticipantBase transforms a raw NonParticipant into its view-agnostic version.
+func NewNonParticipantBase(np *models.PlayerGameNonParticipant) *NonParticipantBase {
+	nick := models.NewMultiNick(np.Nick.String)
+	noDuration := time.Duration(0) * time.Second
+
+	var alivetime *models.MultiDuration
+	if np.AliveTime != nil {
+		alivetime = models.NewMultiDuration(*np.AliveTime)
+	} else {
+		alivetime = models.NewMultiDuration(noDuration)
+	}
+
+	return &NonParticipantBase{
+		PlayerGameNonParticipantID: np.PlayerGameNonParticipantID,
+		PlayerID:                   np.PlayerID,
+		GameID:                     np.GameID,
+		Status:                     np.Status,
+		Nick:                       nick,
+		AliveTime:                  alivetime,
+		Score:                      np.Score.Int32,
+	}
 }
 
 // GameInfoBase is the view-agnostic representation of a Game.
