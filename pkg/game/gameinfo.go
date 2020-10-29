@@ -308,7 +308,8 @@ type GameInfoBase struct {
 	PlayerWeaponStatsByPGSID map[int][]*PlayerWeaponStatBase
 	ShowFragMatrix           bool
 	FragMatrix               map[int][]int
-	NonParticipants          []*NonParticipantBase
+	Forfeits                 []*NonParticipantBase
+	Spectators               []*NonParticipantBase
 }
 
 // GameInfoData returns the view-agnostic data for a given game by its ID.
@@ -350,14 +351,19 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		playerGameStatsByTeam[v.Team] = make([]*PlayerGameStatBase, 0)
 	}
 
-	var nonParticipants []*NonParticipantBase
+	var forfeits, spectators []*NonParticipantBase
 	rawNonParticipants, err := db.RPlayerGameNonParticipantsByGameID(gameID)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, v := range rawNonParticipants {
-		nonParticipants = append(nonParticipants, NewNonParticipantBase(v))
+		np := NewNonParticipantBase(v)
+		if np.Status == "forfeit" {
+			forfeits = append(forfeits, np)
+		} else if np.Status == "spectator" {
+			spectators = append(spectators, np)
+		}
 	}
 
 	var teamOrdering []int // so we know which team "won" since maps are not ordered
@@ -458,6 +464,7 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		PlayerWeaponStatsByPGSID: weaponStatsBaseByPGSID,
 		ShowFragMatrix:           showFragMatrix,
 		FragMatrix:               fragMatrix,
-		NonParticipants:          nonParticipants,
+		Forfeits:                 forfeits,
+		Spectators:               spectators,
 	}, nil
 }
