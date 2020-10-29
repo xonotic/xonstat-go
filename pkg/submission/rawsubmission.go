@@ -168,13 +168,14 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 
 	human := isHuman(events)
 	joined := joinedGame(events)
-	played := playedInGame(events)
+	playedTillEnd := playedInGame(events)
 	if human {
-		if joined && !played {
-			// If they joined the match but didn't actually play/finish it, they 
-			// either spectated the whole time or forfeited (to be determined elsewhere).
+		if (joined && !playedTillEnd) || (!joined && !playedTillEnd) {
+			// If they joined the match but didn't actually finish it, they forfeited.
+			// If they did not join, they spectated. The actual designation is done later,
+			// after we have parsed AliveTime properly.
 			s.NonParticipants = append(s.NonParticipants, events)
-		} else if joined && played {
+		} else if joined && playedTillEnd {
 			if firedWeapon {
 				s.HumanFiredWeapon = true
 			}
@@ -189,7 +190,7 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 
 			s.Humans = append(s.Humans, events)
 		}
-	} else if !human && played {
+	} else if !human && playedTillEnd {
 		s.Bots = append(s.Bots, events)
 	}
 
