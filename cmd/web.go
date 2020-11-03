@@ -115,6 +115,7 @@ func web(port string, printRoutes bool) {
 	r.Get(reverse.Add("games", "/games"), env.RecentGamesHandler)
 	r.Get(reverse.Add("server_info", "/server/{id:\\d+}", "{id:\\d+}"), env.ServerInfoHandler)
 	r.Get(reverse.Add("game_info", "/game/{id:\\d+}", "{id:\\d+}"), env.GameInfoHandler)
+	r.NotFound(env.NotFoundHandler)
 
 	// Static files
 	cwd, _ := os.Getwd()
