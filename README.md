@@ -136,7 +136,7 @@ drop by the `#xonotic` channel on Freenode's IRC network. Please take care to
 follow [IRC etiquette][etiquette].
 
 ## License
-XonStat is licensed under the GNU GPLv3 license. See the `LICENSE.TXT` file
+XonStat is licensed under the GNU AGPLv3 license. See the `LICENSE.TXT` file
 within this repository for the full legal text.
 
 ## Author
