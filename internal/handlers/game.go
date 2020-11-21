@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -121,4 +122,35 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+}
+
+// GameWeaponInfoHandler retrieves information about the weapons in a game by its ID.
+func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) {
+	// All responses will be JSON for now.
+	// acceptHeader := r.Header.Get("Accept")
+
+	gameID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		log.Printf("Invalid or missing game ID value: %s", err)
+		http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
+		return
+	}
+
+	gameWeaponInfo, err := game.GameWeaponInfoData(ae.db, gameID)
+	if err != nil {
+		log.Printf("Could not process weapon info for game ID %d: %s", gameID, err)
+		http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	bytes, err := json.Marshal(gameWeaponInfo)
+	if err != nil {
+		log.Printf("Could not marshal weapon info to JSON for game ID %d: %s", gameID, err)
+		http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
+		return
+	}
+
+	w.Write(bytes)
 }
