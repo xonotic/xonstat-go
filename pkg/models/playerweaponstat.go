@@ -51,10 +51,11 @@ func scanPlayerWeaponStats(rows *sql.Rows) ([]*PlayerWeaponStat, error) {
 
 // RPlayerWeaponStatsByGameID retrieves player weapon stat records by their game ID
 func (ds *PGDatastore) RPlayerWeaponStatsByGameID(gameID int) ([]*PlayerWeaponStat, error) {
-	sql := `select player_weapon_stats_id, player_id, game_id, player_game_stat_id, weapon_cd,
-	actual, max, hit, fired, frags
-	from player_weapon_stats
-	where game_id = $1`
+	sql := `select ws.player_weapon_stats_id, ws.player_id, ws.game_id, 
+	ws.player_game_stat_id, ws.weapon_cd, ws.actual, ws.max, ws.hit, ws.fired, ws.frags
+	from player_weapon_stats ws join player_game_stats gs on ws.player_game_stat_id = gs.player_game_stat_id
+	where ws.game_id = $1
+    order by gs.scoreboardpos;`
 
 	rows, err := ds.db.Query(sql, gameID)
 	if err != nil {
