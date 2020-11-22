@@ -152,6 +152,11 @@ func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) 
 	// distinct set of weapons, with each entry in the set being the list of weapon
 	// stats by the players. 
 	for _, ws := range gameWeaponInfo.WeaponStats {
+		// Ignore the meta entry
+		if ws.WeaponCd == "total" {
+			continue
+		}
+
 		series, ok := weaponToSeries[ws.WeaponCd]
 		if ok {
 			// Series already created, append
