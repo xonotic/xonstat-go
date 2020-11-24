@@ -308,3 +308,20 @@ type PlayerGameNonParticipant struct {
 	Score            sql.NullInt32
 	CreateDt         time.Time
 }
+
+// WeaponInfo is the weapon details of a single player weapon within a given game, paired
+// with a little info about the player themself.
+type WeaponInfo struct {
+	PlayerWeaponStatID int
+	PlayerID           int
+	Nick               string
+	GameID             int
+	PlayerGameStatID   int
+	WeaponCd           string
+	Actual             int
+	Max                int
+	Hit                int
+	Fired              int
+	Frags              int
+	CreateDt           time.Time
+}

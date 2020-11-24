@@ -43,6 +43,9 @@ type Datastore interface {
 	CPlayerWeaponStat(tx *sql.Tx, pws PlayerWeaponStat) (int64, error)
 	RPlayerWeaponStatsByGameID(gameID int) ([]*PlayerWeaponStat, error)
 
+	// WeaponInfo-oriented methods
+	RWeaponInfoByGameID(gameID int) ([]*WeaponInfo, error)
+
 	// TeamGameStat-oriented methods
 	CTeamGameStat(tx *sql.Tx, tgs TeamGameStat) (int64, error)
 

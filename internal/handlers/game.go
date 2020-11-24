@@ -140,44 +140,9 @@ func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	type Series struct {
-		Key string `json:"key"`
-		Color string `json:"color"`
-		Values []*game.PlayerWeaponStatBase `json:"values"`
-	}
-
-	weaponToSeries := make(map[string]*Series)
-
-	// Assemble the weapon data in the "shape" that NVD3 wants. The series is the 
-	// distinct set of weapons, with each entry in the set being the list of weapon
-	// stats by the players. 
-	for _, ws := range gameWeaponInfo.WeaponStats {
-		// Ignore the meta entry
-		if ws.WeaponCd == "total" {
-			continue
-		}
-
-		series, ok := weaponToSeries[ws.WeaponCd]
-		if ok {
-			// Series already created, append
-			series.Values = append(series.Values, ws)
-		} else {
-			// Series not created yet. Create and add.
-			series := Series{Key: ws.WeaponCd, Values: make([]*game.PlayerWeaponStatBase, 0)}
-			series.Values = append(series.Values, ws)
-			weaponToSeries[ws.WeaponCd] = &series
-		}
-	}
-
-	// Flatten the map into a plain list of series
-	series := make([]*Series, 0)
-	for _, s := range weaponToSeries {
-		series = append(series, s)
-	}
-
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	bytes, err := json.Marshal(series)
+	bytes, err := json.Marshal(gameWeaponInfo)
 	if err != nil {
 		log.Printf("Could not marshal weapon info to JSON for game ID %d: %s", gameID, err)
 		http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
