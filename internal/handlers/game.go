@@ -167,16 +167,56 @@ type DamageDataset struct {
 	Label           string            `json:"label"`
 	BackgroundColor string            `json:"backgroundColor"`
 	BorderColor     string            `json:"borderColor"`
+	MaxBarThickness int               `json:"maxBarThickness"`
 	RichData        []*DamageRichData `json:"richData"`
 	Data            []int             `json:"data"`
+}
+
+// Determine the background color for a given weapon in charts
+func weaponBackgroundColor(weaponCd string) string {
+	weaponColors := map[string]string{
+		"arc":             "#7c9ceb",
+		"laser":           "#f7717b",
+		"blaster":         "#f7717b",
+		"shotgun":         "#849ba8",
+		"uzi":             "#81f13d",
+		"machinegun":      "#81f13d",
+		"grenadelauncher": "#fd7865",
+		"mortar":          "#fd7865",
+		"minelayer":       "#fd7865",
+		"electro":         "#6899f2",
+		"crylink":         "#ea6ff9",
+		"nex":             "#75c3d5",
+		"vortex":          "#75c3d5",
+		"hagar":           "#e39160",
+		"rocketlauncher":  "#e9be57",
+		"devastator":      "#e9be57",
+		"porto":           "#6899f2",
+		"minstanex":       "#978ed2",
+		"vaporizer":       "#978ed2",
+		"hook":            "#81f13d",
+		"hlac":            "#e5965b",
+		"seeker":          "#f7717b",
+		"rifle":           "#e39160",
+		"tuba":            "#e9be57",
+		"fireball":        "#f0855f",
+	}
+
+	color, ok := weaponColors[weaponCd]
+	if ok {
+		return color
+	}
+
+	return ""
 }
 
 // NewDamageDataset creates a new DamageDataSet from a weapon code.
 func NewDamageDataset(weaponCd string) *DamageDataset {
 	return &DamageDataset{
 		Label:           weaponCd,
-		BackgroundColor: "", // TODO: calculate background color based on weapon
+		BackgroundColor: weaponBackgroundColor(weaponCd),
 		BorderColor:     "", // TODO: calculate border color based on weapon
+		MaxBarThickness: 25,
 		RichData:        make([]*DamageRichData, 0),
 		Data:            make([]int, 0),
 	}
