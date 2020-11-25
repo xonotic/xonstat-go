@@ -73,6 +73,9 @@
 <div class="grid-x grid-padding-x">
   <div class="cell small-12 medium-9">
     <h3>Weapons and Damage</h3>
+
+    <canvas id="damageChart"></canvas>
+
     {{range $pgstat := .PlayerGameStats}}
       {{if gt $pgstat.PlayerID 1}}
         <p>{{$pgstat.Nick.NickHTML}}:</p>
@@ -82,4 +85,14 @@
   </div>
 </div>
 
+{{end}}
+
+{{define "extra-js"}}
+  <script type='text/javascript' src='/static/js/vendor/Chart.min.js'></script>
+  <script type='text/javascript' src='/static/js/weaponCharts.js'></script>
+  <script type="text/javascript">
+  jQuery.getJSON("/game/{{.GameID}}/weapons", function(data){
+    drawDamageChart("damageChart", data)
+  });
+  </script>
 {{end}}

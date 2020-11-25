@@ -23,6 +23,9 @@
       */ -}}
     {{end}}
 
+    {{block "extra-css" .}}
+    {{end}}
+
     {{block "headjs" .}}
       <script src="/static/js/vendor/modernizr.js"></script>
     {{end}}
@@ -60,6 +63,9 @@
           $(document).foundation();
         </script>
       {{end}}
+    {{end}}
+
+    {{block "extra-js" .}}
     {{end}}
 
     <!-- RELATIVE TIME CONVERSION -->
