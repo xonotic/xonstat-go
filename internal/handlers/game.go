@@ -124,6 +124,78 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DamageRichData is the more detailed set of information for a given slice of the stacked bar chart for damage.
+type DamageRichData struct {
+	PlayerID         int     `json:"player_id"`
+	Nick             string  `json:"nick"`
+	GameID           int     `json:"game_id"`
+	PlayerGameStatID int     `json:"player_game_stat_id"`
+	WeaponCd         string  `json:"weapon_cd"`
+	WeaponCdInitCaps string  `json:"weapon_cd_init_caps"`
+	Actual           int     `json:"actual"`
+	Max              int     `json:"max"`
+	PctTotalDamage   float32 `json:"pct_total_damage"`
+	Frags            int     `json:"frags"`
+}
+
+// NewDamageRichData converts a WeaponInfoBase into a DamageRichData object or a blank entry.
+func NewDamageRichData(weaponCd string, wi *game.WeaponInfoBase) *DamageRichData {
+	if wi == nil {
+		// Blank entry
+		return &DamageRichData{
+			WeaponCd: weaponCd,
+		}
+	} else {
+		return &DamageRichData{
+			PlayerID:         wi.PlayerID,
+			Nick:             wi.Nick.NickStripped,
+			GameID:           wi.GameID,
+			PlayerGameStatID: wi.PlayerGameStatID,
+			WeaponCd:         wi.WeaponCd,
+			WeaponCdInitCaps: wi.WeaponCdInitCaps,
+			Actual:           wi.Actual,
+			Max:              wi.Max,
+			PctTotalDamage:   wi.PctTotalDamage,
+			Frags:            wi.Frags,
+		}
+
+	}
+}
+
+// DamageDataset is damage data in the "shape" that chart.js wants.
+type DamageDataset struct {
+	Label           string            `json:"label"`
+	BackgroundColor string            `json:"backgroundColor"`
+	BorderColor     string            `json:"borderColor"`
+	RichData        []*DamageRichData `json:"richData"`
+	Data            []int             `json:"data"`
+}
+
+// NewDamageDataset creates a new DamageDataSet from a weapon code.
+func NewDamageDataset(weaponCd string) *DamageDataset {
+	return &DamageDataset{
+		Label:           weaponCd,
+		BackgroundColor: "", // TODO: calculate background color based on weapon
+		BorderColor:     "", // TODO: calculate border color based on weapon
+		RichData:        make([]*DamageRichData, 0),
+		Data:            make([]int, 0),
+	}
+}
+
+// GameWeaponInfoResponse is the JSON response type for a game's weapon information.
+type GameWeaponInfoResponse struct {
+	GameID          int              `json:"game_id"`
+	GameTypeCd      string           `json:"game_type_cd"`
+	GameTypeDescr   string           `json:"game_type_descr"`
+	Duration        string           `json:"duration"`
+	Winner          int              `json:"winning_team"`
+	MatchID         string           `json:"match_id"`
+	Mod             string           `json:"mod"`
+	DistinctWeapons []string         `json:"distinct_weapons"`
+	DistinctPlayers []string         `json:"distinct_players"`
+	DamageData      []*DamageDataset `json:"damage_data"`
+}
+
 // GameWeaponInfoHandler retrieves information about the weapons in a game by its ID.
 func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) {
 	gameID, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -140,9 +212,56 @@ func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	pgsIDOrder := make([]int, 0)                                    // the order we've seen the pgsIDs
+	pgsIDToWeapons := make(map[int]map[string]*game.WeaponInfoBase) // game stat IDs to weapons
+	nicks := make([]string, 0)                                      //  keep track of the stripped nicks of each player
+	for _, wi := range gameWeaponInfo.WeaponInfo {
+		pgsID := wi.PlayerGameStatID
+		weaponCd := wi.WeaponCd
+		if _, ok := pgsIDToWeapons[wi.PlayerGameStatID]; !ok {
+			pgsIDToWeapons[pgsID] = make(map[string]*game.WeaponInfoBase)
+			nicks = append(nicks, wi.Nick.NickStripped)
+			pgsIDOrder = append(pgsIDOrder, pgsID)
+		}
+
+		pgsIDToWeapons[pgsID][weaponCd] = wi
+	}
+
+	// A damage dataset is added for each player, for each distinct weapon used in the match.
+	damageData := make([]*DamageDataset, 0)
+	for _, weaponCd := range gameWeaponInfo.DistinctWeapons {
+		dmgDataset := NewDamageDataset(weaponCd)
+		for _, pgsID := range pgsIDOrder {
+			wi, ok := pgsIDToWeapons[pgsID][weaponCd]
+			if ok {
+				// convert wi and add to dataset
+				dmgDataset.RichData = append(dmgDataset.RichData, NewDamageRichData(weaponCd, wi))
+				dmgDataset.Data = append(dmgDataset.Data, wi.Actual)
+			} else {
+				// blank entry
+				dmgDataset.RichData = append(dmgDataset.RichData, NewDamageRichData(weaponCd, nil))
+				dmgDataset.Data = append(dmgDataset.Data, 0)
+			}
+		}
+		damageData = append(damageData, dmgDataset)
+	}
+
+	gameWeaponInfoResponse := GameWeaponInfoResponse{
+		GameID:          gameWeaponInfo.GameID,
+		GameTypeCd:      gameWeaponInfo.GameTypeCd,
+		GameTypeDescr:   gameWeaponInfo.GameTypeDescr,
+		Duration:        gameWeaponInfo.Duration.Long,
+		Winner:          gameWeaponInfo.Winner,
+		MatchID:         gameWeaponInfo.MatchID,
+		Mod:             gameWeaponInfo.Mod,
+		DistinctWeapons: gameWeaponInfo.DistinctWeapons,
+		DistinctPlayers: nicks,
+		DamageData:      damageData,
+	}
+
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	bytes, err := json.Marshal(gameWeaponInfo)
+	bytes, err := json.Marshal(gameWeaponInfoResponse)
 	if err != nil {
 		log.Printf("Could not marshal weapon info to JSON for game ID %d: %s", gameID, err)
 		http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
