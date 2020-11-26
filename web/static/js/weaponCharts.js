@@ -1,5 +1,10 @@
 function drawDamageChart(id, data) {
-    var ctx = document.getElementById('damageChart').getContext('2d');
+    var ctx = document.getElementById(id).getContext('2d');
+
+    // The aspect ratio really depends on how many players are present. This formula 
+    // is based on playing around with values and settling on a comfortable maximum.
+    var aspectRatio = Math.min(1200/(data.distinct_players.length * 25), 7);
+
     window.myHorizontalBar = new Chart(ctx, {
         type: 'horizontalBar',
         data: {
@@ -7,6 +12,7 @@ function drawDamageChart(id, data) {
             datasets: data.damage_data,
         },
         options: {
+            aspectRatio: aspectRatio,
             elements: {
                 rectangle: {
                     borderWidth: 2,
@@ -36,7 +42,7 @@ function drawDamageChart(id, data) {
                 }]
             },
             legend: {
-                position: 'right',
+                position: 'top',
             },
             tooltips: {
                 backgroundColor: 'rgba(255, 255, 255, 0.8)',
