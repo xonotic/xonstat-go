@@ -145,20 +145,19 @@ func NewDamageRichData(weaponCd string, wi *game.WeaponInfoBase) *DamageRichData
 		return &DamageRichData{
 			WeaponCd: weaponCd,
 		}
-	} else {
-		return &DamageRichData{
-			PlayerID:         wi.PlayerID,
-			Nick:             wi.Nick.NickStripped,
-			GameID:           wi.GameID,
-			PlayerGameStatID: wi.PlayerGameStatID,
-			WeaponCd:         wi.WeaponCd,
-			WeaponCdInitCaps: wi.WeaponCdInitCaps,
-			Actual:           wi.Actual,
-			Max:              wi.Max,
-			PctTotalDamage:   wi.PctTotalDamage,
-			Frags:            wi.Frags,
-		}
+	}
 
+	return &DamageRichData{
+		PlayerID:         wi.PlayerID,
+		Nick:             wi.Nick.NickStripped,
+		GameID:           wi.GameID,
+		PlayerGameStatID: wi.PlayerGameStatID,
+		WeaponCd:         wi.WeaponCd,
+		WeaponCdInitCaps: wi.WeaponCdInitCaps,
+		Actual:           wi.Actual,
+		Max:              wi.Max,
+		PctTotalDamage:   wi.PctTotalDamage,
+		Frags:            wi.Frags,
 	}
 }
 
@@ -253,7 +252,7 @@ func NewDamageDataset(weaponCd string) *DamageDataset {
 	return &DamageDataset{
 		Label:           weaponCd,
 		BackgroundColor: weaponBackgroundColor(weaponCd),
-		BorderColor:     weaponBorderColor(weaponCd), 
+		BorderColor:     weaponBorderColor(weaponCd),
 		MaxBarThickness: 25,
 		RichData:        make([]*DamageRichData, 0),
 		Data:            make([]int, 0),
