@@ -73,15 +73,7 @@
 <div class="grid-x grid-padding-x">
   <div class="cell small-12">
     <h3>Damage Information</h3>
-
     <canvas id="damageChart"></canvas>
-
-    {{range $pgstat := .PlayerGameStats}}
-      {{if gt $pgstat.PlayerID 1}}
-        <p>{{$pgstat.Nick.NickHTML}}:</p>
-        {{template "accuracy.partial.html" (index $.PlayerWeaponStatsByPGSID $pgstat.PlayerGameStatID)}}
-      {{end}}
-    {{end}}
   </div>
 </div>
 
