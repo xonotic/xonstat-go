@@ -303,7 +303,7 @@ type AccuracyDataset struct {
 	BorderColor     string              `json:"borderColor"`
 	MaxBarThickness int                 `json:"maxBarThickness"`
 	RichData        []*AccuracyRichData `json:"richData"`
-	Data            []int               `json:"data"`
+	Data            []float32           `json:"data"`
 }
 
 // NewAccuracyDataset creates a new AccuracyDataSet from a weapon code.
@@ -314,7 +314,7 @@ func NewAccuracyDataset(weaponCd string) *AccuracyDataset {
 		BorderColor:     weaponBorderColor(weaponCd),
 		MaxBarThickness: 25,
 		RichData:        make([]*AccuracyRichData, 0),
-		Data:            make([]int, 0),
+		Data:            make([]float32, 0),
 	}
 }
 
@@ -331,6 +331,18 @@ type GameWeaponInfoResponse struct {
 	DistinctPlayers []string           `json:"distinct_players"`
 	DamageData      []*DamageDataset   `json:"damage_data"`
 	AccuracyData    []*AccuracyDataset `json:"accuracy_data"`
+}
+
+// Should the weapon be included in the accuracy dataset?
+func isAccuracyWeapon(weaponCd string) bool {
+	switch weaponCd {
+	case "arc", "assaultrifle", "huntingrifle", "machinegun", "okhmg", "okmachinegun":
+		return true
+	case "oknex", "rifle", "shockwave", "shotgun", "vaporizer", "vortex":
+		return true
+	}
+
+	return false
 }
 
 // GameWeaponInfoHandler retrieves information about the weapons in a game by its ID.
@@ -364,13 +376,16 @@ func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) 
 		pgsIDToWeapons[pgsID][weaponCd] = wi
 	}
 
-	// A damage dataset is added for each player, for each distinct weapon used in the match.
+	// Datasets are added for each player, for each distinct weapon used in the match.
 	damageData := make([]*DamageDataset, 0)
 	for _, weaponCd := range gameWeaponInfo.DistinctWeapons {
 		dmgDataset := NewDamageDataset(weaponCd)
 		for _, pgsID := range pgsIDOrder {
-			wi, ok := pgsIDToWeapons[pgsID][weaponCd]
-			if ok {
+			// Check if the player actually used that weapon.
+			wi, usedWeapon := pgsIDToWeapons[pgsID][weaponCd]
+
+			// Damage
+			if usedWeapon {
 				// convert wi and add to dataset
 				dmgDataset.RichData = append(dmgDataset.RichData, NewDamageRichData(weaponCd, wi))
 				dmgDataset.Data = append(dmgDataset.Data, wi.Actual)
@@ -381,6 +396,33 @@ func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) 
 			}
 		}
 		damageData = append(damageData, dmgDataset)
+	}
+
+	// Accuracy datasets are also added for each player, for each distinct weapon used in the match.
+	accData := make([]*AccuracyDataset, 0)
+	for _, weaponCd := range gameWeaponInfo.DistinctWeapons {
+		// Not all weapons are put into the accuracy charts.
+		if !isAccuracyWeapon(weaponCd) {
+			continue
+		}
+
+		accDataset := NewAccuracyDataset(weaponCd)
+		for _, pgsID := range pgsIDOrder {
+			// Check if the player actually used that weapon.
+			wi, usedWeapon := pgsIDToWeapons[pgsID][weaponCd]
+
+			// Accuracy
+			if usedWeapon {
+				// convert wi and add to dataset
+				accDataset.RichData = append(accDataset.RichData, NewAccuracyRichData(wi.WeaponCd, wi))
+				accDataset.Data = append(accDataset.Data, wi.PctAccuracy)
+			} else {
+				// blank entry
+				accDataset.RichData = append(accDataset.RichData, NewAccuracyRichData(weaponCd, nil))
+				accDataset.Data = append(accDataset.Data, 0.0)
+			}
+		}
+		accData = append(accData, accDataset)
 	}
 
 	gameWeaponInfoResponse := GameWeaponInfoResponse{
@@ -394,6 +436,7 @@ func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) 
 		DistinctWeapons: gameWeaponInfo.DistinctWeapons,
 		DistinctPlayers: nicks,
 		DamageData:      damageData,
+		AccuracyData:    accData,
 	}
 
 	w.Header().Add("Content-Type", "application/json")
