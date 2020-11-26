@@ -68,6 +68,13 @@
     <canvas id="damageChart"></canvas>
   </div>
 </div>
+
+<div class="grid-x grid-padding-x">
+  <div class="cell small-12">
+    <h3>Accuracy</h3>
+    <canvas id="accuracyChart"></canvas>
+  </div>
+</div>
 {{end}}
 
 {{if .ShowFragMatrix}}
@@ -88,7 +95,8 @@
   <script type='text/javascript' src='/static/js/weaponCharts.js'></script>
   <script type="text/javascript">
   jQuery.getJSON("/game/{{.GameID}}/weapons", function(data){
-    drawDamageChart("damageChart", data)
+    drawDamageChart("damageChart", data);
+    drawAccuracyChart("accuracyChart", data);
   });
   </script>
 {{end}}
