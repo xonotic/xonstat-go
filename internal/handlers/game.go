@@ -172,9 +172,47 @@ type DamageDataset struct {
 	Data            []int             `json:"data"`
 }
 
-// Determine the background color for a given weapon in charts
+// Determine the primary background color for weapon charts by weapon code.
 func weaponBackgroundColor(weaponCd string) string {
 	weaponColors := map[string]string{
+		"arc":             "#7C9CEB",
+		"laser":           "#F7717B",
+		"blaster":         "#F7717B",
+		"shotgun":         "#849BA8",
+		"uzi":             "#81F13D",
+		"machinegun":      "#81F13D",
+		"grenadelauncher": "#FD7865",
+		"mortar":          "#FD7865",
+		"minelayer":       "#FD7865",
+		"electro":         "#6899F2",
+		"crylink":         "#EA6FF9",
+		"nex":             "#75C3D5",
+		"vortex":          "#75C3D5",
+		"hagar":           "#E39160",
+		"rocketlauncher":  "#E9BE57",
+		"devastator":      "#E9BE57",
+		"porto":           "#6899F2",
+		"minstanex":       "#978ED2",
+		"vaporizer":       "#978ED2",
+		"hook":            "#81F13D",
+		"hlac":            "#E5965B",
+		"seeker":          "#F7717B",
+		"rifle":           "#E39160",
+		"tuba":            "#E9BE57",
+		"fireball":        "#F0855F",
+	}
+
+	color, ok := weaponColors[weaponCd]
+	if ok {
+		return color
+	}
+
+	return ""
+}
+
+// Determine the border color for a given weapon in charts
+func weaponBorderColor(weaponCd string) string {
+	borderColors := map[string]string{
 		"arc":             "#7c9ceb",
 		"laser":           "#f7717b",
 		"blaster":         "#f7717b",
@@ -202,7 +240,7 @@ func weaponBackgroundColor(weaponCd string) string {
 		"fireball":        "#f0855f",
 	}
 
-	color, ok := weaponColors[weaponCd]
+	color, ok := borderColors[weaponCd]
 	if ok {
 		return color
 	}
@@ -215,7 +253,7 @@ func NewDamageDataset(weaponCd string) *DamageDataset {
 	return &DamageDataset{
 		Label:           weaponCd,
 		BackgroundColor: weaponBackgroundColor(weaponCd),
-		BorderColor:     "", // TODO: calculate border color based on weapon
+		BorderColor:     weaponBorderColor(weaponCd), 
 		MaxBarThickness: 25,
 		RichData:        make([]*DamageRichData, 0),
 		Data:            make([]int, 0),

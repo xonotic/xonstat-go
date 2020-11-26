@@ -116,6 +116,7 @@ func GameWeaponInfoData(db models.Datastore, gameID int) (*GameWeaponInfoBase, e
 	weaponSet := make(map[string]struct{})
 	distinctWeapons := make([]string, 0)
 	weaponInfosByPGSID := make(map[int][]*models.WeaponInfo)
+	pgsidOrder := make([]int, 0)
 
 	for _, w := range rawWeaponInfos {
 		if _, ok := weaponSet[w.WeaponCd]; !ok {
@@ -125,13 +126,15 @@ func GameWeaponInfoData(db models.Datastore, gameID int) (*GameWeaponInfoBase, e
 
 		if _, ok := weaponInfosByPGSID[w.PlayerGameStatID]; !ok {
 			weaponInfosByPGSID[w.PlayerGameStatID] = make([]*models.WeaponInfo, 0)
+			pgsidOrder = append(pgsidOrder, w.PlayerGameStatID)
 		}
 		weaponInfosByPGSID[w.PlayerGameStatID] = append(weaponInfosByPGSID[w.PlayerGameStatID], w)
 	}
 
+	// Iterate over the raw weapon infos, taking care to maintain order
 	weaponInfoBases := make([]*WeaponInfoBase, 0)
-	for _, wiList := range weaponInfosByPGSID {
-		weaponInfoBases = append(weaponInfoBases, NewWeaponInfoBaseList(wiList)...)
+	for _, pgsid := range pgsidOrder {
+		weaponInfoBases = append(weaponInfoBases, NewWeaponInfoBaseList(weaponInfosByPGSID[pgsid])...)
 	}
 
 	return &GameWeaponInfoBase{
