@@ -3,7 +3,7 @@ function drawDamageChart(id, data) {
 
     // The aspect ratio really depends on how many players are present. This formula 
     // is based on playing around with values and settling on a comfortable maximum.
-    var aspectRatio = Math.min(1200/(data.distinct_players.length * 25), 7);
+    var aspectRatio = Math.min(1200/(data.distinct_players.length * 30), 7);
 
     window.myHorizontalBar = new Chart(ctx, {
         type: 'horizontalBar',
