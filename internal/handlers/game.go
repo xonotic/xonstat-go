@@ -124,53 +124,6 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DamageRichData is the more detailed set of information for a given slice of the stacked bar chart for damage.
-type DamageRichData struct {
-	PlayerID         int     `json:"player_id"`
-	Nick             string  `json:"nick"`
-	GameID           int     `json:"game_id"`
-	PlayerGameStatID int     `json:"player_game_stat_id"`
-	WeaponCd         string  `json:"weapon_cd"`
-	WeaponCdInitCaps string  `json:"weapon_cd_init_caps"`
-	Actual           int     `json:"actual"`
-	Max              int     `json:"max"`
-	PctTotalDamage   float32 `json:"pct_total_damage"`
-	Frags            int     `json:"frags"`
-}
-
-// NewDamageRichData converts a WeaponInfoBase into a DamageRichData object or a blank entry.
-func NewDamageRichData(weaponCd string, wi *game.WeaponInfoBase) *DamageRichData {
-	if wi == nil {
-		// Blank entry
-		return &DamageRichData{
-			WeaponCd: weaponCd,
-		}
-	}
-
-	return &DamageRichData{
-		PlayerID:         wi.PlayerID,
-		Nick:             wi.Nick.NickStripped,
-		GameID:           wi.GameID,
-		PlayerGameStatID: wi.PlayerGameStatID,
-		WeaponCd:         wi.WeaponCd,
-		WeaponCdInitCaps: wi.WeaponCdInitCaps,
-		Actual:           wi.Actual,
-		Max:              wi.Max,
-		PctTotalDamage:   wi.PctTotalDamage,
-		Frags:            wi.Frags,
-	}
-}
-
-// DamageDataset is damage data in the "shape" that chart.js wants.
-type DamageDataset struct {
-	Label           string            `json:"label"`
-	BackgroundColor string            `json:"backgroundColor"`
-	BorderColor     string            `json:"borderColor"`
-	MaxBarThickness int               `json:"maxBarThickness"`
-	RichData        []*DamageRichData `json:"richData"`
-	Data            []int             `json:"data"`
-}
-
 // Determine the primary background color for weapon charts by weapon code.
 func weaponBackgroundColor(weaponCd string) string {
 	weaponColors := map[string]string{
@@ -247,6 +200,53 @@ func weaponBorderColor(weaponCd string) string {
 	return ""
 }
 
+// DamageRichData is the more detailed set of information for a given slice of the stacked bar chart for damage.
+type DamageRichData struct {
+	PlayerID         int     `json:"player_id"`
+	Nick             string  `json:"nick"`
+	GameID           int     `json:"game_id"`
+	PlayerGameStatID int     `json:"player_game_stat_id"`
+	WeaponCd         string  `json:"weapon_cd"`
+	WeaponCdInitCaps string  `json:"weapon_cd_init_caps"`
+	Actual           int     `json:"actual"`
+	Max              int     `json:"max"`
+	PctTotalDamage   float32 `json:"pct_total_damage"`
+	Frags            int     `json:"frags"`
+}
+
+// NewDamageRichData converts a WeaponInfoBase into a DamageRichData object or a blank entry.
+func NewDamageRichData(weaponCd string, wi *game.WeaponInfoBase) *DamageRichData {
+	if wi == nil {
+		// Blank entry
+		return &DamageRichData{
+			WeaponCd: weaponCd,
+		}
+	}
+
+	return &DamageRichData{
+		PlayerID:         wi.PlayerID,
+		Nick:             wi.Nick.NickStripped,
+		GameID:           wi.GameID,
+		PlayerGameStatID: wi.PlayerGameStatID,
+		WeaponCd:         wi.WeaponCd,
+		WeaponCdInitCaps: wi.WeaponCdInitCaps,
+		Actual:           wi.Actual,
+		Max:              wi.Max,
+		PctTotalDamage:   wi.PctTotalDamage,
+		Frags:            wi.Frags,
+	}
+}
+
+// DamageDataset is damage data in the "shape" that chart.js wants.
+type DamageDataset struct {
+	Label           string            `json:"label"`
+	BackgroundColor string            `json:"backgroundColor"`
+	BorderColor     string            `json:"borderColor"`
+	MaxBarThickness int               `json:"maxBarThickness"`
+	RichData        []*DamageRichData `json:"richData"`
+	Data            []int             `json:"data"`
+}
+
 // NewDamageDataset creates a new DamageDataSet from a weapon code.
 func NewDamageDataset(weaponCd string) *DamageDataset {
 	return &DamageDataset{
@@ -259,18 +259,78 @@ func NewDamageDataset(weaponCd string) *DamageDataset {
 	}
 }
 
+// AccuracyRichData is the more detailed set of information for a given slice of the bar chart for accuracy.
+type AccuracyRichData struct {
+	PlayerID         int     `json:"player_id"`
+	Nick             string  `json:"nick"`
+	GameID           int     `json:"game_id"`
+	PlayerGameStatID int     `json:"player_game_stat_id"`
+	WeaponCd         string  `json:"weapon_cd"`
+	WeaponCdInitCaps string  `json:"weapon_cd_init_caps"`
+	Hit              int     `json:"hit"`
+	Fired            int     `json:"fired"`
+	PctAccuracy      float32 `json:"pct_accuracy"`
+	Frags            int     `json:"frags"`
+}
+
+// NewAccuracyRichData converts a WeaponInfoBase into an AccuracyRichData object or a blank entry.
+func NewAccuracyRichData(weaponCd string, wi *game.WeaponInfoBase) *AccuracyRichData {
+	if wi == nil {
+		// Blank entry
+		return &AccuracyRichData{
+			WeaponCd: weaponCd,
+		}
+	}
+
+	return &AccuracyRichData{
+		PlayerID:         wi.PlayerID,
+		Nick:             wi.Nick.NickStripped,
+		GameID:           wi.GameID,
+		PlayerGameStatID: wi.PlayerGameStatID,
+		WeaponCd:         wi.WeaponCd,
+		WeaponCdInitCaps: wi.WeaponCdInitCaps,
+		Hit:              wi.Hit,
+		Fired:            wi.Fired,
+		PctAccuracy:      wi.PctAccuracy,
+		Frags:            wi.Frags,
+	}
+}
+
+// AccuracyDataset is damage data in the "shape" that chart.js wants.
+type AccuracyDataset struct {
+	Label           string              `json:"label"`
+	BackgroundColor string              `json:"backgroundColor"`
+	BorderColor     string              `json:"borderColor"`
+	MaxBarThickness int                 `json:"maxBarThickness"`
+	RichData        []*AccuracyRichData `json:"richData"`
+	Data            []int               `json:"data"`
+}
+
+// NewAccuracyDataset creates a new AccuracyDataSet from a weapon code.
+func NewAccuracyDataset(weaponCd string) *AccuracyDataset {
+	return &AccuracyDataset{
+		Label:           weaponCd,
+		BackgroundColor: weaponBackgroundColor(weaponCd),
+		BorderColor:     weaponBorderColor(weaponCd),
+		MaxBarThickness: 25,
+		RichData:        make([]*AccuracyRichData, 0),
+		Data:            make([]int, 0),
+	}
+}
+
 // GameWeaponInfoResponse is the JSON response type for a game's weapon information.
 type GameWeaponInfoResponse struct {
-	GameID          int              `json:"game_id"`
-	GameTypeCd      string           `json:"game_type_cd"`
-	GameTypeDescr   string           `json:"game_type_descr"`
-	Duration        string           `json:"duration"`
-	Winner          int              `json:"winning_team"`
-	MatchID         string           `json:"match_id"`
-	Mod             string           `json:"mod"`
-	DistinctWeapons []string         `json:"distinct_weapons"`
-	DistinctPlayers []string         `json:"distinct_players"`
-	DamageData      []*DamageDataset `json:"damage_data"`
+	GameID          int                `json:"game_id"`
+	GameTypeCd      string             `json:"game_type_cd"`
+	GameTypeDescr   string             `json:"game_type_descr"`
+	Duration        string             `json:"duration"`
+	Winner          int                `json:"winning_team"`
+	MatchID         string             `json:"match_id"`
+	Mod             string             `json:"mod"`
+	DistinctWeapons []string           `json:"distinct_weapons"`
+	DistinctPlayers []string           `json:"distinct_players"`
+	DamageData      []*DamageDataset   `json:"damage_data"`
+	AccuracyData    []*AccuracyDataset `json:"accuracy_data"`
 }
 
 // GameWeaponInfoHandler retrieves information about the weapons in a game by its ID.
