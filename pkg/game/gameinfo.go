@@ -200,23 +200,33 @@ func NewNonParticipantBase(np *models.PlayerGameNonParticipant) *NonParticipantB
 
 // GameInfoBase is the view-agnostic representation of a Game.
 type GameInfoBase struct {
-	GameID                   int
-	GameTypeCd               string
-	GameTypeDescr            string
-	Duration                 *models.MultiDuration
-	Winner                   int
-	MatchID                  string
-	Mod                      string
-	CreateDt                 *models.MultiDt
-	Server                   *server.InfoBase
-	TeamGameStatsByTeam      map[int]*TeamGameStatBase
-	TeamOrdering             []int
-	PlayerGameStats          []*PlayerGameStatBase
-	PlayerGameStatsByTeam    map[int][]*PlayerGameStatBase
-	ShowFragMatrix           bool
-	FragMatrix               map[int][]int
-	Forfeits                 []*NonParticipantBase
-	Spectators               []*NonParticipantBase
+	GameID                int
+	GameTypeCd            string
+	GameTypeDescr         string
+	Duration              *models.MultiDuration
+	Winner                int
+	MatchID               string
+	Mod                   string
+	CreateDt              *models.MultiDt
+	Server                *server.InfoBase
+	TeamGameStatsByTeam   map[int]*TeamGameStatBase
+	TeamOrdering          []int
+	PlayerGameStats       []*PlayerGameStatBase
+	PlayerGameStatsByTeam map[int][]*PlayerGameStatBase
+	ShowFragMatrix        bool
+	FragMatrix            map[int][]int
+	Forfeits              []*NonParticipantBase
+	Spectators            []*NonParticipantBase
+	ShowWeaponCharts      bool
+}
+
+func shouldShowWeaponCharts(gameTypeCd string) bool {
+	switch gameTypeCd {
+	case "cts", "nb", "nexball":
+		return false
+	default:
+		return true
+	}
 }
 
 // GameInfoData returns the view-agnostic data for a given game by its ID.
@@ -337,22 +347,23 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 	}
 
 	return &GameInfoBase{
-		GameID:                   gameID,
-		GameTypeCd:               game.GameTypeCd,
-		GameTypeDescr:            game.GameTypeDescr,
-		Duration:                 models.NewMultiDuration(*game.Duration),
-		Winner:                   int(game.Winner.Int64),
-		MatchID:                  game.MatchID.String,
-		Mod:                      game.Mod.String,
-		CreateDt:                 dt,
-		Server:                   server,
-		TeamGameStatsByTeam:      teamGameStatsByTeam,
-		TeamOrdering:             teamOrdering,
-		PlayerGameStats:          playerGameStats,
-		PlayerGameStatsByTeam:    playerGameStatsByTeam,
-		ShowFragMatrix:           showFragMatrix,
-		FragMatrix:               fragMatrix,
-		Forfeits:                 forfeits,
-		Spectators:               spectators,
+		GameID:                gameID,
+		GameTypeCd:            game.GameTypeCd,
+		GameTypeDescr:         game.GameTypeDescr,
+		Duration:              models.NewMultiDuration(*game.Duration),
+		Winner:                int(game.Winner.Int64),
+		MatchID:               game.MatchID.String,
+		Mod:                   game.Mod.String,
+		CreateDt:              dt,
+		Server:                server,
+		TeamGameStatsByTeam:   teamGameStatsByTeam,
+		TeamOrdering:          teamOrdering,
+		PlayerGameStats:       playerGameStats,
+		PlayerGameStatsByTeam: playerGameStatsByTeam,
+		ShowFragMatrix:        showFragMatrix,
+		FragMatrix:            fragMatrix,
+		Forfeits:              forfeits,
+		Spectators:            spectators,
+		ShowWeaponCharts:      shouldShowWeaponCharts(game.GameTypeCd),
 	}, nil
 }
