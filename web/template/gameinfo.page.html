@@ -29,7 +29,7 @@
 <div class="grid-x grid-padding-x">
   <div class="cell text-center">
     <p>
-      <b>Forfeit:  </b>
+      <b><a id="forfeits"></a>Forfeits:  </b>
         {{range $index, $forfeit := .Forfeits}}
           {{- if $index -}}, {{ end -}}
           {{- if gt $forfeit.PlayerID 2 -}}
@@ -47,7 +47,7 @@
 <div class="grid-x grid-padding-x text-center">
   <div class="cell text-center">
     <p>
-      <b>Spectators:  </b>
+      <b><a id="spectators"></a>Spectators:  </b>
         {{range $index, $spectator := .Spectators}}
           {{- if $index -}}, {{ end -}}
           {{- if gt $spectator.PlayerID 2 -}}
@@ -64,14 +64,14 @@
 {{if .ShowWeaponCharts}}
 <div class="grid-x grid-padding-x">
   <div class="cell small-12">
-    <h3>Damage</h3>
+    <h3><a id="damage"></a>Damage</h3>
     <canvas id="damageChart"></canvas>
   </div>
 </div>
 
 <div class="grid-x grid-padding-x">
   <div class="cell small-12">
-    <h3>Accuracy</h3>
+    <h3><a id="accuracy"></a>Accuracy</h3>
     <canvas id="accuracyChart"></canvas>
   </div>
 </div>
@@ -80,7 +80,7 @@
 {{if .ShowFragMatrix}}
 <div class="grid-x grid-padding-x">
   <div class="cell small-12">
-    <h3>Frag Matrix</h3>
+    <h3><a id="matrix"></a>Frag Matrix</h3>
     {{template "fragmatrix.partial.html" .}}
   </div>
 </div>
