@@ -25,7 +25,7 @@ type TopScorerBase struct {
 // TopScorerData returns view-agnostic data for the top scorers on a given server.
 func TopScorerData(db models.Datastore, serverID int) ([]*TopScorerBase, error) {
 	activePlayerScoresCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("TopPlayersByScoreDays"))
-	rawActivePlayerScores, err := db.RActivePlayerScores(serverID, &activePlayerScoresCutoff, 10)
+	rawActivePlayerScores, err := db.RServerActivePlayerScores(serverID, &activePlayerScoresCutoff, 10)
 	if err != nil {
 		return nil, err
 	}
