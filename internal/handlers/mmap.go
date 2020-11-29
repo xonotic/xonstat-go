@@ -8,12 +8,14 @@ import (
 
 	"github.com/go-chi/chi"
 	"gitlab.com/xonotic/xonstat/pkg/mmap"
+	"gitlab.com/xonotic/xonstat/pkg/server"
 	"strconv"
 )
 
 // MapInfoResponse is the view-specific information about a map related information.
 type MapInfoResponse struct {
-	Map *mmap.InfoBase
+	Map               *mmap.InfoBase
+	TopScoringPlayers []*server.TopScorerBase
 }
 
 // MapInfoHandler is the web handler for retrieving map information
@@ -32,8 +34,11 @@ func (ae *AppEnv) MapInfoHandler(w http.ResponseWriter, r *http.Request) {
 		ae.NotFoundHandler(w, r)
 	}
 
+	topScorers, _ := mmap.TopScorerData(ae.db, mapID)
+
 	response := &MapInfoResponse{
-		Map: info,
+		Map:               info,
+		TopScoringPlayers: topScorers,
 	}
 
 	if acceptHeader == "application/json" {
