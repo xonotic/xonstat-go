@@ -114,6 +114,7 @@ func web(port string, printRoutes bool) {
 	r.Get(reverse.Add("topmaps", "/topmaps"), env.TopMapsHandler)
 	r.Get(reverse.Add("games", "/games"), env.RecentGamesHandler)
 	r.Get(reverse.Add("server_info", "/server/{id:\\d+}", "{id:\\d+}"), env.ServerInfoHandler)
+	r.Get(reverse.Add("map_info", "/map/{id:\\d+}", "{id:\\d+}"), env.MapInfoHandler)
 	r.Get(reverse.Add("game_info", "/game/{id:\\d+}", "{id:\\d+}"), env.GameInfoHandler)
 	r.Get(reverse.Add("game_weapon_info", "/game/{id:\\d+}/weapons", "{id:\\d+}"), env.GameWeaponInfoHandler)
 	r.NotFound(env.NotFoundHandler)
