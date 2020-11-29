@@ -20,6 +20,6 @@ RequestsMaxAge = 14
 SummaryStatsDays = 30
 TopPlayersByTimeDays = 30
 TopPlayersByScoreDays = 30
-TopServersByGamesDays = 30
+TopServersByPlaytimeDays = 30
 TopMapsByGamesDays = 30
 RecentGamesDays = 30

@@ -3,8 +3,8 @@ package mmap
 import (
 	"github.com/antzucaro/qstr"
 	"github.com/spf13/viper"
-	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
+	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/server"
 	"time"
 )
@@ -73,4 +73,27 @@ func TopActivePlayersData(db models.Datastore, mapID int) ([]*leaderboard.Active
 
 	activePlayers := leaderboard.ActivePlayerToActivePlayerBase(rawActivePlayers)
 	return activePlayers, nil
+}
+
+// TopActiveServersData returns view-agnostic data about the servers who have played a given map
+// the most.
+// NOTE: the base type returned here is shared with the leaderboard package.
+func TopActiveServersData(db models.Datastore, mapID int) ([]*leaderboard.ActiveServerBase, error) {
+	cutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("TopServersByPlaytimeDays"))
+	rawActiveServers, err := db.RActiveServersByMap(mapID, &cutoff, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	var activeServers []*leaderboard.ActiveServerBase
+	for _, v := range rawActiveServers {
+		as := leaderboard.ActiveServerBase{
+			SortOrder:  v.SortOrder,
+			ServerID:   v.ServerID,
+			ServerName: v.ServerName,
+			PlayTime:   models.DurationString(v.PlayTime, true),
+		}
+		activeServers = append(activeServers, &as)
+	}
+	return activeServers, nil
 }

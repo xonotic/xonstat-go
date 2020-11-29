@@ -18,6 +18,7 @@ type MapInfoResponse struct {
 	Map               *mmap.InfoBase
 	TopScoringPlayers []*server.TopScorerBase
 	TopActivePlayers  []*leaderboard.ActivePlayerBase
+	TopActiveServers  []*leaderboard.ActiveServerBase
 }
 
 // MapInfoHandler is the web handler for retrieving map information
@@ -38,11 +39,13 @@ func (ae *AppEnv) MapInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	topScorers, _ := mmap.TopScorerData(ae.db, mapID)
 	topActive, _ := mmap.TopActivePlayersData(ae.db, mapID)
+	topServers, _ := mmap.TopActiveServersData(ae.db, mapID)
 
 	response := &MapInfoResponse{
 		Map:               info,
 		TopScoringPlayers: topScorers,
 		TopActivePlayers:  topActive,
+		TopActiveServers:  topServers,
 	}
 
 	if acceptHeader == "application/json" {
