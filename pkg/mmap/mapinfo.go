@@ -4,6 +4,7 @@ import (
 	"github.com/antzucaro/qstr"
 	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/models"
+	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/server"
 	"time"
 )
@@ -58,4 +59,18 @@ func TopScorerData(db models.Datastore, mapID int) ([]*server.TopScorerBase, err
 		topScorers = append(topScorers, &ts)
 	}
 	return topScorers, nil
+}
+
+// TopActivePlayersData returns view-agnostic data for the most active players on a given map.
+// NOTE: the base type returned here is shared with the leaderboard package.
+func TopActivePlayersData(db models.Datastore, mapID int) ([]*leaderboard.ActivePlayerBase, error) {
+	// Top players by alive time over the time period.
+	activePlayersCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("TopPlayersByTimeDays"))
+	rawActivePlayers, err := db.RActivePlayersByMap(mapID, &activePlayersCutoff, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	activePlayers := leaderboard.ActivePlayerToActivePlayerBase(rawActivePlayers)
+	return activePlayers, nil
 }

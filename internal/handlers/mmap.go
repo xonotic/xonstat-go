@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/mmap"
 	"gitlab.com/xonotic/xonstat/pkg/server"
 	"strconv"
@@ -16,6 +17,7 @@ import (
 type MapInfoResponse struct {
 	Map               *mmap.InfoBase
 	TopScoringPlayers []*server.TopScorerBase
+	TopActivePlayers  []*leaderboard.ActivePlayerBase
 }
 
 // MapInfoHandler is the web handler for retrieving map information
@@ -35,10 +37,12 @@ func (ae *AppEnv) MapInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	topScorers, _ := mmap.TopScorerData(ae.db, mapID)
+	topActive, _ := mmap.TopActivePlayersData(ae.db, mapID)
 
 	response := &MapInfoResponse{
 		Map:               info,
 		TopScoringPlayers: topScorers,
+		TopActivePlayers:  topActive,
 	}
 
 	if acceptHeader == "application/json" {
