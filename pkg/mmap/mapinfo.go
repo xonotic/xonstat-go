@@ -97,3 +97,4 @@ func TopActiveServersData(db models.Datastore, mapID int) ([]*leaderboard.Active
 	}
 	return activeServers, nil
 }
+

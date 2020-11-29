@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/spf13/viper"
 	"github.com/go-chi/chi"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/mmap"
+	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/server"
 	"strconv"
 )
@@ -19,6 +22,7 @@ type MapInfoResponse struct {
 	TopScoringPlayers []*server.TopScorerBase
 	TopActivePlayers  []*leaderboard.ActivePlayerBase
 	TopActiveServers  []*leaderboard.ActiveServerBase
+	RecentGames       []game.RecentGameBase
 }
 
 // MapInfoHandler is the web handler for retrieving map information
@@ -41,11 +45,16 @@ func (ae *AppEnv) MapInfoHandler(w http.ResponseWriter, r *http.Request) {
 	topActive, _ := mmap.TopActivePlayersData(ae.db, mapID)
 	topServers, _ := mmap.TopActiveServersData(ae.db, mapID)
 
+	recentGamesCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
+	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, mapID, game.EmptyPlayerID,
+		game.EmptyGameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20)
+
 	response := &MapInfoResponse{
 		Map:               info,
 		TopScoringPlayers: topScorers,
 		TopActivePlayers:  topActive,
 		TopActiveServers:  topServers,
+		RecentGames: recentGames,
 	}
 
 	if acceptHeader == "application/json" {
