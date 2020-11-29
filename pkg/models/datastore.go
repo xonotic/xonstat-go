@@ -20,6 +20,7 @@ type Datastore interface {
 	// Map-oriented methods
 	CMap(tx *sql.Tx, m Map) (int64, error)
 	RMapsByName(name string) ([]*Map, error)
+	RMapByID(mapID int) (*Map, error)
 
 	// Game-oriented methods
 	CGame(tx *sql.Tx, game Game) (int64, error)
