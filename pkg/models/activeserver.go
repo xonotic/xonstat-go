@@ -39,7 +39,7 @@ func (ds *PGDatastore) RActiveServers(limit, start int) ([]*ActiveServer, error)
 // over a given time period.
 func (ds *PGDatastore) RActiveServersByMap(mapID int, cutoff *time.Time, limit int) ([]*ActiveServer, error) {
 	sql := `SELECT row_number() over(order by sum(extract(epoch from pgs.alivetime)) desc) as rank,
-	s.server_id, s.name, now() at time zone 'utc', sum(extract(epoch from pgs.alivetime)) play_time
+	s.server_id, s.name, sum(extract(epoch from pgs.alivetime)) play_time, now() at time zone 'utc' 
 	FROM player_game_stats pgs join games g on pgs.game_id = g.game_id
 	JOIN servers s on s.server_id = g.server_id
 	WHERE g.map_id = $1
