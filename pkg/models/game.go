@@ -89,8 +89,12 @@ func (ds *PGDatastore) RGameByID(gameID int) (*Game, error) {
 	defer rows.Close()
 
 	games, err := scanGames(rows)
-	if err != nil || len(games) != 1 {
+	if err != nil {
 		return nil, err
+	}
+
+	if len(games) != 1 {
+		return nil, fmt.Errorf("unable to find a matching game")
 	}
 
 	return games[0], nil
