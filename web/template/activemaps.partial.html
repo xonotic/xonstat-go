@@ -10,7 +10,7 @@
       {{range .}}
         <tr>
           <td>{{.SortOrder}}</td>
-          <td class="no-stretch"><a href="" title="Go to the map info page for {{.MapName}}">{{.MapName}}</a></td>
+          <td class="no-stretch"><a href="{{urlFor "map_info" (intToString .MapID)}}" title="Go to the map info page for {{.MapName}}">{{.MapName}}</a></td>
           <td>{{.Games}}</td>
         </tr>
       {{end}}

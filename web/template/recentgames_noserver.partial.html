@@ -13,7 +13,7 @@
         <tr>
           <td class="text-center"><a class="button tiny" href="{{urlFor "game_info" (intToString .GameID)}}" title="View detailed information about this game">view</a></td>
           <td class="text-center"><span class="sprite sprite-{{.GameTypeCd}}" alt="{{.GameTypeCd}}" title="{{.GameTypeDescr}}"></span></td>
-          <td class="show-for-medium"><a href="" title="Go to the map detail page for this map">{{.MapName}}</a></td>
+          <td class="show-for-medium"><a href="{{urlFor "map_info" (intToString .MapID)}}" title="Go to the map detail page for this map">{{.MapName}}</a></td>
           <td class="show-for-large"><span class="abstime" data-epoch="{{.CreateDt.Epoch}}" title="{{.CreateDt.UTCStr}}">{{.CreateDt.Fuzzy}}</span></td>
           <td class="no-stretch">
             {{if gt .WinningPlayerID 2}}
