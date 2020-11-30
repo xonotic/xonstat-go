@@ -22,7 +22,7 @@ func (ae *AppEnv) ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	serverID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		log.Printf("Invalid or missing server ID value: %s", err)
-		http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
+		ae.NotFoundHandler(w, r)
 		return
 	}
 
@@ -31,7 +31,7 @@ func (ae *AppEnv) ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		s, err := server.InfoJSON(ae.db, serverID)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
+			ae.NotFoundHandler(w, r)
 			return
 		}
 
@@ -43,7 +43,7 @@ func (ae *AppEnv) ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		s, err := server.InfoData(ae.db, serverID)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
+			ae.NotFoundHandler(w, r)
 			return
 		}
 

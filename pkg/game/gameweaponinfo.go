@@ -1,9 +1,10 @@
 package game
 
 import (
-	"gitlab.com/xonotic/xonstat/pkg/models"
 	"strings"
 	"time"
+
+	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
 type WeaponInfoBase struct {

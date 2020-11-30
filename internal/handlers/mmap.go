@@ -33,12 +33,14 @@ func (ae *AppEnv) MapInfoHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Invalid or missing map ID value: %s", err)
 		ae.NotFoundHandler(w, r)
+		return
 	}
 
 	info, err := mmap.InfoData(ae.db, mapID)
 	if err != nil {
 		log.Printf("Invalid or missing map ID value: %s", err)
 		ae.NotFoundHandler(w, r)
+		return
 	}
 
 	topScorers, _ := mmap.TopScorerData(ae.db, mapID)

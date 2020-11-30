@@ -97,7 +97,7 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 	gameID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		log.Printf("Invalid or missing game ID value: %s", err)
-		http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
+		ae.NotFoundHandler(w, r)
 		return
 	}
 
@@ -350,14 +350,14 @@ func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) 
 	gameID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		log.Printf("Invalid or missing game ID value: %s", err)
-		http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
+		ae.NotFoundHandler(w, r)
 		return
 	}
 
 	gameWeaponInfo, err := game.GameWeaponInfoData(ae.db, gameID)
 	if err != nil {
 		log.Printf("Could not process weapon info for game ID %d: %s", gameID, err)
-		http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
+		ae.NotFoundHandler(w, r)
 		return
 	}
 
@@ -444,7 +444,7 @@ func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) 
 	bytes, err := json.Marshal(gameWeaponInfoResponse)
 	if err != nil {
 		log.Printf("Could not marshal weapon info to JSON for game ID %d: %s", gameID, err)
-		http.Error(w, fmt.Sprintf("404 %s", http.StatusText(404)), 404)
+		ae.NotFoundHandler(w, r)
 		return
 	}
 
