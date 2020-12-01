@@ -92,3 +92,29 @@ func (ds *PGDatastore) UPlayer(tx *sql.Tx, player Player) error {
 
 	return nil
 }
+
+// RPlayerByID retrieves a player record by player_id.
+func (ds *PGDatastore) RPlayerByID(playerID int) (*Player, error) {
+	sql := `select p.player_id, p.nick, p.stripped_nick, p.location, p.email_addr, 
+	p.active_ind, p.create_dt
+	from players p
+	where p.player_id = $1`
+	
+	rows, err := ds.db.Query(sql, playerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var p Player
+	for rows.Next() {
+		err := rows.Scan(&p.PlayerID, &p.Nick, &p.StrippedNick, &p.Location, &p.EmailAddr, 
+			&p.ActiveInd, &p.CreateDt)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &p, nil
+}
