@@ -17,13 +17,13 @@ func (ds *PGDatastore) CPlayer(tx *sql.Tx, player Player) (int64, error) {
 	pid = seqVal
 
 	if player.Nick.Valid && player.Nick.String == "Anonymous Player" {
-		player.Nick = sql.NullString {
-			Valid: true, 
+		player.Nick = sql.NullString{
+			Valid:  true,
 			String: fmt.Sprintf("Anonymous Player #%d", pid),
 		}
 
-		player.StrippedNick = sql.NullString {
-			Valid: true, 
+		player.StrippedNick = sql.NullString{
+			Valid:  true,
 			String: fmt.Sprintf("Anonymous Player #%d", pid),
 		}
 	}
@@ -31,10 +31,10 @@ func (ds *PGDatastore) CPlayer(tx *sql.Tx, player Player) (int64, error) {
 	isql := `insert into players (player_id, nick, stripped_nick, location, email_addr) 
 	values ($1, $2, $3, $4, $5)`
 
-	_, err = tx.Exec(isql, pid, player.Nick, player.StrippedNick, player.Location, 
+	_, err = tx.Exec(isql, pid, player.Nick, player.StrippedNick, player.Location,
 		player.EmailAddr)
 
-    if err != nil {
+	if err != nil {
 		return pid, err
 	}
 
@@ -66,7 +66,7 @@ func (ds *PGDatastore) RPlayersByHashkeyMulti(hashkeys []string) (map[string]*Pl
 		var p Player
 		var hashkey string
 
-		err := rows.Scan(&p.PlayerID, &p.Nick, &p.StrippedNick, &p.Location, &p.EmailAddr, 
+		err := rows.Scan(&p.PlayerID, &p.Nick, &p.StrippedNick, &p.Location, &p.EmailAddr,
 			&p.ActiveInd, &p.CreateDt, &hashkey)
 
 		if err != nil {
@@ -99,7 +99,7 @@ func (ds *PGDatastore) RPlayerByID(playerID int) (*Player, error) {
 	p.active_ind, p.create_dt
 	from players p
 	where p.player_id = $1`
-	
+
 	rows, err := ds.db.Query(sql, playerID)
 	if err != nil {
 		return nil, err
@@ -107,13 +107,19 @@ func (ds *PGDatastore) RPlayerByID(playerID int) (*Player, error) {
 	defer rows.Close()
 
 	var p Player
+	numRows := 0
 	for rows.Next() {
-		err := rows.Scan(&p.PlayerID, &p.Nick, &p.StrippedNick, &p.Location, &p.EmailAddr, 
+		numRows++
+		err := rows.Scan(&p.PlayerID, &p.Nick, &p.StrippedNick, &p.Location, &p.EmailAddr,
 			&p.ActiveInd, &p.CreateDt)
 
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	if numRows == 0 {
+		return nil, fmt.Errorf("no player found with the ID %d", playerID)
 	}
 
 	return &p, nil

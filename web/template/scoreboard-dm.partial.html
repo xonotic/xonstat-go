@@ -20,7 +20,7 @@
             {{end}}
             <td class="small-5 medium-3 no-stretch">
                 {{if gt .PlayerID 2}}
-                <a href="" title="Go to the info page for this player">
+                <a href="{{urlFor "player_info" (intToString .PlayerID)}}" title="Go to the info page for this player">
                     {{.Nick.NickHTML}}
                 </a>
                 {{else}}

@@ -1,0 +1,19 @@
+{{template "base" .}}
+
+{{define "subtitle"}}Player Info - {{end}}
+
+{{define "title"}}Player Information{{end}}
+
+{{define "body"}}
+<div class="grid-x grid-padding-x">
+
+  <div class="cell small-12">
+    <h2>{{.Player.Nick.NickHTML}}</h2>
+    <p>
+      Joined <span class="abstime" data-epoch="{{.Player.CreateDt.Epoch}}"
+        title="{{.Player.CreateDt.UTCStr}}">{{.Player.CreateDt.Fuzzy}}</span> <br />
+    </p>
+  </div>
+
+</div>
+{{end}}

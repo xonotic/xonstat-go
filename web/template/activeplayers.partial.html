@@ -10,7 +10,7 @@
         {{range .}}
           <tr>
             <td>{{.SortOrder}}</td>
-            <td class="no-stretch"><a href="" title="Go to the player info page for this player">{{.HTMLNick}}</a></td>
+            <td class="no-stretch"><a href="{{urlFor "player_info" (intToString .PlayerID)}}" title="Go to the player info page for this player">{{.HTMLNick}}</a></td>
             <td>{{.AliveTime}}</td>
           </tr>
         {{end}}

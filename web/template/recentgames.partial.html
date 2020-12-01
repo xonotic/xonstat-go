@@ -19,7 +19,7 @@
           <td class="show-for-large"><span class="abstime" data-epoch="{{.CreateDt.Epoch}}" title="{{.CreateDt.UTCStr}}">{{.CreateDt.Fuzzy}}</span></td>
           <td class="no-stretch">
             {{if gt .WinningPlayerID 2}}
-            <a href="" title="Go to the player info page for this player">{{.WinningNickHTML}}</a>
+            <a href="{{urlFor "player_info" (intToString .WinningPlayerID)}}" title="Go to the player info page for this player">{{.WinningNickHTML}}</a>
             {{else}}
             {{.WinningNickHTML}}
             {{end}}
