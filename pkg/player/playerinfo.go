@@ -19,7 +19,7 @@ type ByGames []*GameTypeSummaryBase
 
 func (a ByGames) Len() int           { return len(a) }
 func (a ByGames) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByGames) Less(i, j int) bool { return a[i].Games < a[j].Games }
+func (a ByGames) Less(i, j int) bool { return a[i].Games > a[j].Games }  // descending order
 
 func calcPct(numerator, denominator int) float32 {
 	if denominator == 0 {
@@ -38,11 +38,12 @@ func GameTypeSummaryData(db models.Datastore, playerID int) ([]*GameTypeSummaryB
 	}
 
 	// This is a "meta" type that sums all of the others
-	var overall GameTypeSummaryBase
+	overall := GameTypeSummaryBase{GameTypeCd: "overall"}
 
 	var summaries []*GameTypeSummaryBase
 	for _, rs := range rawSummaries {
 		s := GameTypeSummaryBase{
+			GameTypeCd: rs.GameTypeCd,
 			Games:  rs.Wins + rs.Losses,
 			Wins:   rs.Wins,
 			Losses: rs.Losses,
@@ -52,7 +53,7 @@ func GameTypeSummaryData(db models.Datastore, playerID int) ([]*GameTypeSummaryB
 		case "dm", "cts", "ka", "keepaway":
 			s.WinRatio = 0.0
 		default:
-			s.WinRatio = calcPct(rs.Wins, rs.Losses)
+			s.WinRatio = calcPct(rs.Wins, rs.Wins + rs.Losses)
 		}
 
 		// A running tally of the counts we've seen so far
@@ -63,7 +64,7 @@ func GameTypeSummaryData(db models.Datastore, playerID int) ([]*GameTypeSummaryB
 		summaries = append(summaries, &s)
 	}
 
-	overall.WinRatio = calcPct(overall.Wins, overall.Losses)
+	overall.WinRatio = calcPct(overall.Wins, overall.Wins + overall.Losses)
 	summaries = append(summaries, &overall)
 
 	sort.Sort(ByGames(summaries))
