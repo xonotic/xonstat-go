@@ -140,6 +140,25 @@ table thead tr th, table thead tr td, table tr th, table tr td {
   box-shadow: 0 0 6px 1px rgba(0, 140, 186, 0.7);
 }
 
+/* Tab overrides */
+.tabs {
+  background: none;
+  border: none;
+}
+
+.tabs-title > a, .tabs-title > a:hover {
+  color: #848484
+}
+
+.tabs-title > a:hover {
+  background: #1d1d1d;
+}
+
+.tabs-title > a:focus, .tabs-title a[aria-selected="true"] {
+  background: none;
+  color: #c3c3c3;
+}
+
 /* Footer */
 #footer {
   background: linear-gradient( rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 95% );
