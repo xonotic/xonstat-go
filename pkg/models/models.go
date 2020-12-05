@@ -299,14 +299,14 @@ type RecentGame struct {
 // PlayerGameNonParticipant houses people who were around for a match but didn't complete it.
 type PlayerGameNonParticipant struct {
 	PlayerGameNonParticipantID int
-	PlayerID         int
-	GameID           int
-	Status           string
-	Nick             sql.NullString
-	StrippedNick     sql.NullString
-	AliveTime        *time.Duration // PostgreSQL interval
-	Score            sql.NullInt32
-	CreateDt         time.Time
+	PlayerID                   int
+	GameID                     int
+	Status                     string
+	Nick                       sql.NullString
+	StrippedNick               sql.NullString
+	AliveTime                  *time.Duration // PostgreSQL interval
+	Score                      sql.NullInt32
+	CreateDt                   time.Time
 }
 
 // WeaponInfo is the weapon details of a single player weapon within a given game, paired
@@ -324,4 +324,12 @@ type WeaponInfo struct {
 	Fired              int
 	Frags              int
 	CreateDt           time.Time
+}
+
+// PlayerGameTypeSummary holds the number of games for a player for a given game type, 
+// with wins, losses, and a win percentage thereof.
+type PlayerGameTypeSummary struct {
+	GameTypeCd string
+	Wins       int
+	Losses     int
 }
