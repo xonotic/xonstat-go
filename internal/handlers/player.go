@@ -14,6 +14,7 @@ import (
 // PlayerInfoResponse is the view-specific information about a map related information.
 type PlayerInfoResponse struct {
 	Player *player.InfoBase
+	GameTypeSummaries []*player.GameTypeSummaryBase
 }
 
 // PlayerInfoHandler is the web handler for retrieving player information
@@ -34,8 +35,11 @@ func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	summaries, _ := player.GameTypeSummaryData(ae.db, playerID)
+
 	response := &PlayerInfoResponse{
 		Player: info,
+		GameTypeSummaries: summaries,
 	}
 
 	if acceptHeader == "application/json" {
