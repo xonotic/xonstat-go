@@ -159,6 +159,11 @@ table thead tr th, table thead tr td, table tr th, table tr td {
   color: #c3c3c3;
 }
 
+.tabs-content {
+  background: none;
+  border: none;
+}
+
 /* Footer */
 #footer {
   background: linear-gradient( rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 95% );

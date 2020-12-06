@@ -6,7 +6,6 @@
 
 {{define "body"}}
 <div class="grid-x grid-padding-x">
-
   <div class="cell small-12">
     <h2>{{.Player.Nick.NickHTML}}</h2>
     <p>
@@ -14,16 +13,46 @@
         title="{{.Player.CreateDt.UTCStr}}">{{.Player.CreateDt.Fuzzy}}</span> (player #{{.Player.PlayerID}})<br />
     </p>
   </div>
+</div>
 
+<div class="grid-x grid-padding-x">
   <div class="cell small-12">
     <ul class="tabs text-center" data-tabs id="gametype-tabs">
       {{range .GameTypeSummaries}}
-      <li class="tabs-title {{if eq .GameTypeCd "overall"}}is-active{{end}}"><a href="#tab-{{.GameTypeCd}}" title="{{.GameTypeCd}}">
+      <li class="tabs-title {{if eq .GameTypeCd "overall"}}is-active{{end}}"><a href="#tab-{{.GameTypeCd}}"
+          title="{{.GameTypeCd}}">
           <span class="sprite sprite-{{.GameTypeCd}}"></span> <br />
           {{.GameTypeCd}} <br />
-          <small>({{.Games}})</small></a></li>
+          <small>({{.Games}})</small></a>
+      </li>
       {{end}}
     </ul>
   </div>
+</div>
+
+<div class="tabs-content" data-tabs-content="gametype-tabs">
+  {{range .GameTypeSummaries}}
+  <div class="tabs-panel {{if eq .GameTypeCd "overall"}}is-active{{end}}" id="tab-{{.GameTypeCd}}">
+    <div class="grid-x grid-padding-x">
+
+      <!-- LEFT PANEL -->
+      <div class="cell small-6">
+        <p>
+          Games Played: <small>{{.Games}} <br /></small>
+        </p>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="cell small-6">
+        <p>
+          {{if eq .GameTypeCd "overall" "as" "ca" "ctf" "dom" "duel" "ft" "freezetag" "kh" "nb" "nexball" "rune" "tdm"}}
+          Win Percentage: <small>{{printf "%.2f" .WinRatio}}% ({{.Wins}} wins, {{.Losses}} losses)</small> <br />
+          {{end}}
+        </p>
+      </div>
+
+    </div>
+  </div>
+  {{end}}
 </div>
 {{end}}
