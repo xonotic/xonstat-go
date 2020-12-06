@@ -65,7 +65,9 @@ func GameTypeSummaryData(db models.Datastore, playerID int) ([]*GameTypeSummaryB
 	}
 
 	overall.WinRatio = calcPct(overall.Wins, overall.Wins + overall.Losses)
-	summaries = append(summaries, &overall)
+
+	// Put the "overall" entry first in the list so it sorts in a stable fashion.
+	summaries = append([]*GameTypeSummaryBase{&overall}, summaries...)
 
 	sort.Sort(ByGames(summaries))
 
