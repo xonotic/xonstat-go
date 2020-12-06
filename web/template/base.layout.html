@@ -17,18 +17,11 @@
       <link href="/static/css/font-awesome.min.css" rel="stylesheet">
       <link href="/static/css/app.css" rel="stylesheet">
       <link href="/static/css/luma.css" rel="stylesheet">
-
-      {{- /* 
-      <link href="/static/css/xonstat.css" rel="stylesheet">
-      */ -}}
     {{end}}
 
     {{block "extra-css" .}}
     {{end}}
 
-    {{block "headjs" .}}
-      <script src="/static/js/vendor/modernizr.js"></script>
-    {{end}}
   </head>
 
   <body>
@@ -55,28 +48,17 @@
     {{/* footer here */}}
 
     {{block "js" .}}
-      <script type='text/javascript' src='/static/js/vendor/jquery-3.5.1.min.js'></script>
-      <script src="/static/js/foundation.min.js"></script>
+      <script type='text/javascript' src='/static/js/vendor/jquery.js'></script>
+      <script src="/static/js/vendor/foundation.min.js"></script>
  
       {{block "foundation" .}}
-        <script>
-          $(document).foundation();
-        </script>
+      <script src="/static/js/app.js"></script>
       {{end}}
     {{end}}
 
     {{block "extra-js" .}}
     {{end}}
 
-    <!-- RELATIVE TIME CONVERSION -->
-    <script type="text/javascript">
-    $('.abstime').each(function(i,e){
-      var epoch = e.getAttribute('data-epoch');
-      var d = new Date(0);
-      d.setUTCSeconds(epoch);
-      e.setAttribute('title', d.toDateString() + ' ' + d.toTimeString());  
-    });
-    </script>
   </body>
 </html>
 {{end}}
