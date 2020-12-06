@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/xonotic/xonstat/pkg/mmap"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/server"
 	"gitlab.com/xonotic/xonstat/pkg/submission"
@@ -209,6 +210,7 @@ type GameInfoBase struct {
 	Mod                   string
 	CreateDt              *models.MultiDt
 	Server                *server.InfoBase
+	Map                   *mmap.InfoBase
 	TeamGameStatsByTeam   map[int]*TeamGameStatBase
 	TeamOrdering          []int
 	PlayerGameStats       []*PlayerGameStatBase
@@ -237,6 +239,11 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 	}
 
 	server, err := server.InfoData(db, game.ServerID)
+	if err != nil {
+		return nil, err
+	}
+
+	theMap, err := mmap.InfoData(db, game.MapID)
 	if err != nil {
 		return nil, err
 	}
@@ -356,6 +363,7 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		Mod:                   game.Mod.String,
 		CreateDt:              dt,
 		Server:                server,
+		Map:                   theMap,
 		TeamGameStatsByTeam:   teamGameStatsByTeam,
 		TeamOrdering:          teamOrdering,
 		PlayerGameStats:       playerGameStats,

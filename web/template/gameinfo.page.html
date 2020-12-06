@@ -14,6 +14,8 @@
           class="fa fa-info-circle"></i></span><br />
       Server: <a href="{{urlFor "server_info" (intToString .Server.ServerID)}}"
         name="Server info page for {{.Server.Name}}">{{.Server.Name}}</a><br />
+      Map: <a href="{{urlFor "map_info" (intToString .Map.MapID)}}"
+        name="Map info page for {{.Map.Name}}">{{.Map.Name}}</a><br />
       {{if .Duration}}
       Duration: <span>{{.Duration.Long}}</span>
       {{end}}
@@ -29,15 +31,15 @@
 <div class="grid-x grid-padding-x">
   <div class="cell text-center">
     <p>
-      <b><a id="forfeits"></a>Forfeits:  </b>
-        {{range $index, $forfeit := .Forfeits}}
-          {{- if $index -}}, {{ end -}}
-          {{- if gt $forfeit.PlayerID 2 -}}
-            {{- $forfeit.Nick.NickHTML -}}
-          {{- else -}}
-            {{- $forfeit.Nick.NickHTML -}}
-          {{- end -}}
-        {{- end -}}
+      <b><a id="forfeits"></a>Forfeits: </b>
+      {{range $index, $forfeit := .Forfeits}}
+      {{- if $index -}}, {{ end -}}
+      {{- if gt $forfeit.PlayerID 2 -}}
+      {{- $forfeit.Nick.NickHTML -}}
+      {{- else -}}
+      {{- $forfeit.Nick.NickHTML -}}
+      {{- end -}}
+      {{- end -}}
     </p>
   </div>
 </div>
@@ -47,15 +49,15 @@
 <div class="grid-x grid-padding-x text-center">
   <div class="cell text-center">
     <p>
-      <b><a id="spectators"></a>Spectators:  </b>
-        {{range $index, $spectator := .Spectators}}
-          {{- if $index -}}, {{ end -}}
-          {{- if gt $spectator.PlayerID 2 -}}
-            {{- $spectator.Nick.NickHTML -}}
-          {{else}}
-            {{- $spectator.Nick.NickHTML -}}
-          {{end}}
-        {{end}}
+      <b><a id="spectators"></a>Spectators: </b>
+      {{range $index, $spectator := .Spectators}}
+      {{- if $index -}}, {{ end -}}
+      {{- if gt $spectator.PlayerID 2 -}}
+      {{- $spectator.Nick.NickHTML -}}
+      {{else}}
+      {{- $spectator.Nick.NickHTML -}}
+      {{end}}
+      {{end}}
     </p>
   </div>
 </div>
@@ -91,13 +93,13 @@
 
 {{define "extra-js"}}
 {{if .ShowWeaponCharts}}
-  <script type='text/javascript' src='/static/js/vendor/Chart.min.js'></script>
-  <script type='text/javascript' src='/static/js/weaponCharts.js'></script>
-  <script type="text/javascript">
-  jQuery.getJSON("/game/{{.GameID}}/weapons", function(data){
+<script type='text/javascript' src='/static/js/vendor/Chart.min.js'></script>
+<script type='text/javascript' src='/static/js/weaponCharts.js'></script>
+<script type="text/javascript">
+  jQuery.getJSON("/game/{{.GameID}}/weapons", function (data) {
     drawDamageChart("damageChart", data);
     drawAccuracyChart("accuracyChart", data);
   });
-  </script>
+</script>
 {{end}}
 {{end}}
