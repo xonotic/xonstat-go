@@ -33,6 +33,7 @@ type Datastore interface {
 	RPlayersByHashkeyMulti(hashkeys []string) (map[string]*Player, error)
 	RPlayerByID(playerID int) (*Player, error)
 	RGameTypeSummariesByID(playerID int) ([]*PlayerGameTypeSummary, error)
+	RGameIDsByPlayerID(playerID, limit int, gameTypeCd string) ([]int, error)
 	UPlayer(tx *sql.Tx, player Player) error
 
 	// Hashkey-oriented methods

@@ -106,3 +106,76 @@ func (ds *PGDatastore) RRecentGames(serverID int, mapID int, playerID int,
 
 	return rgs, nil
 }
+
+func isWeaponInfoGameType(gameTypeCd string) bool {
+	switch gameTypeCd {
+	case "as", "ca", "ctf", "dm", "dom", "duel", "ft", "freezetag", "ka":
+		return true
+	case "keepaway", "kh", "rune", "tdm":
+		return true
+	default:
+		return false
+	}
+}
+
+// RGameIDsByPlayerID retrieves the recent N game IDs for further queries.
+func (ds *PGDatastore) RGameIDsByPlayerID(playerID, limit int, gameTypeCd string) ([]int, error) {
+	if playerID <= 2 {
+		return nil, fmt.Errorf("invalid player ID")
+	}
+
+	// Some game types don't make sense with respect to weapon data...
+	if !isWeaponInfoGameType(gameTypeCd) {
+		return nil, fmt.Errorf("unsupported game type '%s'", gameTypeCd)
+	}
+
+	// Clamp the limit of data retrieved
+	if limit < 20 {
+		limit = 20
+	}
+
+	if limit > 50 {
+		limit = 50
+	}
+
+	// Keep track of the bind placeholders and their parameters
+	placeholder := 1
+	params := make([]interface{}, 0)
+
+	// Build up the SQL that will eventually be executed.
+	var sqlBuf bytes.Buffer
+	sqlBuf.WriteString(fmt.Sprintf("select g.game_id from games g where g.players @> ARRAY[%d] ", playerID))
+
+	if gameTypeCd != "" {
+		sqlBuf.WriteString(fmt.Sprintf("and g.game_type_cd = $%d ", placeholder))
+		placeholder++
+		params = append(params, gameTypeCd)
+	}
+
+	sqlBuf.WriteString("order by g.game_id ")
+
+	sqlBuf.WriteString(fmt.Sprintf("limit $%d ", placeholder))
+	placeholder++
+	params = append(params, limit)
+
+	rows, err := ds.db.Query(sqlBuf.String(), params...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var gameIDs []int
+	for rows.Next() {
+		var gameID int
+
+		err := rows.Scan(&gameID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		gameIDs = append(gameIDs, gameID)
+	}
+
+	return gameIDs, nil
+}
