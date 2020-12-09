@@ -2,6 +2,8 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
+	"strings"
 )
 
 // scanWeaponInfos is a helper function to parse the query results for weapons
@@ -44,4 +46,44 @@ func (ds *PGDatastore) RWeaponInfoByGameID(gameID int) ([]*WeaponInfo, error) {
 	}
 
 	return wis, nil
+}
+
+// RPlayerWeaponStatsByGameList retrieves PlayerWeaponsStat rows for a list of game IDs using an IN list.
+func (ds *PGDatastore) RPlayerWeaponStatsByGameList(playerID int, gameIDs []int) ([]*PlayerWeaponStat, error) {
+	// Convert the game IDs to strings... 
+	var strGameIDs []string
+	for _, gameID := range gameIDs {
+		strGameIDs = append(strGameIDs, fmt.Sprintf("%d", gameID))
+	}
+
+	// ... and build IN list from those strings
+	gameIDINstr := strings.Join(strGameIDs, ",")
+
+	sql := fmt.Sprintf(`select ws.player_weapon_stats_id, ws.player_id, ws.game_id, 
+	ws.player_game_stat_id, ws.weapon_cd, ws.actual, ws.max, ws.hit, ws.fired, ws.frags
+	from player_weapon_stats ws 
+	where ws.player_id = $1
+	and ws.game_id in (%s) 
+	order by ws.game_id;`, gameIDINstr)
+	
+	rows, err := ds.db.Query(sql, playerID)
+	if err != nil {
+		return nil, err
+	}
+
+	var weaponStats []*PlayerWeaponStat
+	for rows.Next() {
+		var ws PlayerWeaponStat
+
+		err := rows.Scan(&ws.PlayerWeaponStatID, &ws.PlayerID, &ws.GameID, &ws.PlayerGameStatID, 
+			&ws.WeaponCd, &ws.Actual, &ws.Max, &ws.Hit, &ws.Fired, &ws.Frags)
+
+		if err != nil {
+			return nil, err
+		}
+
+		weaponStats = append(weaponStats, &ws)
+	}
+
+	return nil, nil
 }
