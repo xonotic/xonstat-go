@@ -3,6 +3,7 @@ package player
 import (
 	"sort"
 	"gitlab.com/xonotic/xonstat/pkg/models"
+	"gitlab.com/xonotic/xonstat/pkg/util"
 )
 
 // GameTypeSummaryBase is for keeping track of the number of games played by a player plus win:loss ratio.
@@ -20,14 +21,6 @@ type ByGames []*GameTypeSummaryBase
 func (a ByGames) Len() int           { return len(a) }
 func (a ByGames) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByGames) Less(i, j int) bool { return a[i].Games > a[j].Games }  // descending order
-
-func calcPct(numerator, denominator int) float32 {
-	if denominator == 0 {
-		denominator = 1
-	}
-
-	return float32(numerator) / float32(denominator) * 100.0
-}
 
 // GameTypeSummaryData retrieves the summary data for a player by ID.
 // Among the list of returned summaries is also an "overall" entry that is the sum value for all types.
@@ -53,7 +46,7 @@ func GameTypeSummaryData(db models.Datastore, playerID int) ([]*GameTypeSummaryB
 		case "dm", "cts", "ka", "keepaway":
 			s.WinRatio = 0.0
 		default:
-			s.WinRatio = calcPct(rs.Wins, rs.Wins + rs.Losses)
+			s.WinRatio = util.Percentage(rs.Wins, rs.Wins + rs.Losses)
 		}
 
 		// A running tally of the counts we've seen so far
@@ -64,7 +57,7 @@ func GameTypeSummaryData(db models.Datastore, playerID int) ([]*GameTypeSummaryB
 		summaries = append(summaries, &s)
 	}
 
-	overall.WinRatio = calcPct(overall.Wins, overall.Wins + overall.Losses)
+	overall.WinRatio = util.Percentage(overall.Wins, overall.Wins + overall.Losses)
 
 	// Put the "overall" entry first in the list so it sorts in a stable fashion.
 	summaries = append([]*GameTypeSummaryBase{&overall}, summaries...)

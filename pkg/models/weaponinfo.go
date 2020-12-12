@@ -64,7 +64,7 @@ func (ds *PGDatastore) RPlayerWeaponStatsByGameList(playerID int, gameIDs []int)
 	from player_weapon_stats ws 
 	where ws.player_id = $1
 	and ws.game_id in (%s) 
-	order by ws.game_id;`, gameIDINstr)
+	order by ws.game_id, ws.weapon_cd;`, gameIDINstr)
 	
 	rows, err := ds.db.Query(sql, playerID)
 	if err != nil {
