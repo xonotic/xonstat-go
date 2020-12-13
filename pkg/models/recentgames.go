@@ -109,6 +109,8 @@ func (ds *PGDatastore) RRecentGames(serverID int, mapID int, playerID int,
 
 func isWeaponInfoGameType(gameTypeCd string) bool {
 	switch gameTypeCd {
+	case "", "overall":
+		return true
 	case "as", "ca", "ctf", "dm", "dom", "duel", "ft", "freezetag", "ka":
 		return true
 	case "keepaway", "kh", "rune", "tdm":
@@ -146,13 +148,16 @@ func (ds *PGDatastore) RGameIDsByPlayerID(playerID, limit int, gameTypeCd string
 	var sqlBuf bytes.Buffer
 	sqlBuf.WriteString(fmt.Sprintf("select g.game_id from games g where g.players @> ARRAY[%d] ", playerID))
 
-	if gameTypeCd != "" {
+	if gameTypeCd != "" && gameTypeCd != "overall" {
 		sqlBuf.WriteString(fmt.Sprintf("and g.game_type_cd = $%d ", placeholder))
 		placeholder++
 		params = append(params, gameTypeCd)
 	}
 
-	sqlBuf.WriteString("order by g.game_id ")
+	// Clamp the data to the past year for performance reasons.
+	sqlBuf.WriteString("and g.create_dt > (now() at time zone 'utc' - interval '1 year') ")
+
+	sqlBuf.WriteString("order by g.game_id desc ")
 
 	sqlBuf.WriteString(fmt.Sprintf("limit $%d ", placeholder))
 	placeholder++

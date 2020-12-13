@@ -85,5 +85,5 @@ func (ds *PGDatastore) RPlayerWeaponStatsByGameList(playerID int, gameIDs []int)
 		weaponStats = append(weaponStats, &ws)
 	}
 
-	return nil, nil
+	return weaponStats, nil
 }

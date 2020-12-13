@@ -8,16 +8,16 @@ import (
 
 // AccuracyBase is the accuracy of a weapon in a single game.
 type AccuracyBase struct {
-	WeaponCd string
-	Fired int
-	Hit int
+	WeaponCd    string
+	Fired       int
+	Hit         int
 	PctAccuracy float32
 }
 
 // PlayerWeaponInfoBase houses the summary weapon info for a player.
 type PlayerWeaponInfoBase struct {
 	// Player ID who these weapon stats belong to.
-	PlayerID           int
+	PlayerID int
 
 	// List of game IDs used to calculate these figures.
 	GameIDs []int
@@ -54,16 +54,18 @@ func PlayerWeaponInfoData(db models.Datastore, playerID, limit int, gameTypeCd s
 
 		key := fmt.Sprintf("%d-%s", ws.GameID, ws.WeaponCd)
 		accuracy[key] = &AccuracyBase{
-			WeaponCd: ws.WeaponCd,
-			Fired: ws.Fired,
-			Hit: ws.Hit,
-			PctAccuracy: util.Percentage(ws.Hit, ws.Fired + ws.Hit),
+			WeaponCd:    ws.WeaponCd,
+			Fired:       ws.Fired,
+			Hit:         ws.Hit,
+			PctAccuracy: util.Percentage(ws.Hit, ws.Fired+ws.Hit),
 		}
-		
+
 	}
 
 	return &PlayerWeaponInfoBase{
 		PlayerID: playerID,
-		GameIDs: gameIDs,
+		GameIDs:  gameIDs,
+		Weapons:  weapons,
+		Accuracy: accuracy,
 	}, nil
 }
