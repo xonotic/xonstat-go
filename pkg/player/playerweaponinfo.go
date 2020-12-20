@@ -57,7 +57,7 @@ func PlayerWeaponInfoData(db models.Datastore, playerID, limit int, gameTypeCd s
 			WeaponCd:    ws.WeaponCd,
 			Fired:       ws.Fired,
 			Hit:         ws.Hit,
-			PctAccuracy: util.Percentage(ws.Hit, ws.Fired+ws.Hit),
+			PctAccuracy: util.Percentage(ws.Hit, ws.Fired),
 		}
 
 	}
