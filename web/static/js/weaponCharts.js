@@ -132,3 +132,50 @@ function drawAccuracyChart(id, data) {
         }
     });
 };
+
+function drawPlayerAccuracyChart(id, data) {
+    var ctx = document.getElementById(id).getContext('2d');
+
+    window.myHorizontalBar = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.game_ids,
+            datasets: data.accuracy,
+        },
+        options: {
+            aspectRatio: 3,
+            spanGaps: true,
+            responsive: true,
+			scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Game #'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Accuracy %'
+                    },
+                    gridLines: {
+                        color: 'rgba(255, 255, 255, 0.1)',
+                        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
+                    },
+                    ticks: {
+                        suggestedMin: 0,
+                    }
+                }]
+            },
+            legend: {
+                position: 'top',
+            },
+            tooltips: {
+                mode: 'index',
+                intersect: false,
+            }
+        }
+    });
+};

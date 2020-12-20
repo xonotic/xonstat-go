@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -101,6 +102,8 @@ type PlayerAccuracyDataset struct {
 	BorderColor     string                 `json:"borderColor"`
 	RichData        PlayerAccuracyRichData `json:"richData"`
 	Data            []*float32             `json:"data"`
+	Fill            bool                   `json:"fill"`
+	LineTension     float32                `json:"lineTension"`
 }
 
 // NewPlayerAccuracyDataset creates a new PlayerAccuracyDataSet from a weapon code.
@@ -110,6 +113,7 @@ func NewPlayerAccuracyDataset(weaponCd string) *PlayerAccuracyDataset {
 		BackgroundColor: weaponBackgroundColor(weaponCd),
 		BorderColor:     weaponBorderColor(weaponCd),
 		Data:            make([]*float32, 0),
+		LineTension:     0.1,
 	}
 }
 
@@ -136,6 +140,9 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 		ae.NotFoundHandler(w, r)
 		return
 	}
+
+	// Sort the game IDs in ascending order 
+	sort.Ints(info.GameIDs)
 
 	// Build up the accuracy dataset
 	accuracy := make([]*PlayerAccuracyDataset, 0)
