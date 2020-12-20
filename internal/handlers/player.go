@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/player"
+	"gitlab.com/xonotic/xonstat/pkg/util"
 )
 
 // PlayerInfoResponse is the view-specific information about a map related information.
@@ -70,7 +71,6 @@ func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 // PlayerAccuracyRichData is the more detailed set of information for a given slice of the line chart for accuracy.
 type PlayerAccuracyRichData struct {
-	GameID           int      `json:"game_id"`
 	WeaponCd         string   `json:"weapon_cd"`
 	WeaponCdInitCaps string   `json:"weapon_cd_init_caps"`
 	Hit              int      `json:"hit"`
@@ -80,49 +80,45 @@ type PlayerAccuracyRichData struct {
 
 // NewPlayerAccuracyRichData converts an AccuracyBase into a PlayerAccuracyRichData object or a blank entry.
 func NewPlayerAccuracyRichData(weaponCd string, gameID int, ab *player.AccuracyBase) *PlayerAccuracyRichData {
-	if ab == nil {
-		// Blank entry (nil for accuracy to let Chart.js know it is missing data)
-		return &PlayerAccuracyRichData{
-			WeaponCd:    weaponCd,
-			PctAccuracy: nil,
-		}
+	richData := &PlayerAccuracyRichData{
+		WeaponCd:         weaponCd,
+		WeaponCdInitCaps: strings.Title(weaponCd),
 	}
 
-	return &PlayerAccuracyRichData{
-		GameID:           gameID,
-		WeaponCd:         ab.WeaponCd,
-		WeaponCdInitCaps: strings.Title(ab.WeaponCd),
-		Hit:              ab.Hit,
-		Fired:            ab.Fired,
-		PctAccuracy:      &ab.PctAccuracy,
+	if ab != nil {
+		richData.Hit = ab.Hit
+		richData.Fired = ab.Fired
+		richData.PctAccuracy = &ab.PctAccuracy
 	}
+
+	return richData
 }
 
 // PlayerAccuracyDataset is player accuracy data in the "shape" that Chart.js wants.
 type PlayerAccuracyDataset struct {
-	Label           string                    `json:"label"`
-	BackgroundColor string                    `json:"backgroundColor"`
-	BorderColor     string                    `json:"borderColor"`
-	RichData        []*PlayerAccuracyRichData `json:"richData"`
-	Data            []float32                 `json:"data"`
+	Label           string                 `json:"label"`
+	BackgroundColor string                 `json:"backgroundColor"`
+	BorderColor     string                 `json:"borderColor"`
+	RichData        PlayerAccuracyRichData `json:"richData"`
+	Data            []*float32             `json:"data"`
 }
 
-// NewPlayerAccuracyDataset creates a new AccuracyDataSet from a weapon code.
-func NewPlayerAccuracyDataset(weaponCd string) *AccuracyDataset {
-	return &AccuracyDataset{
+// NewPlayerAccuracyDataset creates a new PlayerAccuracyDataSet from a weapon code.
+func NewPlayerAccuracyDataset(weaponCd string) *PlayerAccuracyDataset {
+	return &PlayerAccuracyDataset{
 		Label:           weaponCd,
 		BackgroundColor: weaponBackgroundColor(weaponCd),
 		BorderColor:     weaponBorderColor(weaponCd),
-		RichData:        make([]*AccuracyRichData, 0),
-		Data:            make([]float32, 0),
+		Data:            make([]*float32, 0),
 	}
 }
 
 // PlayerWeaponInfoResponse is the response type for the PlayerWeaponInfoHandler.
 type PlayerWeaponInfoResponse struct {
-	PlayerID int      `json:"player_id"`
-	Weapons  []string `json:"weapons"`
-	GameIDs  []int    `json:"game_ids"`
+	PlayerID     int                      `json:"player_id"`
+	Weapons      []string                 `json:"weapons"`
+	GameIDs      []int                    `json:"game_ids"`
+	AccuracyData []*PlayerAccuracyDataset `json:"accuracy"`
 }
 
 // PlayerWeaponInfoHandler is the web handler for retrieving player weapon information
@@ -141,10 +137,46 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// Build up the accuracy dataset
+	accuracy := make([]*PlayerAccuracyDataset, 0)
+	for _, weaponCd := range info.Weapons {
+		if !isAccuracyWeapon(weaponCd) {
+			continue
+		}
+
+		dataset := NewPlayerAccuracyDataset(weaponCd)
+		richData := PlayerAccuracyRichData{
+			WeaponCd:         weaponCd,
+			WeaponCdInitCaps: strings.Title(weaponCd),
+		}
+
+		// For each game ID, we'll pull that weapon's data
+		for _, gameID := range info.GameIDs {
+			base, _ := info.Accuracy[fmt.Sprintf("%d-%s", gameID, weaponCd)]
+			if base == nil {
+				// Player did not use this weapon in this game, so put a blank marker.
+				dataset.Data = append(dataset.Data, nil)
+			} else {
+				dataset.Data = append(dataset.Data, &base.PctAccuracy)
+
+				// Keep track of the overall numbers to provide hover information.
+				richData.Hit += base.Hit
+				richData.Fired += base.Fired
+			}
+		}
+		// Calculate the overall accuracy from total hits and fired-s.
+		overallAccuracy := util.Percentage(richData.Hit, richData.Fired)
+		richData.PctAccuracy = &overallAccuracy
+		dataset.RichData = richData
+
+		accuracy = append(accuracy, dataset)
+	}
+
 	response := &PlayerWeaponInfoResponse{
-		PlayerID: playerID,
-		Weapons:  info.Weapons,
-		GameIDs:  info.GameIDs,
+		PlayerID:     playerID,
+		Weapons:      info.Weapons,
+		GameIDs:      info.GameIDs,
+		AccuracyData: accuracy,
 	}
 
 	bytes, _ := json.Marshal(response)
