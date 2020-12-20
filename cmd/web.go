@@ -161,6 +161,6 @@ func init() {
 	}
 
 	rootCmd.AddCommand(webCmd)
-	webCmd.Flags().StringP("port", "p", "8080", "port number")
+	webCmd.Flags().StringP("port", "p", "6543", "port number")
 	webCmd.Flags().BoolP("routes", "r", false, "print routing information")
 }
