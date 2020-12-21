@@ -70,8 +70,8 @@ func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// PlayerAccuracyRichData is the more detailed set of information for a given slice of the line chart for accuracy.
-type PlayerAccuracyRichData struct {
+// PlayerAccuracySummary is the more detailed set of information for a given slice of the line chart for accuracy.
+type PlayerAccuracySummary struct {
 	WeaponCd         string   `json:"weapon_cd"`
 	WeaponCdInitCaps string   `json:"weapon_cd_init_caps"`
 	Hit              int      `json:"hit"`
@@ -81,14 +81,14 @@ type PlayerAccuracyRichData struct {
 
 // PlayerAccuracyDataset is player accuracy data in the "shape" that Chart.js wants.
 type PlayerAccuracyDataset struct {
-	Label           string                 `json:"label"`
-	BackgroundColor string                 `json:"backgroundColor"`
-	BorderColor     string                 `json:"borderColor"`
-	Summary         PlayerAccuracyRichData `json:"summary"`
-	Data            []*float32             `json:"data"`
-	Fill            bool                   `json:"fill"`
-	LineTension     float32                `json:"lineTension"`
-	PointHitRadius  int                    `json:"pointHitRadius"`
+	Label           string                `json:"label"`
+	BackgroundColor string                `json:"backgroundColor"`
+	BorderColor     string                `json:"borderColor"`
+	Summary         PlayerAccuracySummary `json:"summary"`
+	Data            []*float32            `json:"data"`
+	Fill            bool                  `json:"fill"`
+	LineTension     float32               `json:"lineTension"`
+	PointHitRadius  int                   `json:"pointHitRadius"`
 }
 
 // NewPlayerAccuracyDataset creates a new PlayerAccuracyDataSet from a weapon code.
@@ -148,7 +148,7 @@ func assembleAccuracy(weaponsUsed []string, gameIDs []int, rawAccuracy map[strin
 		}
 
 		dataset := NewPlayerAccuracyDataset(weaponCd)
-		richData := PlayerAccuracyRichData{
+		summary := PlayerAccuracySummary{
 			WeaponCd:         weaponCd,
 			WeaponCdInitCaps: strings.Title(weaponCd),
 		}
@@ -163,14 +163,14 @@ func assembleAccuracy(weaponsUsed []string, gameIDs []int, rawAccuracy map[strin
 				dataset.Data = append(dataset.Data, &base.PctAccuracy)
 
 				// Keep track of the overall numbers to provide hover information.
-				richData.Hit += base.Hit
-				richData.Fired += base.Fired
+				summary.Hit += base.Hit
+				summary.Fired += base.Fired
 			}
 		}
 		// Calculate the overall accuracy from total hits and fired-s.
-		overallAccuracy := util.Percentage(richData.Hit, richData.Fired)
-		richData.PctAccuracy = &overallAccuracy
-		dataset.Summary = richData
+		overallAccuracy := util.Percentage(summary.Hit, summary.Fired)
+		summary.PctAccuracy = &overallAccuracy
+		dataset.Summary = summary
 
 		accuracy = append(accuracy, dataset)
 	}
