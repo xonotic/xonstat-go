@@ -79,22 +79,6 @@ type PlayerAccuracyRichData struct {
 	PctAccuracy      *float32 `json:"pct_accuracy"`
 }
 
-// NewPlayerAccuracyRichData converts an AccuracyBase into a PlayerAccuracyRichData object or a blank entry.
-func NewPlayerAccuracyRichData(weaponCd string, gameID int, ab *player.AccuracyBase) *PlayerAccuracyRichData {
-	richData := &PlayerAccuracyRichData{
-		WeaponCd:         weaponCd,
-		WeaponCdInitCaps: strings.Title(weaponCd),
-	}
-
-	if ab != nil {
-		richData.Hit = ab.Hit
-		richData.Fired = ab.Fired
-		richData.PctAccuracy = &ab.PctAccuracy
-	}
-
-	return richData
-}
-
 // PlayerAccuracyDataset is player accuracy data in the "shape" that Chart.js wants.
 type PlayerAccuracyDataset struct {
 	Label           string                 `json:"label"`
@@ -119,12 +103,54 @@ func NewPlayerAccuracyDataset(weaponCd string) *PlayerAccuracyDataset {
 	}
 }
 
+// PlayerDamageRichData is the more detailed set of information for a given slice of the bar chart for damage.
+type PlayerDamageRichData struct {
+	WeaponCd         string   `json:"weapon_cd"`
+	WeaponCdInitCaps string   `json:"weapon_cd_init_caps"`
+	Actual           int      `json:"actual"`
+	Max              int      `json:"max"`
+}
+
+// PlayerDamageDataset is player damage data in the "shape" that Chart.js wants.
+type PlayerDamageDataset struct {
+	Label           string               `json:"label"`
+	BackgroundColor string               `json:"backgroundColor"`
+	BorderColor     string               `json:"borderColor"`
+	RichData        PlayerDamageRichData `json:"richData"`
+	Data            []int                `json:"data"`
+}
+
+// NewPlayerDamageDataset creates a new PlayerDamageDataSet from a weapon code.
+func NewPlayerDamageDataset(weaponCd string) *PlayerDamageDataset {
+	return &PlayerDamageDataset{
+		Label:           weaponCd,
+		BackgroundColor: weaponBackgroundColor(weaponCd),
+		BorderColor:     weaponBorderColor(weaponCd),
+		Data:            make([]int, 0),
+	}
+}
+
+// Should the weapon be included in the damage dataset?
+func isDamageWeapon(weaponCd string) bool {
+	switch weaponCd {
+	case "vortex", "machinegun", "shotgun", "arc", "uzi", "nex", "minstanex":
+		return true
+	case "rifle", "grenadelauncher", "minelayer", "rocketlauncher", "hlac", "seeker":
+		return true
+	case "fireball", "mortar", "electro", "crylink", "hagar", "devastator":
+		return true
+	}
+
+	return false
+}
+
 // PlayerWeaponInfoResponse is the response type for the PlayerWeaponInfoHandler.
 type PlayerWeaponInfoResponse struct {
 	PlayerID     int                      `json:"player_id"`
 	Weapons      []string                 `json:"weapons"`
 	GameIDs      []int                    `json:"game_ids"`
 	AccuracyData []*PlayerAccuracyDataset `json:"accuracy"`
+	DamageData   []*PlayerDamageDataset   `json:"damage"`
 }
 
 // PlayerWeaponInfoHandler is the web handler for retrieving player weapon information
@@ -181,11 +207,44 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 		accuracy = append(accuracy, dataset)
 	}
 
+	// Build up the damage dataset
+	damage := make([]*PlayerDamageDataset, 0)
+	for _, weaponCd := range info.Weapons {
+		if !isDamageWeapon(weaponCd) {
+			continue
+		}
+
+		dataset := NewPlayerDamageDataset(weaponCd)
+		richData := PlayerDamageRichData{
+			WeaponCd:         weaponCd,
+			WeaponCdInitCaps: strings.Title(weaponCd),
+		}
+
+		// For each game ID, we'll pull that weapon's data
+		for _, gameID := range info.GameIDs {
+			base, _ := info.Damage[fmt.Sprintf("%d-%s", gameID, weaponCd)]
+			if base == nil {
+				// Player did not use this weapon in this game, so put a blank marker.
+				dataset.Data = append(dataset.Data, 0)
+			} else {
+				dataset.Data = append(dataset.Data, base.Actual)
+
+				// Keep track of the overall numbers to provide hover information.
+				richData.Actual += base.Actual
+				richData.Max += base.Max
+			}
+		}
+		dataset.RichData = richData
+
+		damage = append(damage, dataset)
+	}
+
 	response := &PlayerWeaponInfoResponse{
 		PlayerID:     playerID,
 		Weapons:      info.Weapons,
 		GameIDs:      info.GameIDs,
 		AccuracyData: accuracy,
+		DamageData: damage,
 	}
 
 	bytes, _ := json.Marshal(response)

@@ -14,6 +14,13 @@ type AccuracyBase struct {
 	PctAccuracy float32
 }
 
+// DamageBase is the damage of a weapon in a single game.
+type DamageBase struct {
+	WeaponCd string
+	Actual   int
+	Max      int
+}
+
 // PlayerWeaponInfoBase houses the summary weapon info for a player.
 type PlayerWeaponInfoBase struct {
 	// Player ID who these weapon stats belong to.
@@ -25,8 +32,11 @@ type PlayerWeaponInfoBase struct {
 	// List of distinct weapons used in the figures.
 	Weapons []string
 
-	// Accuracies of the maps, in GameID order. They key here is <gameID>-<weaponCd>.
+	// Accuracies accessible by the key <gameID>-<weaponCd>.
 	Accuracy map[string]*AccuracyBase
+
+	// Damages accessible by the key <gameID><weaponCd>.
+	Damage map[string]*DamageBase
 }
 
 // PlayerWeaponInfoData returns the view-agnostic weapon data for a given player by ID.
@@ -44,6 +54,7 @@ func PlayerWeaponInfoData(db models.Datastore, playerID, limit int, gameTypeCd s
 	weaponSet := make(map[string]struct{})
 	weapons := make([]string, 0)
 	accuracy := make(map[string]*AccuracyBase)
+	damage := make(map[string]*DamageBase)
 	for _, ws := range weaponStats {
 		// Keep track of the distinct weapons we've seen.
 		_, seen := weaponSet[ws.WeaponCd]
@@ -52,6 +63,7 @@ func PlayerWeaponInfoData(db models.Datastore, playerID, limit int, gameTypeCd s
 			weapons = append(weapons, ws.WeaponCd)
 		}
 
+		// Add data entries to the map using the key.
 		key := fmt.Sprintf("%d-%s", ws.GameID, ws.WeaponCd)
 		accuracy[key] = &AccuracyBase{
 			WeaponCd:    ws.WeaponCd,
@@ -60,6 +72,11 @@ func PlayerWeaponInfoData(db models.Datastore, playerID, limit int, gameTypeCd s
 			PctAccuracy: util.Percentage(ws.Hit, ws.Fired),
 		}
 
+		damage[key] = &DamageBase{
+			WeaponCd: ws.WeaponCd,
+			Actual:   ws.Actual,
+			Max:      ws.Max,
+		}
 	}
 
 	return &PlayerWeaponInfoBase{
@@ -67,5 +84,6 @@ func PlayerWeaponInfoData(db models.Datastore, playerID, limit int, gameTypeCd s
 		GameIDs:  gameIDs,
 		Weapons:  weapons,
 		Accuracy: accuracy,
+		Damage:   damage,
 	}, nil
 }
