@@ -180,28 +180,30 @@ func assembleAccuracy(weaponsUsed []string, gameIDs []int, rawAccuracy map[strin
 
 // Assemble the damage data in a Chart.js friendly format.
 func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*player.DamageBase) []*PlayerDamageDataset {
-	damage := make([]*PlayerDamageDataset, 0)
+	// Map of weapon codes to datasets
+	datasets := make(map[string]*PlayerDamageDataset)
 	for _, weaponCd := range weaponsUsed {
-		if !isDamageWeapon(weaponCd) {
-			continue
-		}
+		datasets[weaponCd] = NewPlayerDamageDataset(weaponCd)
+	}
 
-		dataset := NewPlayerDamageDataset(weaponCd)
-
-		// For each game ID, we'll pull that weapon's data
-		for _, gameID := range gameIDs {
+	for _, gameID := range gameIDs {
+		for _, weaponCd := range weaponsUsed {
 			base, _ := rawDamage[fmt.Sprintf("%d-%s", gameID, weaponCd)]
 			if base == nil {
 				// Player did not use this weapon in this game, so put a blank marker.
-				dataset.Data = append(dataset.Data, 0)
+				datasets[weaponCd].Data = append(datasets[weaponCd].Data, 0)
 			} else {
-				dataset.Data = append(dataset.Data, base.Actual)
+				datasets[weaponCd].Data = append(datasets[weaponCd].Data, base.Actual)
 			}
 		}
-		damage = append(damage, dataset)
 	}
 
-	return damage
+	datasetList := make([]*PlayerDamageDataset, 0, len(datasets))
+	for _, weaponCd := range weaponsUsed {
+		datasetList = append(datasetList, datasets[weaponCd])
+	}
+
+	return datasetList
 }
 
 // PlayerWeaponInfoHandler is the web handler for retrieving player weapon information
