@@ -139,28 +139,10 @@ type PlayerWeaponInfoResponse struct {
 	DamageData   []*PlayerDamageDataset   `json:"damage"`
 }
 
-// PlayerWeaponInfoHandler is the web handler for retrieving player weapon information
-func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request) {
-	playerID, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		log.Printf("Invalid or missing player ID value: %s", err)
-		ae.NotFoundHandler(w, r)
-		return
-	}
-
-	info, err := player.PlayerWeaponInfoData(ae.db, playerID, 20, "")
-	if err != nil {
-		log.Printf("Unable to retrieve weapon info data: %s", err)
-		ae.NotFoundHandler(w, r)
-		return
-	}
-
-	// Sort the game IDs in ascending order
-	sort.Ints(info.GameIDs)
-
-	// Build up the accuracy dataset
+// Assemble the accuracy data in a Chart.js friendly format.
+func assembleAccuracy(weaponsUsed []string, gameIDs []int, rawAccuracy map[string]*player.AccuracyBase) []*PlayerAccuracyDataset {
 	accuracy := make([]*PlayerAccuracyDataset, 0)
-	for _, weaponCd := range info.Weapons {
+	for _, weaponCd := range weaponsUsed {
 		if !isAccuracyWeapon(weaponCd) {
 			continue
 		}
@@ -172,8 +154,8 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 		}
 
 		// For each game ID, we'll pull that weapon's data
-		for _, gameID := range info.GameIDs {
-			base, _ := info.Accuracy[fmt.Sprintf("%d-%s", gameID, weaponCd)]
+		for _, gameID := range gameIDs {
+			base, _ := rawAccuracy[fmt.Sprintf("%d-%s", gameID, weaponCd)]
 			if base == nil {
 				// Player did not use this weapon in this game, so put a blank marker.
 				dataset.Data = append(dataset.Data, nil)
@@ -193,9 +175,13 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 		accuracy = append(accuracy, dataset)
 	}
 
-	// Build up the damage dataset
+	return accuracy
+}
+
+// Assemble the damage data in a Chart.js friendly format.
+func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*player.DamageBase) []*PlayerDamageDataset {
 	damage := make([]*PlayerDamageDataset, 0)
-	for _, weaponCd := range info.Weapons {
+	for _, weaponCd := range weaponsUsed {
 		if !isDamageWeapon(weaponCd) {
 			continue
 		}
@@ -207,8 +193,8 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 		}
 
 		// For each game ID, we'll pull that weapon's data
-		for _, gameID := range info.GameIDs {
-			base, _ := info.Damage[fmt.Sprintf("%d-%s", gameID, weaponCd)]
+		for _, gameID := range gameIDs {
+			base, _ := rawDamage[fmt.Sprintf("%d-%s", gameID, weaponCd)]
 			if base == nil {
 				// Player did not use this weapon in this game, so put a blank marker.
 				dataset.Data = append(dataset.Data, 0)
@@ -224,6 +210,35 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 
 		damage = append(damage, dataset)
 	}
+
+	return damage
+}
+
+// PlayerWeaponInfoHandler is the web handler for retrieving player weapon information
+func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request) {
+	playerID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		log.Printf("Invalid or missing player ID value: %s", err)
+		ae.NotFoundHandler(w, r)
+		return
+	}
+
+	info, err := player.PlayerWeaponInfoData(ae.db, playerID, 20, "")
+	if err != nil {
+		log.Printf("Unable to retrieve weapon info data: %s", err)
+		ae.NotFoundHandler(w, r)
+		return
+	}
+
+	// Sort the game IDs in ascending order for processing.
+	sort.Ints(info.GameIDs)
+
+	// Note that we do two passes through the raw weapon data here. This is largely because of the different
+	// aggregation between accuracy and damage. For accuracy, we want to show the average accuracy over
+	// all games (e.g. 40% vortex accuracy) whereas for damage we want to know percentage per game (e.g.
+	// devastator was 35% of the total damage for this game).
+	accuracy := assembleAccuracy(info.Weapons, info.GameIDs, info.Accuracy)
+	damage := assembleDamage(info.Weapons, info.GameIDs, info.Damage)
 
 	response := &PlayerWeaponInfoResponse{
 		PlayerID:     playerID,
