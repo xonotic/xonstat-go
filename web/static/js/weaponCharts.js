@@ -173,8 +173,25 @@ function drawPlayerAccuracyChart(id, data) {
                 position: 'top',
             },
             tooltips: {
-                mode: 'index',
+                mode: 'point',
                 intersect: false,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                titleFontColor: '#000',
+                bodyFontColor: '#000',
+                callbacks: {
+                    label: function (tooltipItem, data) {
+                        // RichData contains aggregate accuracy.
+                        var overall = data.datasets[tooltipItem.datasetIndex].richData;
+                        var overallAccuracy = Math.round(overall.pct_accuracy);
+
+                        // The individual data points are the accuracy for that particular game.
+                        var rawAccuracy = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                        var accuracy = Math.round(rawAccuracy);
+
+                        return `${overall.weapon_cd_init_caps}: ${accuracy}% (${overallAccuracy}% overall)`;
+                    }
+                }
+
             }
         }
     });
