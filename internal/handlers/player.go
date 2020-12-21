@@ -105,10 +105,10 @@ func NewPlayerAccuracyDataset(weaponCd string) *PlayerAccuracyDataset {
 
 // PlayerDamageRichData is the more detailed set of information for a given slice of the bar chart for damage.
 type PlayerDamageRichData struct {
-	WeaponCd         string   `json:"weapon_cd"`
-	WeaponCdInitCaps string   `json:"weapon_cd_init_caps"`
-	Actual           int      `json:"actual"`
-	Max              int      `json:"max"`
+	WeaponCd         string `json:"weapon_cd"`
+	WeaponCdInitCaps string `json:"weapon_cd_init_caps"`
+	Actual           int    `json:"actual"`
+	Max              int    `json:"max"`
 }
 
 // PlayerDamageDataset is player damage data in the "shape" that Chart.js wants.
@@ -244,7 +244,7 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 		Weapons:      info.Weapons,
 		GameIDs:      info.GameIDs,
 		AccuracyData: accuracy,
-		DamageData: damage,
+		DamageData:   damage,
 	}
 
 	bytes, _ := json.Marshal(response)

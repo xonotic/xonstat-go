@@ -196,3 +196,49 @@ function drawPlayerAccuracyChart(id, data) {
         }
     });
 };
+
+function drawPlayerDamageChart(id, data) {
+    var ctx = document.getElementById(id).getContext('2d');
+
+    window.myHorizontalBar = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.game_ids,
+            datasets: data.damage,
+        },
+        options: {
+            aspectRatio: 3,
+            elements: {
+                rectangle: {
+                    borderWidth: 2,
+                }
+            },
+            responsive: true,
+            scales: {
+                xAxes: [{
+                    stacked: true,
+                    gridLines: {
+                        color: 'rgba(255, 255, 255, 0.2)',
+                        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
+                    },
+                }],
+                yAxes: [{
+                    stacked: true,
+                    gridLines: {
+                        color: 'rgba(255, 255, 255, 0.2)',
+                        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
+                    },
+                }]
+            },
+            legend: {
+                position: 'right',
+            },
+            tooltips: {
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                titleFontColor: '#000',
+                bodyFontColor: '#000',
+                mode: "point",
+            }
+        }
+    });
+};
