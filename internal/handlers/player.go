@@ -104,6 +104,7 @@ type PlayerAccuracyDataset struct {
 	Data            []*float32             `json:"data"`
 	Fill            bool                   `json:"fill"`
 	LineTension     float32                `json:"lineTension"`
+	PointHitRadius  int                    `json:"pointHitRadius"`
 }
 
 // NewPlayerAccuracyDataset creates a new PlayerAccuracyDataSet from a weapon code.
@@ -114,6 +115,7 @@ func NewPlayerAccuracyDataset(weaponCd string) *PlayerAccuracyDataset {
 		BorderColor:     weaponBorderColor(weaponCd),
 		Data:            make([]*float32, 0),
 		LineTension:     0.1,
+		PointHitRadius:  5,
 	}
 }
 
@@ -141,7 +143,7 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Sort the game IDs in ascending order 
+	// Sort the game IDs in ascending order
 	sort.Ints(info.GameIDs)
 
 	// Build up the accuracy dataset
