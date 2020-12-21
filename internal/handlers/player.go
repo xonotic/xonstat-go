@@ -84,7 +84,7 @@ type PlayerAccuracyDataset struct {
 	Label           string                 `json:"label"`
 	BackgroundColor string                 `json:"backgroundColor"`
 	BorderColor     string                 `json:"borderColor"`
-	RichData        PlayerAccuracyRichData `json:"richData"`
+	Summary         PlayerAccuracyRichData `json:"summary"`
 	Data            []*float32             `json:"data"`
 	Fill            bool                   `json:"fill"`
 	LineTension     float32                `json:"lineTension"`
@@ -170,7 +170,7 @@ func assembleAccuracy(weaponsUsed []string, gameIDs []int, rawAccuracy map[strin
 		// Calculate the overall accuracy from total hits and fired-s.
 		overallAccuracy := util.Percentage(richData.Hit, richData.Fired)
 		richData.PctAccuracy = &overallAccuracy
-		dataset.RichData = richData
+		dataset.Summary = richData
 
 		accuracy = append(accuracy, dataset)
 	}

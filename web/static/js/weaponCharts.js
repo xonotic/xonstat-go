@@ -180,15 +180,15 @@ function drawPlayerAccuracyChart(id, data) {
                 bodyFontColor: '#000',
                 callbacks: {
                     label: function (tooltipItem, data) {
-                        // RichData contains aggregate accuracy.
-                        var overall = data.datasets[tooltipItem.datasetIndex].richData;
-                        var overallAccuracy = Math.round(overall.pct_accuracy);
+                        // Summary contains the aggregate accuracy for the weapon.
+                        var summary = data.datasets[tooltipItem.datasetIndex].summary;
+                        var overallAccuracy = Math.round(summary.pct_accuracy);
 
                         // The individual data points are the accuracy for that particular game.
                         var rawAccuracy = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
                         var accuracy = Math.round(rawAccuracy);
 
-                        return `${overall.weapon_cd_init_caps}: ${accuracy}% (${overallAccuracy}% overall)`;
+                        return `${summary.weapon_cd_init_caps}: ${accuracy}% (${overallAccuracy}% overall)`;
                     }
                 }
 
