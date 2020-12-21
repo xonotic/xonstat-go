@@ -32,9 +32,10 @@ func (ds *PGDatastore) RWeaponInfoByGameID(gameID int) ([]*WeaponInfo, error) {
 	ws.player_game_stat_id, ws.weapon_cd, ws.actual, ws.max, ws.hit, ws.fired, ws.frags
 	from player_weapon_stats ws join player_game_stats gs on ws.player_game_stat_id = gs.player_game_stat_id
 	where ws.game_id = $1
+	and gs.game_id = $2
     order by gs.scoreboardpos;`
 
-	rows, err := ds.db.Query(sql, gameID)
+	rows, err := ds.db.Query(sql, gameID, gameID)
 	if err != nil {
 		return nil, err
 	}
