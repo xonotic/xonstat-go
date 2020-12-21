@@ -333,18 +333,6 @@ type GameWeaponInfoResponse struct {
 	AccuracyData    []*AccuracyDataset `json:"accuracy_data"`
 }
 
-// Should the weapon be included in the accuracy dataset?
-func isAccuracyWeapon(weaponCd string) bool {
-	switch weaponCd {
-	case "arc", "assaultrifle", "huntingrifle", "machinegun", "okhmg", "okmachinegun":
-		return true
-	case "oknex", "rifle", "shockwave", "shotgun", "vaporizer", "vortex":
-		return true
-	}
-
-	return false
-}
-
 // GameWeaponInfoHandler retrieves information about the weapons in a game by its ID.
 func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) {
 	gameID, err := strconv.Atoi(chi.URLParam(r, "id"))

@@ -130,20 +130,6 @@ func NewPlayerDamageDataset(weaponCd string) *PlayerDamageDataset {
 	}
 }
 
-// Should the weapon be included in the damage dataset?
-func isDamageWeapon(weaponCd string) bool {
-	switch weaponCd {
-	case "vortex", "machinegun", "shotgun", "arc", "uzi", "nex", "minstanex":
-		return true
-	case "rifle", "grenadelauncher", "minelayer", "rocketlauncher", "hlac", "seeker":
-		return true
-	case "fireball", "mortar", "electro", "crylink", "hagar", "devastator":
-		return true
-	}
-
-	return false
-}
-
 // PlayerWeaponInfoResponse is the response type for the PlayerWeaponInfoHandler.
 type PlayerWeaponInfoResponse struct {
 	PlayerID     int                      `json:"player_id"`
