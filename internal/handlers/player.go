@@ -105,9 +105,9 @@ func NewPlayerAccuracyDataset(weaponCd string) *PlayerAccuracyDataset {
 
 // PlayerDamageRichData is the more detailed set of information for a given slice of the bar chart for damage.
 type PlayerDamageRichData struct {
-	WeaponCd         string  `json:"weapon_cd"`
-	WeaponCdInitCaps string  `json:"weapon_cd_init_caps"`
-	PctDamage        float32 `json:"pct_damage"`
+	WeaponCd         string `json:"weapon_cd"`
+	WeaponCdInitCaps string `json:"weapon_cd_init_caps"`
+	TotalDamage      int    `json:"t_damage"`
 }
 
 // PlayerDamageDataset is player damage data in the "shape" that Chart.js wants.
@@ -132,11 +132,12 @@ func NewPlayerDamageDataset(weaponCd string) *PlayerDamageDataset {
 
 // PlayerWeaponInfoResponse is the response type for the PlayerWeaponInfoHandler.
 type PlayerWeaponInfoResponse struct {
-	PlayerID     int                      `json:"player_id"`
-	Weapons      []string                 `json:"weapons"`
-	GameIDs      []int                    `json:"game_ids"`
-	AccuracyData []*PlayerAccuracyDataset `json:"accuracy"`
-	DamageData   []*PlayerDamageDataset   `json:"damage"`
+	PlayerID           int                      `json:"player_id"`
+	Weapons            []string                 `json:"weapons"`
+	GameIDs            []int                    `json:"game_ids"`
+	AccuracyData       []*PlayerAccuracyDataset `json:"accuracy"`
+	DamageData         []*PlayerDamageDataset   `json:"damage"`
+	TotalDamagePerGame []int                    `json:"total_damage_per_game"`
 }
 
 // Assemble the accuracy data in a Chart.js friendly format.
@@ -179,14 +180,16 @@ func assembleAccuracy(weaponsUsed []string, gameIDs []int, rawAccuracy map[strin
 }
 
 // Assemble the damage data in a Chart.js friendly format.
-func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*player.DamageBase) []*PlayerDamageDataset {
+func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*player.DamageBase) ([]*PlayerDamageDataset, []int) {
 	// Map of weapon codes to datasets
 	datasets := make(map[string]*PlayerDamageDataset)
 	for _, weaponCd := range weaponsUsed {
 		datasets[weaponCd] = NewPlayerDamageDataset(weaponCd)
 	}
 
+	totalDamagePerGame := make([]int, 0, len(gameIDs))
 	for _, gameID := range gameIDs {
+		totalDamage := 0
 		for _, weaponCd := range weaponsUsed {
 			base, _ := rawDamage[fmt.Sprintf("%d-%s", gameID, weaponCd)]
 			if base == nil {
@@ -194,8 +197,10 @@ func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*p
 				datasets[weaponCd].Data = append(datasets[weaponCd].Data, 0)
 			} else {
 				datasets[weaponCd].Data = append(datasets[weaponCd].Data, base.Actual)
+				totalDamage += base.Actual
 			}
 		}
+		totalDamagePerGame = append(totalDamagePerGame, totalDamage)
 	}
 
 	datasetList := make([]*PlayerDamageDataset, 0, len(datasets))
@@ -203,7 +208,7 @@ func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*p
 		datasetList = append(datasetList, datasets[weaponCd])
 	}
 
-	return datasetList
+	return datasetList, totalDamagePerGame
 }
 
 // PlayerWeaponInfoHandler is the web handler for retrieving player weapon information
@@ -230,14 +235,15 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 	// all games (e.g. 40% vortex accuracy) whereas for damage we want to know percentage per game (e.g.
 	// devastator was 35% of the total damage for this game).
 	accuracy := assembleAccuracy(info.Weapons, info.GameIDs, info.Accuracy)
-	damage := assembleDamage(info.Weapons, info.GameIDs, info.Damage)
+	damage, totalDamagePerGame := assembleDamage(info.Weapons, info.GameIDs, info.Damage)
 
 	response := &PlayerWeaponInfoResponse{
-		PlayerID:     playerID,
-		Weapons:      info.Weapons,
-		GameIDs:      info.GameIDs,
-		AccuracyData: accuracy,
-		DamageData:   damage,
+		PlayerID:           playerID,
+		Weapons:            info.Weapons,
+		GameIDs:            info.GameIDs,
+		AccuracyData:       accuracy,
+		DamageData:         damage,
+		TotalDamagePerGame: totalDamagePerGame,
 	}
 
 	bytes, _ := json.Marshal(response)
