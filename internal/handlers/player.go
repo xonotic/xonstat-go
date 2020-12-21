@@ -105,19 +105,18 @@ func NewPlayerAccuracyDataset(weaponCd string) *PlayerAccuracyDataset {
 
 // PlayerDamageRichData is the more detailed set of information for a given slice of the bar chart for damage.
 type PlayerDamageRichData struct {
-	WeaponCd         string `json:"weapon_cd"`
-	WeaponCdInitCaps string `json:"weapon_cd_init_caps"`
-	Actual           int    `json:"actual"`
-	Max              int    `json:"max"`
+	WeaponCd         string  `json:"weapon_cd"`
+	WeaponCdInitCaps string  `json:"weapon_cd_init_caps"`
+	PctDamage        float32 `json:"pct_damage"`
 }
 
 // PlayerDamageDataset is player damage data in the "shape" that Chart.js wants.
 type PlayerDamageDataset struct {
-	Label           string               `json:"label"`
-	BackgroundColor string               `json:"backgroundColor"`
-	BorderColor     string               `json:"borderColor"`
-	RichData        PlayerDamageRichData `json:"richData"`
-	Data            []int                `json:"data"`
+	Label           string                  `json:"label"`
+	BackgroundColor string                  `json:"backgroundColor"`
+	BorderColor     string                  `json:"borderColor"`
+	RichData        []*PlayerDamageRichData `json:"richData"`
+	Data            []int                   `json:"data"`
 }
 
 // NewPlayerDamageDataset creates a new PlayerDamageDataSet from a weapon code.
@@ -126,6 +125,7 @@ func NewPlayerDamageDataset(weaponCd string) *PlayerDamageDataset {
 		Label:           weaponCd,
 		BackgroundColor: weaponBackgroundColor(weaponCd),
 		BorderColor:     weaponBorderColor(weaponCd),
+		RichData:        make([]*PlayerDamageRichData, 0),
 		Data:            make([]int, 0),
 	}
 }
@@ -187,10 +187,6 @@ func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*p
 		}
 
 		dataset := NewPlayerDamageDataset(weaponCd)
-		richData := PlayerDamageRichData{
-			WeaponCd:         weaponCd,
-			WeaponCdInitCaps: strings.Title(weaponCd),
-		}
 
 		// For each game ID, we'll pull that weapon's data
 		for _, gameID := range gameIDs {
@@ -200,14 +196,8 @@ func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*p
 				dataset.Data = append(dataset.Data, 0)
 			} else {
 				dataset.Data = append(dataset.Data, base.Actual)
-
-				// Keep track of the overall numbers to provide hover information.
-				richData.Actual += base.Actual
-				richData.Max += base.Max
 			}
 		}
-		dataset.RichData = richData
-
 		damage = append(damage, dataset)
 	}
 
