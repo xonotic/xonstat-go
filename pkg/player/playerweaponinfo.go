@@ -41,6 +41,10 @@ type PlayerWeaponInfoBase struct {
 
 // PlayerWeaponInfoData returns the view-agnostic weapon data for a given player by ID.
 func PlayerWeaponInfoData(db models.Datastore, playerID, limit int, gameTypeCd string) (*PlayerWeaponInfoBase, error) {
+	if !models.IsWeaponInfoGameType(gameTypeCd) {
+		return nil, fmt.Errorf("unsupported gameTypeCd=%s for PlayerWeaponInfoData", gameTypeCd)
+	}
+
 	gameIDs, err := db.RGameIDsByPlayerID(playerID, limit, gameTypeCd)
 	if err != nil {
 		return nil, err

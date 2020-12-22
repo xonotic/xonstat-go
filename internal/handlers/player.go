@@ -233,7 +233,10 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	info, err := player.PlayerWeaponInfoData(ae.db, playerID, 20, "")
+	params := r.URL.Query()
+	gameTypeCd := params.Get("game_type_cd")
+
+	info, err := player.PlayerWeaponInfoData(ae.db, playerID, 20, gameTypeCd)
 	if err != nil {
 		log.Printf("Unable to retrieve weapon info data: %s", err)
 		ae.NotFoundHandler(w, r)

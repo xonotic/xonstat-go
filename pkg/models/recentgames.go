@@ -107,7 +107,8 @@ func (ds *PGDatastore) RRecentGames(serverID int, mapID int, playerID int,
 	return rgs, nil
 }
 
-func isWeaponInfoGameType(gameTypeCd string) bool {
+// IsWeaponInfoGameType determines if retrieving weapon info makes sense for the given game type.
+func IsWeaponInfoGameType(gameTypeCd string) bool {
 	switch gameTypeCd {
 	case "", "overall":
 		return true
@@ -127,7 +128,7 @@ func (ds *PGDatastore) RGameIDsByPlayerID(playerID, limit int, gameTypeCd string
 	}
 
 	// Some game types don't make sense with respect to weapon data...
-	if !isWeaponInfoGameType(gameTypeCd) {
+	if !IsWeaponInfoGameType(gameTypeCd) {
 		return nil, fmt.Errorf("unsupported game type '%s'", gameTypeCd)
 	}
 
