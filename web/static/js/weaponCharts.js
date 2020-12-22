@@ -5,7 +5,7 @@ function drawDamageChart(id, data) {
     // is based on playing around with values and settling on a comfortable maximum.
     var aspectRatio = Math.min(1200 / (data.distinct_players.length * 30), 7);
 
-    window.myHorizontalBar = new Chart(ctx, {
+    window.damageChart = new Chart(ctx, {
         type: 'horizontalBar',
         data: {
             labels: data.distinct_players,
@@ -69,7 +69,7 @@ function drawAccuracyChart(id, data) {
     // is based on playing around with values and settling on a comfortable maximum.
     var aspectRatio = Math.min(1200 / (data.distinct_players.length * 40), 10);
 
-    window.myHorizontalBar = new Chart(ctx, {
+    window.accuracyChart = new Chart(ctx, {
         type: 'horizontalBar',
         data: {
             labels: data.distinct_players,
@@ -136,7 +136,7 @@ function drawAccuracyChart(id, data) {
 function drawPlayerAccuracyChart(id, data) {
     var ctx = document.getElementById(id).getContext('2d');
 
-    window.myHorizontalBar = new Chart(ctx, {
+    window.playerAccuracyChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: data.game_ids,
@@ -200,7 +200,7 @@ function drawPlayerAccuracyChart(id, data) {
 function drawPlayerDamageChart(id, data) {
     var ctx = document.getElementById(id).getContext('2d');
 
-    window.myHorizontalBar = new Chart(ctx, {
+    window.playerDamageChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.game_ids,
