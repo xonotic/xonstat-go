@@ -183,13 +183,21 @@ func assembleAccuracy(weaponsUsed []string, gameIDs []int, rawAccuracy map[strin
 func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*player.DamageBase) ([]*PlayerDamageDataset, []int) {
 	// Map of weapon codes to datasets
 	datasets := make(map[string]*PlayerDamageDataset)
+
+	// We need the total damage by weapon to determine placement of the bar segments in the chart. 
+	// The weapons with the most total damage would form the "base" of the bars. Since we'd like
+	// to control the ordering of the datasets based on this order, we keep track of those in a 
+	// map as well.
 	totalDamageByWeapon := make(map[string]int)
 	for _, weaponCd := range weaponsUsed {
 		datasets[weaponCd] = NewPlayerDamageDataset(weaponCd)
 		totalDamageByWeapon[weaponCd] = 0
 	}
 
+	// We need the total damage dealt per game to show the contribution any given weapon
+	// had towards it as a percentage (e.g. your damage in game 123 was 45% from vortex).
 	totalDamagePerGame := make([]int, 0, len(gameIDs))
+
 	for _, gameID := range gameIDs {
 		totalDamage := 0
 		for _, weaponCd := range weaponsUsed {
@@ -206,8 +214,10 @@ func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*p
 		totalDamagePerGame = append(totalDamagePerGame, totalDamage)
 	}
 
+	// Here is where we add the datasets in a particular order so they are shown properly.
+	weaponOrder := sortDescByIntValue(totalDamageByWeapon)
 	datasetList := make([]*PlayerDamageDataset, 0, len(datasets))
-	for _, weaponCd := range weaponsUsed {
+	for _, weaponCd := range weaponOrder {
 		datasetList = append(datasetList, datasets[weaponCd])
 	}
 
