@@ -21,21 +21,25 @@ type AppEnv struct {
 }
 
 func loadTemplates(templateDir string) map[string]*template.Template {
+	// The core data structure is a map of filename -> template. We only
+	// compile templates for pages which are named with the "page.html" suffix.
 	templates := make(map[string]*template.Template)
 
-	baseTemplate := template.New("base")
-	baseTemplate.Funcs(template.FuncMap{
+	// These functions will be available to all templates.
+	funcMap := template.FuncMap{
 		"urlFor": reverse.Rev,
 		"inc":    func(i int) int { return i + 1 },
 		"intToString":    func(i int) string { return fmt.Sprintf("%d", i) },
-	})
+	}
 
-	// Separate pages from partials and layouts
+	// First, grab the filenames of all of the templates in the directory.
 	allFiles, err := filepath.Glob(filepath.Join(templateDir, "*html"))
 	if err != nil {
 		log.Print(err)
 	}
 
+	// Then we separate out the pages from the rest to avoid re-defining blocks multiple times
+	// which leads to unexpected renders. 
 	var baseFilenames, pageFilenames []string
 	for _, t := range allFiles {
 		if strings.Contains(t, "page") {
@@ -45,18 +49,22 @@ func loadTemplates(templateDir string) map[string]*template.Template {
 		}
 	}
 
+	// Build the map such that templates[page filename] yields the compiled template.
 	for _, pageFilename := range pageFilenames {
 		basePageFilename := filepath.Base(pageFilename)
 		filenames := append([]string{pageFilename}, baseFilenames...)
 
-		// If we don't clone the base template, the calls to ParseFiles are accumulated and will
-		// result in template compilation errors (e.g. leaderboard has a non-blank hero_unit that
-		// isn't present in other pages)
-		t, _ := baseTemplate.Clone()
-		templates[basePageFilename], err = t.ParseFiles(filenames...)
+		// This is needed as a preprocessing step, else we get template compilation errors
+		// for functions that are used by not defined yet (like urlFor).
+		sharedTemplate := template.New(basePageFilename)
+		sharedTemplate.Funcs(funcMap)
+
+		t, err := sharedTemplate.ParseFiles(filenames...)
 		if err != nil {
 			log.Println(err)
 		}
+
+		templates[basePageFilename] = t
 	}
 
 	return templates
