@@ -183,8 +183,10 @@ func assembleAccuracy(weaponsUsed []string, gameIDs []int, rawAccuracy map[strin
 func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*player.DamageBase) ([]*PlayerDamageDataset, []int) {
 	// Map of weapon codes to datasets
 	datasets := make(map[string]*PlayerDamageDataset)
+	totalDamageByWeapon := make(map[string]int)
 	for _, weaponCd := range weaponsUsed {
 		datasets[weaponCd] = NewPlayerDamageDataset(weaponCd)
+		totalDamageByWeapon[weaponCd] = 0
 	}
 
 	totalDamagePerGame := make([]int, 0, len(gameIDs))
@@ -198,6 +200,7 @@ func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*p
 			} else {
 				datasets[weaponCd].Data = append(datasets[weaponCd].Data, base.Actual)
 				totalDamage += base.Actual
+				totalDamageByWeapon[weaponCd] += base.Actual
 			}
 		}
 		totalDamagePerGame = append(totalDamagePerGame, totalDamage)

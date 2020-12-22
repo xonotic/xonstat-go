@@ -3,7 +3,7 @@ function drawDamageChart(id, data) {
 
     // The aspect ratio really depends on how many players are present. This formula 
     // is based on playing around with values and settling on a comfortable maximum.
-    var aspectRatio = Math.min(1200/(data.distinct_players.length * 30), 7);
+    var aspectRatio = Math.min(1200 / (data.distinct_players.length * 30), 7);
 
     window.myHorizontalBar = new Chart(ctx, {
         type: 'horizontalBar',
@@ -67,7 +67,7 @@ function drawAccuracyChart(id, data) {
 
     // The aspect ratio really depends on how many players are present. This formula 
     // is based on playing around with values and settling on a comfortable maximum.
-    var aspectRatio = Math.min(1200/(data.distinct_players.length * 40), 10);
+    var aspectRatio = Math.min(1200 / (data.distinct_players.length * 40), 10);
 
     window.myHorizontalBar = new Chart(ctx, {
         type: 'horizontalBar',
@@ -94,7 +94,7 @@ function drawAccuracyChart(id, data) {
                         fontColor: '#ccc',
                         suggestedMin: 0,
                         suggestedMax: 100,
-                        callback: function(value, index, values) {
+                        callback: function (value, index, values) {
                             return value + "%";
                         }
                     }
@@ -146,7 +146,7 @@ function drawPlayerAccuracyChart(id, data) {
             aspectRatio: 3,
             spanGaps: true,
             responsive: true,
-			scales: {
+            scales: {
                 xAxes: [{
                     display: true,
                     scaleLabel: {
@@ -238,6 +238,16 @@ function drawPlayerDamageChart(id, data) {
                 titleFontColor: '#000',
                 bodyFontColor: '#000',
                 mode: "point",
+                callbacks: {
+                    label: function (tooltipItem, d) {
+                        var label = d.datasets[tooltipItem.datasetIndex].label;
+                        var totalDamage = data.total_damage_per_game[tooltipItem.index];
+                        var weaponDamage = d.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                        var pctOfTotal = Math.round(weaponDamage/totalDamage*100);
+
+                        return `${label}: ${weaponDamage} (${pctOfTotal}% of total)`;
+                    }
+                }
             }
         }
     });
