@@ -21,7 +21,6 @@ import (
 type PlayerInfoResponse struct {
 	Player            *player.InfoBase
 	GameTypeSummaries []*player.GameTypeSummaryBase
-	RecentGames       []game.RecentGameBase
 }
 
 // PlayerInfoHandler is the web handler for retrieving player information
@@ -44,14 +43,9 @@ func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	summaries, _ := player.GameTypeSummaryData(ae.db, playerID)
 
-	recentGamesCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
-	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, game.EmptyMapID, playerID,
-		game.EmptyGameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20)
-
 	response := &PlayerInfoResponse{
 		Player:            info,
 		GameTypeSummaries: summaries,
-		RecentGames:       recentGames,
 	}
 
 	if acceptHeader == "application/json" {

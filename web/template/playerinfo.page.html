@@ -72,12 +72,8 @@
 </div>
 
 <div class="cell small-12 large-12">
-  {{if gt (len .RecentGames) 0}}
   <h5>Recent Games <a href="{{urlFor " games"}}"><i class="fa fa-plus-circle"></i></a></h5>
-  {{template "recentgames_noserver.partial.html" .RecentGames}}
-  {{else}}
-  <h5>No Recent Games!</h5>
-  {{end}}
+  <div id="recent-games"></div>
 </div>
 
 {{end}}
