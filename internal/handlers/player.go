@@ -184,9 +184,9 @@ func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*p
 	// Map of weapon codes to datasets
 	datasets := make(map[string]*PlayerDamageDataset)
 
-	// We need the total damage by weapon to determine placement of the bar segments in the chart. 
+	// We need the total damage by weapon to determine placement of the bar segments in the chart.
 	// The weapons with the most total damage would form the "base" of the bars. Since we'd like
-	// to control the ordering of the datasets based on this order, we keep track of those in a 
+	// to control the ordering of the datasets based on this order, we keep track of those in a
 	// map as well.
 	totalDamageByWeapon := make(map[string]int)
 	for _, weaponCd := range weaponsUsed {
@@ -267,4 +267,28 @@ func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(bytes)
+}
+
+// PlayerRecentGamesFragmentHandler retrieves just the recent games table.
+func (ae *AppEnv) PlayerRecentGamesFragmentHandler(w http.ResponseWriter, r *http.Request) {
+	playerID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		log.Printf("invalid or missing player ID value: %s", err)
+		ae.NotFoundHandler(w, r)
+		return
+	}
+
+	params := r.URL.Query()
+	gameTypeCd := params.Get("game_type_cd")
+
+	recentGamesCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
+	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, game.EmptyMapID, playerID,
+		gameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20)
+
+	err = ae.templates["recentgames.fragment.page.html"].Execute(w, recentGames)
+	if err != nil {
+		log.Printf("Error: %s", err)
+		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		return
+	}
 }
