@@ -91,12 +91,17 @@
     drawPlayerDamageChart("playerDamageChart", data);
   });
 
+  jQuery.get("/player/{{.Player.PlayerID}}/recentGamesFragment", function(html){
+    $("#recent-games").replaceWith(html);
+  });
+
   // Find all attributes that have a "game-type-cd" data attribute, then register click events
   $('[data-game-type-cd]').each(function (i, e) {
     e.addEventListener("click", function () {
-      var url = `/player/${e.dataset.playerId}/weapons?game_type_cd=${e.dataset.gameTypeCd}`;
+      // Update the data in the weapon charts.
+      var weaponURL = `/player/${e.dataset.playerId}/weapons?game_type_cd=${e.dataset.gameTypeCd}`;
 
-      jQuery.getJSON(url, function (data) {
+      jQuery.getJSON(weaponURL, function (data) {
         window.playerAccuracyChart.data.labels = data.game_ids;
         window.playerAccuracyChart.data.datasets = data.accuracy;
         window.playerAccuracyChart.update();
@@ -105,6 +110,14 @@
         window.playerDamageChart.data.datasets = data.damage;
         window.playerDamageChart.update();
       });
+
+      // Update the data in the recent games table.
+      var recentGamesURL = `/player/${e.dataset.playerId}/recentGamesFragment?game_type_cd=${e.dataset.gameTypeCd}`;
+
+      jQuery.get(recentGamesURL, function(html){
+        $("#recent-games").replaceWith(html);
+      });
+
     });
   });
 
