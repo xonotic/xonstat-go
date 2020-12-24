@@ -326,10 +326,23 @@ type WeaponInfo struct {
 	CreateDt           time.Time
 }
 
-// PlayerGameTypeSummary holds the number of games for a player for a given game type, 
+// PlayerGameTypeSummary holds the number of games for a player for a given game type,
 // with wins, losses, and a win percentage thereof.
 type PlayerGameTypeSummary struct {
 	GameTypeCd string
 	Wins       int
 	Losses     int
+}
+
+// PlayerOverallStats holds aggregate stats about a player.
+type PlayerOverallStats struct {
+	GameTypeCd    string
+	GameTypeDescr string
+	Kills         int
+	Deaths        int
+	Pickups       int
+	Captures      int
+	CarrierFrags  int
+	LastPlayed    time.Time
+	TimePlayed    time.Duration
 }
