@@ -338,11 +338,11 @@ type PlayerGameTypeSummary struct {
 type PlayerOverallStats struct {
 	GameTypeCd    string
 	GameTypeDescr string
-	Kills         int
-	Deaths        int
-	Pickups       int
-	Captures      int
-	CarrierFrags  int
-	LastPlayed    time.Time
+	Kills         sql.NullInt32
+	Deaths        sql.NullInt32
+	Pickups       sql.NullInt32
+	Captures      sql.NullInt32
+	CarrierFrags  sql.NullInt32
+	LastPlayed    sql.NullTime
 	TimePlayed    time.Duration
 }

@@ -92,7 +92,7 @@ func OverallStatsData(db models.Datastore, playerID int) ([]*OverallStatsBase, e
 
 	overallStats := make([]*OverallStatsBase, 0, len(rawOverallStats))
 	for _, elem := range rawOverallStats {
-		lastPlayed, err := models.NewMultiDt(elem.LastPlayed)
+		lastPlayed, err := models.NewMultiDt(elem.LastPlayed.Time)
 		if err != nil {
 			return nil, err
 		}
@@ -102,13 +102,13 @@ func OverallStatsData(db models.Datastore, playerID int) ([]*OverallStatsBase, e
 		stat := OverallStatsBase{
 			GameTypeCd:    elem.GameTypeCd,
 			GameTypeDescr: elem.GameTypeDescr,
-			Kills:         elem.Kills,
-			Deaths:        elem.Deaths,
-			KDRatio:       util.Percentage(elem.Kills, elem.Deaths),
-			Captures:      elem.Captures,
-			Pickups:       elem.Pickups,
-			CapRatio:      util.Percentage(elem.Captures, elem.Pickups),
-			CarrierFrags:  elem.CarrierFrags,
+			Kills:         int(elem.Kills.Int32),
+			Deaths:        int(elem.Deaths.Int32),
+			KDRatio:       util.Percentage(int(elem.Kills.Int32), int(elem.Deaths.Int32)),
+			Captures:      int(elem.Captures.Int32),
+			Pickups:       int(elem.Pickups.Int32),
+			CapRatio:      util.Percentage(int(elem.Captures.Int32), int(elem.Pickups.Int32)),
+			CarrierFrags:  int(elem.CarrierFrags.Int32),
 			LastPlayed:    *lastPlayed,
 			TimePlayed:    *timePlayed,
 		}

@@ -20,6 +20,7 @@ import (
 // PlayerInfoResponse is the view-specific information about a map related information.
 type PlayerInfoResponse struct {
 	Player            *player.InfoBase
+	OverallStats      map[string]*player.OverallStatsBase
 	GameTypeSummaries []*player.GameTypeSummaryBase
 }
 
@@ -41,11 +42,29 @@ func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	summaries, _ := player.GameTypeSummaryData(ae.db, playerID)
+	summaries, err := player.GameTypeSummaryData(ae.db, playerID)
+	if err != nil {
+		log.Printf("Error: %s", err)
+		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		return
+	}
+
+	rawOverallStats, err := player.OverallStatsData(ae.db, playerID)
+	if err != nil {
+		log.Printf("Error: %s", err)
+		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		return
+	}
+
+	overallStats := make(map[string]*player.OverallStatsBase, len(rawOverallStats))
+	for _, e := range rawOverallStats {
+		overallStats[e.GameTypeCd] = e
+	}
 
 	response := &PlayerInfoResponse{
 		Player:            info,
 		GameTypeSummaries: summaries,
+		OverallStats:      overallStats,
 	}
 
 	if acceptHeader == "application/json" {

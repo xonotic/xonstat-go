@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -21,8 +22,8 @@ func (ds *PGDatastore) RPlayerOverallStats(playerID int) ([]*PlayerOverallStats,
 		  player_game_stats pgs 
 	WHERE g.game_id = pgs.game_id 
 	AND   g.game_type_cd = gt.game_type_cd 
-	AND   g.players @> ARRAY[$1] 
-	AND   pgs.player_id = $2 
+	AND   g.players @> ARRAY[%d]  
+	AND   pgs.player_id = $1
 	GROUP BY g.game_type_cd, game_type_descr 
 	UNION 
 	SELECT 'overall'              game_type_cd, 
@@ -35,9 +36,12 @@ func (ds *PGDatastore) RPlayerOverallStats(playerID int) ([]*PlayerOverallStats,
 		   Sum(pgs.captures)      total_captures, 
 		   Sum(pgs.carrier_frags) total_carrier_frags 
 	FROM   player_game_stats pgs 
-	WHERE  pgs.player_id = $3 `
+	WHERE  pgs.player_id = $1 `
 
-	rows, err := ds.db.Query(sql, playerID, playerID, playerID)
+	// No idea why we have to fmt.Sprintf() the playerID for the ARRAY inlist with this query when
+	// the same exact clause works fine for RGameTypeSummariesByID(). Bug? Error encountered if we use
+	// a regular bind param: "pq: operator does not exist: integer[] @> text[]"
+	rows, err := ds.db.Query(fmt.Sprintf(sql, playerID), playerID)
 	if err != nil {
 		return nil, err
 	}
