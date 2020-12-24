@@ -2,6 +2,7 @@ package player
 
 import (
 	"sort"
+
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/util"
 )
@@ -20,7 +21,7 @@ type ByGames []*GameTypeSummaryBase
 
 func (a ByGames) Len() int           { return len(a) }
 func (a ByGames) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByGames) Less(i, j int) bool { return a[i].Games > a[j].Games }  // descending order
+func (a ByGames) Less(i, j int) bool { return a[i].Games > a[j].Games } // descending order
 
 // GameTypeSummaryData retrieves the summary data for a player by ID.
 // Among the list of returned summaries is also an "overall" entry that is the sum value for all types.
@@ -37,16 +38,16 @@ func GameTypeSummaryData(db models.Datastore, playerID int) ([]*GameTypeSummaryB
 	for _, rs := range rawSummaries {
 		s := GameTypeSummaryBase{
 			GameTypeCd: rs.GameTypeCd,
-			Games:  rs.Wins + rs.Losses,
-			Wins:   rs.Wins,
-			Losses: rs.Losses,
+			Games:      rs.Wins + rs.Losses,
+			Wins:       rs.Wins,
+			Losses:     rs.Losses,
 		}
 
 		switch rs.GameTypeCd {
 		case "dm", "cts", "ka", "keepaway":
 			s.WinRatio = 0.0
 		default:
-			s.WinRatio = util.Percentage(rs.Wins, rs.Wins + rs.Losses)
+			s.WinRatio = util.Percentage(rs.Wins, rs.Wins+rs.Losses)
 		}
 
 		// A running tally of the counts we've seen so far
@@ -57,7 +58,7 @@ func GameTypeSummaryData(db models.Datastore, playerID int) ([]*GameTypeSummaryB
 		summaries = append(summaries, &s)
 	}
 
-	overall.WinRatio = util.Percentage(overall.Wins, overall.Wins + overall.Losses)
+	overall.WinRatio = util.Percentage(overall.Wins, overall.Wins+overall.Losses)
 
 	// Put the "overall" entry first in the list so it sorts in a stable fashion.
 	summaries = append([]*GameTypeSummaryBase{&overall}, summaries...)
@@ -65,6 +66,57 @@ func GameTypeSummaryData(db models.Datastore, playerID int) ([]*GameTypeSummaryB
 	sort.Sort(ByGames(summaries))
 
 	return summaries, nil
+}
+
+// OverallStatsBase is for aggregate stats (kills, deaths, etc)
+type OverallStatsBase struct {
+	GameTypeCd    string
+	GameTypeDescr string
+	Kills         int
+	Deaths        int
+	KDRatio       float32
+	Captures      int
+	Pickups       int
+	CapRatio      float32
+	CarrierFrags  int
+	LastPlayed    models.MultiDt
+	TimePlayed    models.MultiDuration
+}
+
+// OverallStatsData retrieves aggregate stats and converts them to a view-agnostic form.
+func OverallStatsData(db models.Datastore, playerID int) ([]*OverallStatsBase, error) {
+	rawOverallStats, err := db.RPlayerOverallStats(playerID)
+	if err != nil {
+		return nil, err
+	}
+
+	overallStats := make([]*OverallStatsBase, 0, len(rawOverallStats))
+	for _, elem := range rawOverallStats {
+		lastPlayed, err := models.NewMultiDt(elem.LastPlayed)
+		if err != nil {
+			return nil, err
+		}
+
+		timePlayed := models.NewMultiDuration(elem.TimePlayed)
+
+		stat := OverallStatsBase{
+			GameTypeCd:    elem.GameTypeCd,
+			GameTypeDescr: elem.GameTypeDescr,
+			Kills:         elem.Kills,
+			Deaths:        elem.Deaths,
+			KDRatio:       util.Percentage(elem.Kills, elem.Deaths),
+			Captures:      elem.Captures,
+			Pickups:       elem.Pickups,
+			CapRatio:      util.Percentage(elem.Captures, elem.Pickups),
+			CarrierFrags:  elem.CarrierFrags,
+			LastPlayed:    *lastPlayed,
+			TimePlayed:    *timePlayed,
+		}
+
+		overallStats = append(overallStats, &stat)
+	}
+
+	return overallStats, nil
 }
 
 // InfoBase is the view-agnostic representation of player information.
