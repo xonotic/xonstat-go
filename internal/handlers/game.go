@@ -21,6 +21,21 @@ func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
 
 	params := r.URL.Query()
 
+	serverID, err := strconv.Atoi(params.Get("server_id"))
+	if err != nil {
+		serverID = game.EmptyServerID
+	}
+
+	mapID, err := strconv.Atoi(params.Get("map_id"))
+	if err != nil {
+		mapID = game.EmptyMapID
+	}
+
+	playerID, err := strconv.Atoi(params.Get("player_id"))
+	if err != nil {
+		playerID = game.EmptyPlayerID
+	}
+
 	gameTypeCd := params.Get("game_type_cd")
 	if !submission.IsSupportedGameType(gameTypeCd) {
 		// It is not a supported game type. Use the default for the DB query and don't include it
@@ -32,12 +47,18 @@ func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
 	startGameID, err := strconv.Atoi(params.Get("start_game_id"))
 	params.Del("start_game_id")
 	if err != nil {
-		startGameID = -1
+		startGameID = game.EmptyStartGameID
+	}
+
+	endGameID, err := strconv.Atoi(params.Get("end_game_id"))
+	params.Del("end_game_id")
+	if err != nil {
+		endGameID = game.EmptyEndGameID
 	}
 
 	if acceptHeader == "application/json" {
 		// JSON response
-		recentGames, err := game.RecentGamesJSON(ae.db, -1, -1, -1, gameTypeCd, nil, startGameID, -1, 20)
+		recentGames, err := game.RecentGamesJSON(ae.db, serverID, mapID, playerID, gameTypeCd, nil, startGameID, endGameID, 20)
 		if err != nil {
 			log.Printf("Error: %s", err)
 			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
@@ -51,7 +72,7 @@ func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
 		// HTML response
 		gameTypeCds := []string{"overall", "duel", "ctf", "dm", "tdm", "ca", "kh", "ft", "as", "dom", "nb", "cts"}
 
-		recentGames, err := game.RecentGamesData(ae.db, -1, -1, -1, gameTypeCd, nil, startGameID, -1, 20)
+		recentGames, err := game.RecentGamesData(ae.db, serverID, mapID, playerID, gameTypeCd, nil, startGameID, endGameID, 20)
 		if err != nil {
 			log.Printf("Error: %s", err)
 			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
