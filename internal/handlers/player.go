@@ -294,6 +294,11 @@ func (ae *AppEnv) PlayerRecentGamesFragmentHandler(w http.ResponseWriter, r *htt
 	params := r.URL.Query()
 	gameTypeCd := params.Get("game_type_cd")
 
+	// The "overall" game type means no filter.
+	if gameTypeCd == "overall" {
+		gameTypeCd = ""
+	}
+
 	recentGamesCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
 	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, game.EmptyMapID, playerID,
 		gameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20)
