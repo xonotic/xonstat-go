@@ -63,6 +63,7 @@ func (ds *PGDatastore) RMapActivePlayerScores(mapID int, cutoff *time.Time, limi
 	AND games.map_id = $1
 	AND players.player_id > 2 
 	AND player_game_stats.create_dt > $2
+	AND games.create_dt > $2
 	GROUP BY players.nick, players.player_id 
 	ORDER BY sum(player_game_stats.score) DESC
 	LIMIT $3`
