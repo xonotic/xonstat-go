@@ -315,7 +315,8 @@ func (ae *AppEnv) PlayerRecentGamesFragmentHandler(w http.ResponseWriter, r *htt
 
 // PlayerEloInfoHandler is the web handler for retrieving player Elo information
 func (ae *AppEnv) PlayerEloInfoHandler(w http.ResponseWriter, r *http.Request) {
-	hashkey := chi.URLParam(r, "hashkey")
+	params := r.URL.Query()
+	hashkey := params.Get("hashkey")
 
 	eloInfo, err := player.EloInfoData(ae.db, hashkey)
 	if err != nil {
