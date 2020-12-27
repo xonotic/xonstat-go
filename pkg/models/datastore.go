@@ -85,4 +85,7 @@ type Datastore interface {
 	// PlayerGameNonParticipant-oriented methods
 	CPlayerGameNonParticipant(tx *sql.Tx, pgnp PlayerGameNonParticipant) (int64, error)
 	RPlayerGameNonParticipantsByGameID(gameID int) ([]*PlayerGameNonParticipant, error)
+
+	// PlayerElo-oriented methods
+	RPlayerElosByHashkey(hashkey string) ([]*PlayerElo, error)
 }

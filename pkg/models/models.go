@@ -346,3 +346,14 @@ type PlayerOverallStats struct {
 	LastPlayed    sql.NullTime
 	TimePlayed    time.Duration
 }
+
+// PlayerElo is a single Elo record for a player
+type PlayerElo struct {
+	PlayerID int
+	GameTypeCd string
+	Games int
+	Elo float32
+	ActiveInd bool
+	CreateDt time.Time
+	UpdateDt time.Time
+}
