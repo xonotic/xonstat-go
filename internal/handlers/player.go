@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,6 +14,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/game"
+	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/player"
 	"gitlab.com/xonotic/xonstat/pkg/util"
 )
@@ -309,4 +311,59 @@ func (ae *AppEnv) PlayerRecentGamesFragmentHandler(w http.ResponseWriter, r *htt
 		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
 		return
 	}
+}
+
+// PlayerEloInfoHandler is the web handler for retrieving player Elo information
+func (ae *AppEnv) PlayerEloInfoHandler(w http.ResponseWriter, r *http.Request) {
+	hashkey := chi.URLParam(r, "hashkey")
+
+	eloInfo, err := player.EloInfoData(ae.db, hashkey)
+	if err != nil {
+		log.Printf("Error retrieving Elo information for hashkey %s: %s", hashkey, err)
+		ae.NotFoundHandler(w, r)
+		return
+	}
+
+	if len(eloInfo) == 0 {
+		log.Printf("No Elos found for hashkey %s", hashkey)
+		ae.NotFoundHandler(w, r)
+		return
+	}
+
+	playerID := eloInfo[0].PlayerID
+
+	t, _ := models.NewMultiDt(time.Now().UTC())
+	player, err := player.InfoData(ae.db, playerID)
+	if err != nil {
+		log.Printf("No player with ID %d found", playerID)
+		ae.NotFoundHandler(w, r)
+		return
+	}
+
+	// The Elo info response type is a flat textual response. Rather than putting this in a template
+	// and worrying about collapsing whitespace with the logic involved, we'll build it up in a buffer
+	// directly.
+	var buf bytes.Buffer
+	buf.WriteString("V 1\n")
+	buf.WriteString("R XonStat/1.0\n")
+	buf.WriteString(fmt.Sprintf("T %d\n", t.Epoch))
+	buf.WriteString(fmt.Sprintf("S /player/%d\n", eloInfo[0].PlayerID))
+	buf.WriteString(fmt.Sprintf("P %s\n", hashkey))
+	buf.WriteString(fmt.Sprintf("n %s\n", player.Nick.Nick))
+	buf.WriteString(fmt.Sprintf("i %d\n", player.PlayerID))
+
+	if player.ActiveInd {
+		buf.WriteString(fmt.Sprintf("e active-ind 1\n"))
+	} else {
+		buf.WriteString(fmt.Sprintf("e active-ind 0\n"))
+	}
+
+	buf.WriteString("e location")
+
+	for _, elo := range eloInfo {
+		buf.WriteString(fmt.Sprintf("G %s\n", elo.GameTypeCd))
+		buf.WriteString(fmt.Sprintf("e %.2f\n", elo.Elo))
+	}
+
+	w.Write(buf.Bytes())
 }
