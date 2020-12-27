@@ -92,7 +92,7 @@
 </div>
 
 <div class="cell small-12 large-12">
-  <h5>Recent Games <a href="{{urlFor " games"}}"><i class="fa fa-plus-circle"></i></a></h5>
+  <h5>Recent Games <a id="more-recent-games" href="{{urlFor "games"}}?player_id={{.Player.PlayerID}}"><i class="fa fa-plus-circle"></i></a></h5>
   <div id="recent-games"></div>
 </div>
 
@@ -114,6 +114,10 @@
   // Find all attributes that have a "game-type-cd" data attribute, then register click events
   $('[data-game-type-cd]').each(function (i, e) {
     e.addEventListener("click", function () {
+      // Update the "more" recent games link (plus sign)
+      var moreRecentGamesURL = `/games?player_id=${e.dataset.playerId}&game_type_cd=${e.dataset.gameTypeCd}`;
+      document.getElementById("more-recent-games").href = moreRecentGamesURL;
+
       // Update the data in the weapon charts.
       var weaponURL = `/player/${e.dataset.playerId}/weapons?game_type_cd=${e.dataset.gameTypeCd}`;
 
