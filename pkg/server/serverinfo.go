@@ -39,6 +39,7 @@ func TopScorerData(db models.Datastore, serverID int) ([]*TopScorerBase, error) 
 			Nick:         v.Nick,
 			NickStripped: nick.Stripped(),
 			NickHTML:     nick.HTML(),
+			Score:        v.Score,
 		}
 
 		topScorers = append(topScorers, &ts)
