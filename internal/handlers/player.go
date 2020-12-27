@@ -358,7 +358,7 @@ func (ae *AppEnv) PlayerEloInfoHandler(w http.ResponseWriter, r *http.Request) {
 		buf.WriteString(fmt.Sprintf("e active-ind 0\n"))
 	}
 
-	buf.WriteString("e location")
+	buf.WriteString("e location\n")
 
 	for _, elo := range eloInfo {
 		buf.WriteString(fmt.Sprintf("G %s\n", elo.GameTypeCd))
