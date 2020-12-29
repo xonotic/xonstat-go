@@ -104,6 +104,7 @@ func web(port string, printRoutes bool) {
 		}
 
 		r.Post("/stats/submit", env.SubmissionHandler)
+		r.Post("/player/me", env.PlayerHashkeyInfoHandler)
 		r.Get("/elo", env.PlayerEloInfoHandler)
 	})
 

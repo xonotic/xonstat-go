@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -50,6 +51,10 @@ func D0Verify(next http.Handler) http.Handler {
 
 		// Add the result to the context of the request so it can be used later.
 		ctx := context.WithValue(r.Context(), D0VerifyResultKey, result)
+
+		// Also set headers for fetching via that method too.
+		r.Header.Set("X-D0-Blind-Id-CAStatus", fmt.Sprintf("%v", result.CAStatus))
+		r.Header.Set("X-D0-Blind-Id-IDFP", result.IDFP)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
