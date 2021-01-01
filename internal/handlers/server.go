@@ -108,6 +108,15 @@ type ServerTopScorersResponse struct {
 
 // ServerTopScorersHandler retrieves information about the top scoring players on a given server.
 func (ae *AppEnv) ServerTopScorersHandler(w http.ResponseWriter, r *http.Request) {
+	acceptHeader := r.Header.Get("Accept")
+
+	// This handler only accepts JSON.
+	if acceptHeader != "application/json" {
+		log.Printf("Invalid or missing Accept header: %s", acceptHeader)
+		ae.NotFoundHandler(w, r)
+		return
+	}
+
 	serverID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		log.Printf("Invalid or missing server ID value: %s", err)
