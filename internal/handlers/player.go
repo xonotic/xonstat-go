@@ -26,6 +26,95 @@ type PlayerInfoResponse struct {
 	GameTypeSummaries []*player.GameTypeSummaryBase
 }
 
+// PlayerJSON is the JSON-specific representation of a player.
+type PlayerJSON struct {
+	PlayerID     int    `json:"player_id"`
+	Nick         string `json:"nick"`
+	StrippedNick string `json:"stripped_nick"`
+	ActiveInd    bool   `json:"active_ind"`
+	Joined       string `json:"joined"`
+	JoinedEpoch  int    `json:"joined_epoch"`
+	JoinedFuzzy  string `json:"joined_fuzzy"`
+}
+
+// GamesPlayedJSON is the JSON-specific representation of the games played by a player.
+type GamesPlayedJSON struct {
+	GameTypeCd string  `json:"game_type_cd"`
+	Games      int     `json:"games"`
+	Wins       int     `json:"wins"`
+	Losses     int     `json:"losses"`
+	WinPct     float32 `json:"win_pct"`
+}
+
+// OverallStatsJSON is the JSON-specific representation of the overall stats of a player.
+type OverallStatsJSON struct {
+	GameTypeCd       string  `json:"game_type_cd"`
+	Kills            int     `json:"total_kills"`
+	Deaths           int     `json:"total_deaths"`
+	KDRatio          float32 `json:"k_d_ratio"`
+	Captures         int     `json:"total_captures"`
+	Pickups          int     `json:"total_pickups"`
+	CapRatio         float32 `json:"cap_ratio"`
+	CarrierFrags     int     `json:"total_carrier_frags"`
+	LastPlayed       string  `json:"last_played"`
+	LastPlayedEpoch  int     `json:"last_played_epoch"`
+	LastPlayedFuzzy  string  `json:"last_played_fuzzy"`
+	TotalPlayingTime int     `json:"total_playing_time"`
+}
+
+// PlayerInfoJSONResponse is the JSON-specific response type
+type PlayerInfoJSONResponse struct {
+	Player       PlayerJSON                  `json:"player"`
+	GamesPlayed  map[string]GamesPlayedJSON  `json:"games_played"`
+	OverallStats map[string]OverallStatsJSON `json:"overall_stats"`
+}
+
+// NewPlayerInfoJSONResponse converts a regular response into a JSON-specific one
+func NewPlayerInfoJSONResponse(response *PlayerInfoResponse) PlayerInfoJSONResponse {
+	var jsonResponse PlayerInfoJSONResponse
+
+	jsonResponse.Player = PlayerJSON{
+		PlayerID:     response.Player.PlayerID,
+		Nick:         response.Player.Nick.Nick,
+		StrippedNick: response.Player.Nick.NickStripped,
+		ActiveInd:    response.Player.ActiveInd,
+		Joined:       response.Player.CreateDt.Dt.String(),
+		JoinedEpoch:  int(response.Player.CreateDt.Epoch),
+		JoinedFuzzy:  response.Player.CreateDt.Fuzzy,
+	}
+
+	jsonResponse.GamesPlayed = make(map[string]GamesPlayedJSON, len(response.GameTypeSummaries))
+	for _, summary := range response.GameTypeSummaries {
+		jsonResponse.GamesPlayed[summary.GameTypeCd] = GamesPlayedJSON{
+			GameTypeCd: summary.GameTypeCd,
+			Games:      summary.Games,
+			Wins:       summary.Wins,
+			Losses:     summary.Losses,
+			WinPct:     summary.WinRatio,
+		}
+	}
+
+	jsonResponse.OverallStats = make(map[string]OverallStatsJSON, len(response.OverallStats))
+	for _, overall := range response.OverallStats {
+		jsonResponse.OverallStats[overall.GameTypeCd] = OverallStatsJSON{
+			GameTypeCd:       overall.GameTypeCd,
+			Kills:            overall.Kills,
+			Deaths:           overall.Deaths,
+			KDRatio:          overall.KDRatio,
+			Captures:         overall.Captures,
+			Pickups:          overall.Pickups,
+			CapRatio:         overall.CapRatio,
+			CarrierFrags:     overall.CarrierFrags,
+			LastPlayed:       overall.LastPlayed.Dt.String(),
+			LastPlayedEpoch:  int(overall.LastPlayed.Epoch),
+			LastPlayedFuzzy:  overall.LastPlayed.Fuzzy,
+			TotalPlayingTime: int(overall.TimePlayed.Duration.Seconds()),
+		}
+	}
+
+	return jsonResponse
+}
+
 // PlayerInfoHandler is the web handler for retrieving player information
 func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
@@ -70,7 +159,8 @@ func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if acceptHeader == "application/json" {
-		bytes, _ := json.Marshal(response)
+		jsonResponse := NewPlayerInfoJSONResponse(response)
+		bytes, _ := json.Marshal(jsonResponse)
 
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -491,6 +581,6 @@ func (ae *AppEnv) PlayerHashkeyInfoHandler(w http.ResponseWriter, r *http.Reques
 
 		// Omitting the "e favorite-map" for the game type here.
 	}
-	
+
 	w.Write(buf.Bytes())
 }
