@@ -78,7 +78,7 @@ func NewPlayerInfoJSONResponse(response *PlayerInfoResponse) PlayerInfoJSONRespo
 		Nick:         response.Player.Nick.Nick,
 		StrippedNick: response.Player.Nick.NickStripped,
 		ActiveInd:    response.Player.ActiveInd,
-		Joined:       response.Player.CreateDt.Dt.String(),
+		Joined:       response.Player.CreateDt.Dt.Format(time.RFC3339),
 		JoinedEpoch:  int(response.Player.CreateDt.Epoch),
 		JoinedFuzzy:  response.Player.CreateDt.Fuzzy,
 	}
@@ -105,7 +105,7 @@ func NewPlayerInfoJSONResponse(response *PlayerInfoResponse) PlayerInfoJSONRespo
 			Pickups:          overall.Pickups,
 			CapRatio:         overall.CapRatio,
 			CarrierFrags:     overall.CarrierFrags,
-			LastPlayed:       overall.LastPlayed.Dt.String(),
+			LastPlayed:       overall.LastPlayed.Dt.Format(time.RFC3339),
 			LastPlayedEpoch:  int(overall.LastPlayed.Epoch),
 			LastPlayedFuzzy:  overall.LastPlayed.Fuzzy,
 			TotalPlayingTime: int(overall.TimePlayed.Duration.Seconds()),
