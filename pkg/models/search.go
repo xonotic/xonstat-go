@@ -10,7 +10,7 @@ func (ds *PGDatastore) RSearchPlayer(nickFragment string) ([]*Player, error) {
 	sql := `select p.player_id, p.nick, p.stripped_nick, p.location, p.email_addr, 
 	p.active_ind, p.create_dt
 	from players p 
-	where UPPER(p.stripped_nick) like $1;`
+	where UPPER(p.stripped_nick) LIKE $1;`
 
 	fragment := fmt.Sprintf("%%s%", strings.ToUpper(nickFragment))
 
@@ -50,4 +50,21 @@ func (ds *PGDatastore) RSearchServer(nameFragment string) ([]*Server, error) {
 	defer rows.Close()
 
 	return scanServers(rows)
+}
+
+// RSearchMap performs map searches by fragments of their names
+func (ds *PGDatastore) RSearchMap(nameFragment string) ([]*Map, error) {
+	sql := `select map_id, name, version, pk3_name, curl_url, create_dt 
+	from maps
+	where UPPER(name) LIKE $1;`
+
+	fragment := fmt.Sprintf("%%s%", strings.ToUpper(nameFragment))
+
+	rows, err := ds.db.Query(sql, fragment)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanMaps(rows)
 }
