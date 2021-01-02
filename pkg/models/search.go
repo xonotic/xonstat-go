@@ -33,3 +33,21 @@ func (ds *PGDatastore) RSearchPlayer(nickFragment string) ([]*Player, error) {
 
 	return players, nil
 }
+
+// RSearchServer performs server searches by fragments of their names
+func (ds *PGDatastore) RSearchServer(nameFragment string) ([]*Server, error) {
+	sql := `select server_id, name, location, ip_addr, port, hashkey, public_key, revision, 
+	pure_ind, impure_cvars, elo_ind, active_ind, create_dt
+	from servers
+	where UPPER(name) LIKE $1;`
+
+	fragment := fmt.Sprintf("%%s%", strings.ToUpper(nameFragment))
+
+	rows, err := ds.db.Query(sql, fragment)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanServers(rows)
+}
