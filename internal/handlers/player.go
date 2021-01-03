@@ -584,3 +584,20 @@ func (ae *AppEnv) PlayerHashkeyInfoHandler(w http.ResponseWriter, r *http.Reques
 
 	w.Write(buf.Bytes())
 }
+
+// PlayerIndexHandler is the web handler for showing the player index and player search results.
+func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
+	acceptHeader := r.Header.Get("Accept")
+
+	if acceptHeader == "application/json" {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	} else {
+		err := ae.templates["playerindex.page.html"].Execute(w, nil)
+		if err != nil {
+			log.Printf("Error: %s", err)
+			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			return
+		}
+	}
+}

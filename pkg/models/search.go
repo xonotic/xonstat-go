@@ -12,7 +12,7 @@ func (ds *PGDatastore) RSearchPlayer(nickFragment string) ([]*Player, error) {
 	from players p 
 	where UPPER(p.stripped_nick) LIKE $1;`
 
-	fragment := fmt.Sprintf("%%s%", strings.ToUpper(nickFragment))
+	fragment := fmt.Sprintf("%%%s%%", strings.ToUpper(nickFragment))
 
 	rows, err := ds.db.Query(sql, fragment)
 	if err != nil {
@@ -41,7 +41,7 @@ func (ds *PGDatastore) RSearchServer(nameFragment string) ([]*Server, error) {
 	from servers
 	where UPPER(name) LIKE $1;`
 
-	fragment := fmt.Sprintf("%%s%", strings.ToUpper(nameFragment))
+	fragment := fmt.Sprintf("%%%s%%", strings.ToUpper(nameFragment))
 
 	rows, err := ds.db.Query(sql, fragment)
 	if err != nil {
@@ -58,7 +58,7 @@ func (ds *PGDatastore) RSearchMap(nameFragment string) ([]*Map, error) {
 	from maps
 	where UPPER(name) LIKE $1;`
 
-	fragment := fmt.Sprintf("%%s%", strings.ToUpper(nameFragment))
+	fragment := fmt.Sprintf("%%%s%%", strings.ToUpper(nameFragment))
 
 	rows, err := ds.db.Query(sql, fragment)
 	if err != nil {
@@ -67,4 +67,22 @@ func (ds *PGDatastore) RSearchMap(nameFragment string) ([]*Map, error) {
 	defer rows.Close()
 
 	return scanMaps(rows)
+}
+
+// RPlayerIndex performs player searches by simple pagination.
+func (ds *PGDatastore) RPlayerIndex(start, limit int) ([]*Player, error) {
+	sql := `select p.player_id, p.nick, p.stripped_nick, p.location, p.email_addr, 
+	p.active_ind, p.create_dt
+	from players p 
+	where p.player_id < $1
+	order by p.player_id desc
+	limit $2;`
+
+	rows, err := ds.db.Query(sql, start, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanPlayers(rows)
 }

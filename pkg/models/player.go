@@ -41,6 +41,21 @@ func (ds *PGDatastore) CPlayer(tx *sql.Tx, player Player) (int64, error) {
 	return pid, nil
 }
 
+func scanPlayers(rows *sql.Rows) ([]*Player, error) {
+	players := make([]*Player, 0)
+	for rows.Next() {
+		var p Player
+		err := rows.Scan(&p.PlayerID, &p.Nick, &p.StrippedNick, &p.Location, &p.EmailAddr, &p.ActiveInd, &p.CreateDt)
+		if err != nil {
+			return nil, err
+		}
+
+		players = append(players, &p)
+	}
+
+	return players, nil
+}
+
 // RPlayersByHashkeyMulti finds multiple players by their hashkeys, returning back a map
 // indexed by the hashkey with player record pointers as values.
 func (ds *PGDatastore) RPlayersByHashkeyMulti(hashkeys []string) (map[string]*Player, error) {
@@ -106,21 +121,14 @@ func (ds *PGDatastore) RPlayerByID(playerID int) (*Player, error) {
 	}
 	defer rows.Close()
 
-	var p Player
-	numRows := 0
-	for rows.Next() {
-		numRows++
-		err := rows.Scan(&p.PlayerID, &p.Nick, &p.StrippedNick, &p.Location, &p.EmailAddr,
-			&p.ActiveInd, &p.CreateDt)
-
-		if err != nil {
-			return nil, err
-		}
+	players, err := scanPlayers(rows)
+	if err != nil {
+		return nil, err
 	}
 
-	if numRows == 0 {
+	if len(players) == 0 {
 		return nil, fmt.Errorf("no player found with the ID %d", playerID)
 	}
 
-	return &p, nil
+	return players[0], nil
 }

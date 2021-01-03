@@ -90,6 +90,7 @@ type Datastore interface {
 	RPlayerElosByHashkey(hashkey string) ([]*PlayerElo, error)
 
 	// Search methods
+	RPlayerIndex(start, limit int) ([]*Player, error)
 	RSearchPlayer(nickFragment string) ([]*Player, error)
 	RSearchServer(nameFragment string) ([]*Server, error)
 	RSearchMap(nameFragment string) ([]*Map, error)
