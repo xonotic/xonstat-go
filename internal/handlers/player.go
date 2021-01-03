@@ -585,15 +585,41 @@ func (ae *AppEnv) PlayerHashkeyInfoHandler(w http.ResponseWriter, r *http.Reques
 	w.Write(buf.Bytes())
 }
 
+// PlayerIndexResponse is the response type for the player index.
+type PlayerIndexResponse struct {
+	Start int 
+	Players []*player.InfoBase
+}
+
 // PlayerIndexHandler is the web handler for showing the player index and player search results.
 func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
+
+	params := r.URL.Query()
+	var start int
+
+	start, err := strconv.Atoi(params.Get("start"))
+	if err != nil {
+		start = models.BlankStart
+	}
+
+	players, err := player.IndexData(ae.db, start, 20)
+	if err != nil {
+		log.Printf("Error: %s", err)
+		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		return
+	}
+
+	response := PlayerIndexResponse{
+		Start: start,
+		Players: players,
+	}
 
 	if acceptHeader == "application/json" {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 	} else {
-		err := ae.templates["playerindex.page.html"].Execute(w, nil)
+		err := ae.templates["playerindex.page.html"].Execute(w, response)
 		if err != nil {
 			log.Printf("Error: %s", err)
 			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)

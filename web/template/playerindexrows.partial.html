@@ -1,0 +1,8 @@
+        {{range .Players}}
+        <tr>
+            <td>{{.PlayerID}}</td>
+            <td class="no-stretch"><a href='{{urlFor "player_info" (intToString .PlayerID)}}' title="Go to the player info page for this player">{{.Nick.NickHTML}}</a></td>
+            <td><span class="abstime" data-epoch="{{.CreateDt.Epoch}}" title="{{.CreateDt.UTCStr}}">{{.CreateDt.Fuzzy}}</span></th>
+            <td class="no-stretch"><a href='{{urlFor "games"}}?player_id={{.PlayerID}}' title="See recent games for {{.Nick.NickStripped}}"><i class="fa fa-list"></i></a></td>
+        </tr>
+        {{end}}

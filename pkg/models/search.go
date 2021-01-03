@@ -1,9 +1,13 @@
 package models
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 )
+
+// BlankStart is a blank or empty starting point value.
+const BlankStart = -1
 
 // RSearchPlayer performs player searches by fragments of the nickname.
 func (ds *PGDatastore) RSearchPlayer(nickFragment string) ([]*Player, error) {
@@ -71,14 +75,27 @@ func (ds *PGDatastore) RSearchMap(nameFragment string) ([]*Map, error) {
 
 // RPlayerIndex performs player searches by simple pagination.
 func (ds *PGDatastore) RPlayerIndex(start, limit int) ([]*Player, error) {
-	sql := `select p.player_id, p.nick, p.stripped_nick, p.location, p.email_addr, 
+	var sqlBuf bytes.Buffer
+	sqlBuf.WriteString(`select p.player_id, p.nick, p.stripped_nick, p.location, p.email_addr, 
 	p.active_ind, p.create_dt
 	from players p 
-	where p.player_id < $1
-	order by p.player_id desc
-	limit $2;`
+	where p.nick not like 'Anonymous Player%'`)
 
-	rows, err := ds.db.Query(sql, start, limit)
+	// We might not have a start value, so we have to keep track of the bind params
+	// and their placeholder numbers.
+	params := make([]interface{}, 0)
+	paramIndex := 1
+	if start != BlankStart {
+		sqlBuf.WriteString(fmt.Sprintf("and player_id < $%d ", paramIndex))
+		params = append(params, start)
+		paramIndex++
+	}
+
+	sqlBuf.WriteString(fmt.Sprintf("order by p.player_id desc limit $%d;", paramIndex))
+	params = append(params, limit)
+	paramIndex++
+
+	rows, err := ds.db.Query(sqlBuf.String(), params...)
 	if err != nil {
 		return nil, err
 	}
