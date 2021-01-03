@@ -5,8 +5,8 @@ import (
 )
 
 // IndexData retrieves information about the list of players.
-func IndexData(db models.Datastore, start, limit int) ([]*InfoBase, error) {
-	rawPlayers, err := db.RPlayerIndex(start, limit)
+func IndexData(db models.Datastore, start, limit int, nickFragment string) ([]*InfoBase, error) {
+	rawPlayers, err := db.RPlayerIndex(start, limit, nickFragment)
 	if err != nil {
 		return nil, err
 	}

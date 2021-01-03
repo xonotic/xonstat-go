@@ -588,21 +588,26 @@ func (ae *AppEnv) PlayerHashkeyInfoHandler(w http.ResponseWriter, r *http.Reques
 
 // PlayerIndexJSONResponse is the response type for the player index.
 type PlayerIndexJSONResponse struct {
-	Start int           `json:"start"`
-	Next  int           `json:"next"`
-	HTML  template.HTML `json:"HTML"`
+	Start    int           `json:"start"`
+	Next     int           `json:"next"`
+	ShowMore bool          `json:"show_more"`
+	HTML     template.HTML `json:"HTML"`
 }
 
 // PlayerIndexResponse is the response type for the player index.
 type PlayerIndexResponse struct {
-	Start   int
-	Next    int
-	Players []*player.InfoBase
+	Start        int
+	Next         int
+	NickFragment string
+	ShowMore     bool
+	Players      []*player.InfoBase
 }
 
 // PlayerIndexHandler is the web handler for showing the player index and player search results.
 func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
+
+	limit := 20
 
 	params := r.URL.Query()
 	var start int
@@ -612,7 +617,9 @@ func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 		start = models.BlankStart
 	}
 
-	players, err := player.IndexData(ae.db, start, 20)
+	nickFragment := params.Get("nick")
+
+	players, err := player.IndexData(ae.db, start, limit, nickFragment)
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
@@ -626,10 +633,17 @@ func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 		next = players[len(players)-1].PlayerID
 	}
 
+	var showMore bool
+	if len(players) >= limit {
+		showMore = true
+	}
+
 	response := PlayerIndexResponse{
-		Start:   start,
-		Next:    next,
-		Players: players,
+		Start:        start,
+		Next:         next,
+		NickFragment: nickFragment,
+		ShowMore:     showMore,
+		Players:      players,
 	}
 
 	if acceptHeader == "application/json" {
@@ -645,9 +659,10 @@ func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		jsonResponse := PlayerIndexJSONResponse{
-			Start: response.Start,
-			Next:  response.Next,
-			HTML:  template.HTML(fragment.String()),
+			Start:    response.Start,
+			Next:     response.Next,
+			ShowMore: response.ShowMore,
+			HTML:     template.HTML(fragment.String()),
 		}
 
 		bytes, _ := json.Marshal(jsonResponse)

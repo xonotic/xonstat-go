@@ -74,7 +74,7 @@ func (ds *PGDatastore) RSearchMap(nameFragment string) ([]*Map, error) {
 }
 
 // RPlayerIndex performs player searches by simple pagination.
-func (ds *PGDatastore) RPlayerIndex(start, limit int) ([]*Player, error) {
+func (ds *PGDatastore) RPlayerIndex(start, limit int, nickFragment string) ([]*Player, error) {
 	var sqlBuf bytes.Buffer
 	sqlBuf.WriteString(`select p.player_id, p.nick, p.stripped_nick, p.location, p.email_addr, 
 	p.active_ind, p.create_dt
@@ -89,6 +89,13 @@ func (ds *PGDatastore) RPlayerIndex(start, limit int) ([]*Player, error) {
 	if start != BlankStart {
 		sqlBuf.WriteString(fmt.Sprintf("and player_id < $%d ", paramIndex))
 		params = append(params, start)
+		paramIndex++
+	}
+
+	if nickFragment != "" {
+		nickFragment = fmt.Sprintf("%%%s%%", strings.ToUpper(nickFragment))
+		sqlBuf.WriteString(fmt.Sprintf("and UPPER(p.stripped_nick) like $%d ", paramIndex))
+		params = append(params, nickFragment)
 		paramIndex++
 	}
 
