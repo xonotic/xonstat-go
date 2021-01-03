@@ -79,7 +79,8 @@ func (ds *PGDatastore) RPlayerIndex(start, limit int) ([]*Player, error) {
 	sqlBuf.WriteString(`select p.player_id, p.nick, p.stripped_nick, p.location, p.email_addr, 
 	p.active_ind, p.create_dt
 	from players p 
-	where p.nick not like 'Anonymous Player%'`)
+	where p.nick not like 'Anonymous Player%'
+	and p.player_id > 2`)
 
 	// We might not have a start value, so we have to keep track of the bind params
 	// and their placeholder numbers.
