@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"sort"
@@ -585,9 +586,17 @@ func (ae *AppEnv) PlayerHashkeyInfoHandler(w http.ResponseWriter, r *http.Reques
 	w.Write(buf.Bytes())
 }
 
+// PlayerIndexJSONResponse is the response type for the player index.
+type PlayerIndexJSONResponse struct {
+	Start int           `json:"start"`
+	Next  int           `json:"next"`
+	HTML  template.HTML `json:"HTML"`
+}
+
 // PlayerIndexResponse is the response type for the player index.
 type PlayerIndexResponse struct {
-	Start int 
+	Start   int
+	Next    int
 	Players []*player.InfoBase
 }
 
@@ -610,14 +619,39 @@ func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var next int
+	if len(players) < 1 {
+		next = -1
+	} else {
+		next = players[len(players)-1].PlayerID
+	}
+
 	response := PlayerIndexResponse{
-		Start: start,
+		Start:   start,
+		Next:    next,
 		Players: players,
 	}
 
 	if acceptHeader == "application/json" {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
+
+		var fragment bytes.Buffer
+		err := ae.templates["playerindex.fragment.page.html"].Execute(&fragment, response)
+		if err != nil {
+			log.Printf("Error: %s", err)
+			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			return
+		}
+
+		jsonResponse := PlayerIndexJSONResponse{
+			Start: response.Start,
+			Next:  response.Next,
+			HTML:  template.HTML(fragment.String()),
+		}
+
+		bytes, _ := json.Marshal(jsonResponse)
+		w.Write(bytes)
 	} else {
 		err := ae.templates["playerindex.page.html"].Execute(w, response)
 		if err != nil {
