@@ -9,41 +9,6 @@ import (
 // BlankStart is a blank or empty starting point value.
 const BlankStart = -1
 
-// RSearchServer performs server searches by fragments of their names
-func (ds *PGDatastore) RSearchServer(nameFragment string) ([]*Server, error) {
-	sql := `select server_id, name, location, ip_addr, port, hashkey, public_key, revision, 
-	pure_ind, impure_cvars, elo_ind, active_ind, create_dt
-	from servers
-	where UPPER(name) LIKE $1;`
-
-	fragment := fmt.Sprintf("%%%s%%", strings.ToUpper(nameFragment))
-
-	rows, err := ds.db.Query(sql, fragment)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	return scanServers(rows)
-}
-
-// RSearchMap performs map searches by fragments of their names
-func (ds *PGDatastore) RSearchMap(nameFragment string) ([]*Map, error) {
-	sql := `select map_id, name, version, pk3_name, curl_url, create_dt 
-	from maps
-	where UPPER(name) LIKE $1;`
-
-	fragment := fmt.Sprintf("%%%s%%", strings.ToUpper(nameFragment))
-
-	rows, err := ds.db.Query(sql, fragment)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	return scanMaps(rows)
-}
-
 // RPlayerIndex performs player searches by simple pagination.
 func (ds *PGDatastore) RPlayerIndex(start, limit int, nickFragment string) ([]*Player, error) {
 	var sqlBuf bytes.Buffer
@@ -81,4 +46,42 @@ func (ds *PGDatastore) RPlayerIndex(start, limit int, nickFragment string) ([]*P
 	defer rows.Close()
 
 	return scanPlayers(rows)
+}
+
+// RServerIndex performs server searches by simple pagination.
+func (ds *PGDatastore) RServerIndex(start, limit int, nameFragment string) ([]*Server, error) {
+	var sqlBuf bytes.Buffer
+	sqlBuf.WriteString(`select server_id, name, location, ip_addr, port, hashkey, 
+	public_key, revision, pure_ind, impure_cvars, elo_ind, active_ind, create_dt
+	from servers
+	where active_ind = true`)
+
+	// We might not have a start value, so we have to keep track of the bind params
+	// and their placeholder numbers.
+	params := make([]interface{}, 0)
+	paramIndex := 1
+	if start != BlankStart {
+		sqlBuf.WriteString(fmt.Sprintf("and server_id < $%d ", paramIndex))
+		params = append(params, start)
+		paramIndex++
+	}
+
+	if nameFragment != "" {
+		nameFragment = fmt.Sprintf("%%%s%%", strings.ToUpper(nameFragment))
+		sqlBuf.WriteString(fmt.Sprintf("and UPPER(name) like $%d ", paramIndex))
+		params = append(params, nameFragment)
+		paramIndex++
+	}
+
+	sqlBuf.WriteString(fmt.Sprintf("order by server_id desc limit $%d;", paramIndex))
+	params = append(params, limit)
+	paramIndex++
+
+	rows, err := ds.db.Query(sqlBuf.String(), params...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanServers(rows)
 }

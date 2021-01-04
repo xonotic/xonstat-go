@@ -91,6 +91,5 @@ type Datastore interface {
 
 	// Search methods
 	RPlayerIndex(start, limit int, nickFragment string) ([]*Player, error)
-	RSearchServer(nameFragment string) ([]*Server, error)
-	RSearchMap(nameFragment string) ([]*Map, error)
+	RServerIndex(start, limit int, nameFragment string) ([]*Server, error)
 }
