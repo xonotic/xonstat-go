@@ -1,0 +1,10 @@
+{{range .Servers}}
+<tr>
+    <td>{{.ServerID}}</td>
+    <td><a href='{{urlFor "server_info" (intToString .ServerID)}}'
+            title="Go to the server info page for this server">{{.NameHTML}}</a></td>
+    <td><span class="abstime" data-epoch="{{.CreateDt.Epoch}}" title="{{.CreateDt.UTCStr}}">{{.CreateDt.Fuzzy}}</span> </td>
+    <td><a href='{{urlFor "games"}}?server_id={{.ServerID}}'
+            title="See recent games for {{.Name}}"><i class="fa fa-list"></i></a></td>
+</tr>
+{{end}}

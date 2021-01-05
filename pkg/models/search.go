@@ -54,7 +54,7 @@ func (ds *PGDatastore) RServerIndex(start, limit int, nameFragment string) ([]*S
 	sqlBuf.WriteString(`select server_id, name, location, ip_addr, port, hashkey, 
 	public_key, revision, pure_ind, impure_cvars, elo_ind, active_ind, create_dt
 	from servers
-	where active_ind = true`)
+	where active_ind = true `)
 
 	// We might not have a start value, so we have to keep track of the bind params
 	// and their placeholder numbers.
