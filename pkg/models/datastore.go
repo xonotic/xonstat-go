@@ -89,7 +89,8 @@ type Datastore interface {
 	// PlayerElo-oriented methods
 	RPlayerElosByHashkey(hashkey string) ([]*PlayerElo, error)
 
-	// Search methods
+	// Index and entity-specific search methods
 	RPlayerIndex(start, limit int, nickFragment string) ([]*Player, error)
 	RServerIndex(start, limit int, nameFragment string) ([]*Server, error)
+	RMapIndex(start, limit int, nameFragment string) ([]*Map, error)
 }

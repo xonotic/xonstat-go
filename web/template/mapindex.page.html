@@ -1,0 +1,55 @@
+{{template "base" .}}
+
+{{define "subtitle"}}Map Index - {{end}}
+
+{{define "title"}}Map Index{{end}}
+
+{{define "body"}}
+
+<form>
+    <div class="grid-container">
+        <div class="grid-x grid-padding-x">
+            <div class="medium-6 cell medium-offset-3">
+                <input type="text" name="name" placeholder="search">
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="grid-x grid-padding-x">
+    <div class="cell small-12 large-6 large-offset-3">
+        {{template "mapindex.partial.html" .}}
+        {{if .ShowMore}}
+        <div class="text-center">
+            <a id="load-more" class="button tiny" title="Load more maps">more</a>
+        </div>
+        {{end}}
+    </div>
+</div>
+
+{{end}}
+
+{{define "extra-js"}}
+<script type="text/javascript">
+    var nextPage = {{.Next }};
+    var name = "{{.NameFragment}}";
+    function loadMore() {
+        $.ajax({
+            url: "/maps?start=" + nextPage + "&name=" + name,
+            headers: { Accept: "application/json" },
+            success: function (response) {
+                $("#map-index-table tr:last").after(response.HTML);
+                if (response.next === -1 || !response.show_more) {
+                    // No more entries
+                    $("#load-more").remove();
+                }
+                nextPage = response.next;
+            }
+        });
+    };
+
+    $("#load-more").each(function (i, e) {
+        e.addEventListener("click", loadMore)
+    });
+</script>
+{{end}}

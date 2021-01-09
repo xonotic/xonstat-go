@@ -85,3 +85,40 @@ func (ds *PGDatastore) RServerIndex(start, limit int, nameFragment string) ([]*S
 
 	return scanServers(rows)
 }
+
+// RMapIndex performs map searches by simple pagination.
+func (ds *PGDatastore) RMapIndex(start, limit int, nameFragment string) ([]*Map, error) {
+	var sqlBuf bytes.Buffer
+	sqlBuf.WriteString(`select map_id, name, version, pk3_name, curl_url, create_dt 
+	from maps
+	where 1=1 `)
+
+	// We might not have a start value, so we have to keep track of the bind params
+	// and their placeholder numbers.
+	params := make([]interface{}, 0)
+	paramIndex := 1
+	if start != BlankStart {
+		sqlBuf.WriteString(fmt.Sprintf("and map_id < $%d ", paramIndex))
+		params = append(params, start)
+		paramIndex++
+	}
+
+	if nameFragment != "" {
+		nameFragment = fmt.Sprintf("%%%s%%", strings.ToUpper(nameFragment))
+		sqlBuf.WriteString(fmt.Sprintf("and UPPER(name) like $%d ", paramIndex))
+		params = append(params, nameFragment)
+		paramIndex++
+	}
+
+	sqlBuf.WriteString(fmt.Sprintf("order by map_id desc limit $%d;", paramIndex))
+	params = append(params, limit)
+	paramIndex++
+
+	rows, err := ds.db.Query(sqlBuf.String(), params...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanMaps(rows)
+}

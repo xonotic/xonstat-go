@@ -1,0 +1,11 @@
+{{range .Maps}}
+<tr>
+    <td>{{.MapID}}</td>
+    <td><a href='{{urlFor "map_info" (intToString .MapID)}}'
+            title="Go to the map info page for this server">{{.Name}}</a></td>
+    <td><span class="abstime" data-epoch="{{.CreateDt.Epoch}}" title="{{.CreateDt.UTCStr}}">{{.CreateDt.Fuzzy}}</span>
+    </td>
+    <td><a href='{{urlFor "games"}}?map_id={{.MapID}}' title="See recent games for {{.Name}}"><i
+                class="fa fa-list"></i></a></td>
+</tr>
+{{end}}
