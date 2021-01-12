@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"time"
 )
 
-// Initial parameters for Ratings.
 // MU is the mean skill value for a brand new player.
 const MU = 25.0
 
@@ -88,7 +86,7 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 			}
 
 			omega[p1.PlayerID] += (p1SigmaSquared / ciq) * (s - piq)
-			gamma := skills[p1.PlayerID].Sigma / ciq
+			gamma := skills[p1index].Sigma / ciq
 			delta[p1.PlayerID] += gamma * (p1SigmaSquared / ciq) / ciq * piq * (1 - piq)
 		}
 	}
