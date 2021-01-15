@@ -60,8 +60,12 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 	omega := make(map[int]float64, len(result.PlayerResults))
 	delta := make(map[int]float64, len(result.PlayerResults))
 	for p1index, p1 := range result.PlayerResults {
+		// Omega is the amount added to Mu to determine its new value.
 		omega[p1.PlayerID] = 0.0
+
+		// Delta is the amount multiplied with Sigma to determine its new value.
 		delta[p1.PlayerID] = 0.0
+
 		for p2index, p2 := range result.PlayerResults {
 			if p2.PlayerID == p1.PlayerID {
 				continue
@@ -76,6 +80,8 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 			piq := 1. / (1. + math.Exp(muDiff/ciq))
 
 			// TODO: This is currently winner-take-all. Implement scaling?
+			// If we implement scaling, we also need to normalize the scores with 
+			// offsets so they can be compared.
 			s := 0.0
 			if p1.Score > p2.Score {
 				// P1 won
