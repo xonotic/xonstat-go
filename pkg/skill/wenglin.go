@@ -71,8 +71,6 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 				continue
 			}
 
-			fmt.Printf("Comparing %d and %d\n", p1index, p2index)
-
 			p1SigmaSquared := math.Pow(skills[p1index].Sigma, 2.0)
 			p2SigmaSquared := math.Pow(skills[p2index].Sigma, 2.0)
 			betaSquared := math.Pow(BETA, 2.0)
@@ -80,9 +78,6 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 
 			muDiff := skills[p2index].Mu - skills[p1index].Mu
 			piq := 1. / (1. + math.Exp(muDiff/ciq))
-
-			fmt.Printf("p1MuDiff: %f\n", muDiff)
-			fmt.Printf("p1piq: %f\n", piq)
 
 			// TODO: This is currently winner-take-all. Implement scaling?
 			// If we implement scaling, we also need to normalize the scores with
@@ -100,6 +95,10 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 			gamma := skills[p1index].Sigma / ciq
 			delta[p1.PlayerID] += gamma * (p1SigmaSquared / ciq) / ciq * piq * (1 - piq)
 
+			// Debugging...
+			fmt.Printf("Comparing %d and %d\n", p1index, p2index)
+			fmt.Printf("p1MuDiff: %f\n", muDiff)
+			fmt.Printf("p1piq: %f\n", piq)
 			fmt.Printf("p1 omega += %f\n", (p1SigmaSquared/ciq)*(s-piq))
 			fmt.Printf("p1 delta += %f\n\n", gamma*(p1SigmaSquared/ciq)/ciq*piq*(1-piq))
 		}
@@ -117,6 +116,10 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 			Mu:    skills[i].Mu + omega[player.PlayerID],
 			Sigma: skills[i].Sigma * math.Sqrt(d),
 		}
+
+		// Debugging...
+		fmt.Printf("omega: %f\n", omega[player.PlayerID])
+		fmt.Printf("delta: %f\n", delta[player.PlayerID])
 	}
 
 	return newSkills, nil
