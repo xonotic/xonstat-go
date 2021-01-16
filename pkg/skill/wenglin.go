@@ -57,27 +57,30 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 		return nil, fmt.Errorf("number of players and skills do not match")
 	}
 
-	omega := make(map[int]float64, len(result.PlayerResults))
-	delta := make(map[int]float64, len(result.PlayerResults))
+	// Omega is the amount added to Mu to determine its new value.
+	omega := make([]float64, len(result.PlayerResults))
+
+	// Delta is the amount multiplied with Sigma to determine its new value.
+	delta := make([]float64, len(result.PlayerResults))
+
 	for p1index, p1 := range result.PlayerResults {
-		// Omega is the amount added to Mu to determine its new value.
-		omega[p1.PlayerID] = 0.0
-
-		// Delta is the amount multiplied with Sigma to determine its new value.
-		delta[p1.PlayerID] = 0.0
-
-		for p2index, p2 := range result.PlayerResults {
+		for p2index := p1index + 1; p2index < len(result.PlayerResults); p2index++ {
+			p2 := result.PlayerResults[p2index]
 			if p2.PlayerID == p1.PlayerID {
 				continue
 			}
 
 			p1SigmaSquared := math.Pow(skills[p1index].Sigma, 2.0)
 			p2SigmaSquared := math.Pow(skills[p2index].Sigma, 2.0)
+
 			betaSquared := math.Pow(BETA, 2.0)
 			ciq := math.Sqrt(p1SigmaSquared + p2SigmaSquared + (2 * betaSquared))
 
-			muDiff := skills[p2index].Mu - skills[p1index].Mu
-			piq := 1. / (1. + math.Exp(muDiff/ciq))
+			p1MuDiff := skills[p2index].Mu - skills[p1index].Mu
+			p2MuDiff := skills[p1index].Mu - skills[p2index].Mu
+
+			p1piq := 1. / (1. + math.Exp(p1MuDiff/ciq))
+			p2piq := 1. / (1. + math.Exp(p2MuDiff/ciq))
 
 			// TODO: This is currently winner-take-all. Implement scaling?
 			// If we implement scaling, we also need to normalize the scores with
@@ -91,35 +94,38 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 				s = 0.5
 			}
 
-			omega[p1.PlayerID] += (p1SigmaSquared / ciq) * (s - piq)
-			gamma := skills[p1index].Sigma / ciq
-			delta[p1.PlayerID] += gamma * (p1SigmaSquared / ciq) / ciq * piq * (1 - piq)
+			omega[p1index] += (p1SigmaSquared / ciq) * (s - p1piq)
+			omega[p2index] += (p2SigmaSquared / ciq) * ((1 - s) - p2piq)
 
-			// Debugging...
-			fmt.Printf("Comparing %d and %d\n", p1index, p2index)
-			fmt.Printf("p1MuDiff: %f\n", muDiff)
-			fmt.Printf("p1piq: %f\n", piq)
-			fmt.Printf("p1 omega += %f\n", (p1SigmaSquared/ciq)*(s-piq))
-			fmt.Printf("p1 delta += %f\n\n", gamma*(p1SigmaSquared/ciq)/ciq*piq*(1-piq))
+			delta[p1index] += (skills[p1index].Sigma / ciq) * (p1SigmaSquared / ciq) / ciq * p1piq * (1 - p1piq)
+			delta[p2index] += (skills[p2index].Sigma / ciq) * (p2SigmaSquared / ciq) / ciq * p2piq * (1 - p2piq)
+
+			/* Debugging...
+			fmt.Printf("Comparing player %d and player %d\n", p1.PlayerID, p2.PlayerID)
+			fmt.Printf("player %d MuDiff: %f\n", p1.PlayerID, p1MuDiff)
+			fmt.Printf("player %d piq: %f\n", p1.PlayerID, p1piq)
+			fmt.Printf("player %d omega += %f\n", p1.PlayerID, (p1SigmaSquared/ciq)*(s-p1piq))
+			fmt.Printf("player %d delta += %f\n", p1.PlayerID, (skills[p1index].Sigma/ciq)*(p1SigmaSquared/ciq)/ciq*p1piq*(1-p1piq))
+			fmt.Printf("player %d MuDiff: %f\n", p2.PlayerID, p2MuDiff)
+			fmt.Printf("player %d piq: %f\n", p2.PlayerID, p2piq)
+			fmt.Printf("player %d omega += %f\n", p2.PlayerID, (p2SigmaSquared/ciq)*((1-s)-p2piq))
+			fmt.Printf("player %d delta += %f\n\n", p2.PlayerID, (skills[p2index].Sigma/ciq)*(p2SigmaSquared/ciq)/ciq*p2piq*(1-p2piq))
+			*/
 		}
 	}
 
 	newSkills := make([]Rating, len(skills))
-	for i, player := range result.PlayerResults {
+	for i := range result.PlayerResults {
 		// Clamp the factor by which sigma changes.
-		d := 1 - delta[player.PlayerID]
+		d := 1 - delta[i]
 		if d < 0.0001 {
 			d = 0.0001
 		}
 
 		newSkills[i] = Rating{
-			Mu:    skills[i].Mu + omega[player.PlayerID],
+			Mu:    skills[i].Mu + omega[i],
 			Sigma: skills[i].Sigma * math.Sqrt(d),
 		}
-
-		// Debugging...
-		fmt.Printf("omega: %f\n", omega[player.PlayerID])
-		fmt.Printf("delta: %f\n", delta[player.PlayerID])
 	}
 
 	return newSkills, nil
