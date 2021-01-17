@@ -1,6 +1,7 @@
 package models
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"time"
@@ -98,4 +99,28 @@ func (ds *PGDatastore) RGameByID(gameID int) (*Game, error) {
 	}
 
 	return games[0], nil
+}
+
+// RGamesByRange retrives game records within a specified game ID range.
+func (ds *PGDatastore) RGamesByRange(start, end, limit int) ([]*Game, error) {
+	// Build up the SQL that will eventually be executed.
+	var sqlBuf bytes.Buffer
+
+	// Keep track of the bind placeholders and their parameters
+	placeholder := 1
+	params := make([]interface{}, 0)
+
+	sqlBuf.WriteString(fmt.Sprintf(`select game_id, c.game_type_cd, c.descr, server_id, map_id, winner, match_id, mod, create_dt,
+	coalesce(cast(extract(epoch from duration) as integer), 0) as duration
+	from games g join cd_game_type c on g.game_type_cd = c.game_type_cd
+	where game_id >= $%d `, placeholder))
+	placeholder++
+	params = append(params, start)
+
+	rows, err := ds.db.Query(sqlBuf.String(), params...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanGames(rows)
 }
