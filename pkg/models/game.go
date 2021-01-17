@@ -9,6 +9,12 @@ import (
 	"github.com/lib/pq"
 )
 
+// BlankEnd is a blank ending game ID.
+const BlankEndingGameID = -1
+
+// BlankLimit is a blank limit value.
+const BlankLimit = -1
+
 // CGame inserts a Game record into the database.
 func (ds *PGDatastore) CGame(tx *sql.Tx, game Game) (int64, error) {
 	var gameID int64
@@ -114,8 +120,23 @@ func (ds *PGDatastore) RGamesByRange(start, end, limit int) ([]*Game, error) {
 	coalesce(cast(extract(epoch from duration) as integer), 0) as duration
 	from games g join cd_game_type c on g.game_type_cd = c.game_type_cd
 	where game_id >= $%d `, placeholder))
+
 	placeholder++
 	params = append(params, start)
+
+	if end != BlankEndingGameID {
+		sqlBuf.WriteString(fmt.Sprintf("and game_id <= $%d ", end))
+	}
+	placeholder++
+	params = append(params, end)
+
+	sqlBuf.WriteString("order by game_id asc ")
+
+	if limit != BlankLimit {
+		sqlBuf.WriteString(fmt.Sprintf("limit $%d ", limit))
+	}
+	placeholder++
+	params = append(params, limit)
 
 	rows, err := ds.db.Query(sqlBuf.String(), params...)
 	if err != nil {
