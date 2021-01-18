@@ -94,4 +94,7 @@ type Datastore interface {
 	RPlayerIndex(start, limit int, nickFragment string) ([]*Player, error)
 	RServerIndex(start, limit int, nameFragment string) ([]*Server, error)
 	RMapIndex(start, limit int, nameFragment string) ([]*Map, error)
+
+	// Queries for skill processing
+	RMatchResultsByGameID(gameID int) ([]*PlayerSkillMatchResult, error)
 }

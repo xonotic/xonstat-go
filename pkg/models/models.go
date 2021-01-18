@@ -349,11 +349,24 @@ type PlayerOverallStats struct {
 
 // PlayerElo is a single Elo record for a player
 type PlayerElo struct {
-	PlayerID int
+	PlayerID   int
 	GameTypeCd string
-	Games int
-	Elo float32
-	ActiveInd bool
-	CreateDt time.Time
-	UpdateDt time.Time
+	Games      int
+	Elo        float32
+	ActiveInd  bool
+	CreateDt   time.Time
+	UpdateDt   time.Time
+}
+
+// PlayerSkillMatchResult is the "flattened" version of the input
+// that we'll pass to the skill package for skill/ratings calculation.
+type PlayerSkillMatchResult struct {
+	PlayerID   int
+	GameID     int
+	GameTypeCd string
+	Duration   time.Duration
+	Score      int
+	AliveTime  time.Duration
+	Mu         sql.NullFloat64
+	Sigma      sql.NullFloat64
 }
