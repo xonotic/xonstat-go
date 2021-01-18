@@ -9,8 +9,11 @@ import (
 	"github.com/lib/pq"
 )
 
-// BlankEnd is a blank ending game ID.
+// BlankEndingGameID is a blank ending game ID.
 const BlankEndingGameID = -1
+
+// BlankStartingGameID is a blank ending game ID.
+const BlankStartingGameID = -1
 
 // BlankLimit is a blank limit value.
 const BlankLimit = -1
@@ -125,7 +128,7 @@ func (ds *PGDatastore) RGamesByRange(start, end, limit int) ([]*Game, error) {
 	params = append(params, start)
 
 	if end != BlankEndingGameID {
-		sqlBuf.WriteString(fmt.Sprintf("and game_id <= $%d ", end))
+		sqlBuf.WriteString(fmt.Sprintf("and game_id <= $%d ", placeholder))
 	}
 	placeholder++
 	params = append(params, end)
@@ -133,10 +136,10 @@ func (ds *PGDatastore) RGamesByRange(start, end, limit int) ([]*Game, error) {
 	sqlBuf.WriteString("order by game_id asc ")
 
 	if limit != BlankLimit {
-		sqlBuf.WriteString(fmt.Sprintf("limit $%d ", limit))
+		sqlBuf.WriteString(fmt.Sprintf("limit $%d ", placeholder))
+		placeholder++
+		params = append(params, limit)
 	}
-	placeholder++
-	params = append(params, limit)
 
 	rows, err := ds.db.Query(sqlBuf.String(), params...)
 	if err != nil {
