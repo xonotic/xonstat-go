@@ -129,9 +129,9 @@ func (ds *PGDatastore) RGamesByRange(start, end, limit int) ([]*Game, error) {
 
 	if end != BlankEndingGameID {
 		sqlBuf.WriteString(fmt.Sprintf("and game_id <= $%d ", placeholder))
+		placeholder++
+		params = append(params, end)
 	}
-	placeholder++
-	params = append(params, end)
 
 	sqlBuf.WriteString("order by game_id asc ")
 
