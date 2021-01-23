@@ -1,8 +1,12 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -46,6 +50,58 @@ func init() {
 	updateSkillsCmd.Flags().BoolP("resume", "r", true, "Resume from where we last left off (use resumefile contents)")
 	updateSkillsCmd.Flags().String("resumefile", "skill_state.txt", "File containing the game ID to start from")
 	updateSkillsCmd.Flags().Bool("simulate", false, "Do not change the database")
+}
+
+// ResumeFile handles reading and writing to a file on the filesystem to save
+// our progress.
+type ResumeFile struct {
+	Filename   string
+	LastGameID int
+}
+
+// NewResumeFile creates a new single-lined file for saving the last known processed game ID
+func NewResumeFile(filename string) *ResumeFile {
+	return &ResumeFile{
+		Filename: filename,
+	}
+}
+
+// Read reads the last game ID from the resume file.
+func (r *ResumeFile) Read() error {
+	file, err := os.Open(r.Filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	var line string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line = scanner.Text()
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	gameID, err := strconv.Atoi(line)
+	if err != nil {
+		return err
+	}
+
+	r.LastGameID = gameID
+
+	return nil
+}
+
+// Write writes the last game ID to the resume file.
+func (r *ResumeFile) Write() error {
+	err := ioutil.WriteFile(r.Filename, []byte(fmt.Sprintf("%d", r.LastGameID)), 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // prepareInput takes the raw data from the database and transforms it into the format that the skill
@@ -118,10 +174,24 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 		log.Fatal("Unable to initialize database connection.")
 	}
 
+	if resumeFile != "" {
+		rf := NewResumeFile(resumeFile)
+		err := rf.Read()
+		if err == nil {
+			start = rf.LastGameID + 1
+			log.Printf("Resume file found. Resuming from game ID %d.", start)
+		}
+	}
+
 	begin := time.Now()
 	games, err := db.RGamesByRange(start, end, limit)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if len(games) < 1 {
+		log.Printf("Nothing to do. Exiting...")
+		return
 	}
 
 	log.Printf("Collected info for %d games in %s.\n", len(games), time.Since(begin))
@@ -167,6 +237,15 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 		}
 	}
 	log.Printf("Processed %d games in %s.\n", len(games), time.Since(begin))
+
+	if resumeFile != "" {
+		rf := NewResumeFile(resumeFile)
+		rf.LastGameID = games[len(games)-1].GameID
+		err := rf.Write()
+		if err == nil {
+			log.Printf("Will resume next time from game ID %d.", rf.LastGameID)
+		}
+	}
 
 	if simulate {
 		log.Printf("Need to create %d new records.", len(brandNewKeys))
