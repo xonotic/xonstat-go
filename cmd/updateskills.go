@@ -48,10 +48,12 @@ func init() {
 	updateSkillsCmd.Flags().Bool("simulate", false, "Do not change the database")
 }
 
-// prepareInput takes the raw data from the database and transforms it into the format that the skill 
-// package requires. It also takes the "running" skills maps so we can provide the algorithm with the 
+// prepareInput takes the raw data from the database and transforms it into the format that the skill
+// package requires. It also takes the "running" skills maps so we can provide the algorithm with the
 // most recently calculated ratings.
-func prepareInput(rawResults []*models.PlayerSkillMatchResult, skillsByPlayer map[string]*skill.Rating) (skill.MatchResult, []skill.Rating) {
+func prepareInput(rawResults []*models.PlayerSkillMatchResult,
+	skillsByPlayer map[string]*models.PlayerSkill, brandNewKeys map[string]struct{}) (skill.MatchResult, []skill.Rating) {
+
 	matchResult := skill.MatchResult{
 		MatchID:       rawResults[0].GameID,
 		PlayerResults: make([]skill.PlayerResult, 0, len(rawResults)),
@@ -77,12 +79,13 @@ func prepareInput(rawResults []*models.PlayerSkillMatchResult, skillsByPlayer ma
 		if rating, ok := skillsByPlayer[key]; ok {
 			// If we've seen this player before in our calculations, we need to use that
 			// Rating value since it has probably been updated. No need to update the skill map.
-			playerRating = *rating
+			playerRating.Mu = rating.Mu
+			playerRating.Sigma = rating.Sigma
 		} else {
 			// Otherwise we have not seen this player before and will need to save it in the skill map
 			// when done.
 			if result.Mu.Valid && result.Sigma.Valid {
-				// We haven't seen this player before and they have a non-null rating in the DB. Use it.
+				// We haven't seen this player before but they have a rating in the DB. Use it.
 				playerRating.Mu = result.Mu.Float64
 				playerRating.Sigma = result.Sigma.Float64
 			} else {
@@ -90,9 +93,15 @@ func prepareInput(rawResults []*models.PlayerSkillMatchResult, skillsByPlayer ma
 				playerRating.Mu = skill.MU
 				playerRating.Sigma = skill.SIGMA
 
-				// TODO: log that we need to insert this record when done. Maybe a set?
+				brandNewKeys[key] = struct{}{}
 			}
-			skillsByPlayer[key] = &playerRating
+			skillsByPlayer[key] = &models.PlayerSkill{
+				PlayerID:   result.PlayerID,
+				GameTypeCd: result.GameTypeCd,
+				Mu:         playerRating.Mu,
+				Sigma:      playerRating.Sigma,
+				ActiveInd:  true,
+			}
 		}
 
 		skills[i] = playerRating
@@ -121,7 +130,11 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 
 	// skills indexed by player_id-game_type_cd
 	// TODO: This needs to be updated with a PlayerSkill object when ready.
-	skillsByPlayer := make(map[string]*skill.Rating)
+	skillsByPlayer := make(map[string]*models.PlayerSkill)
+
+	// Used to keep track of which keys (playerID + gameTypeCd) are brand new, thus
+	// need to be inserted rather than updated at the end of processing.
+	brandNewKeys := make(map[string]struct{})
 
 	for _, game := range games {
 		rawResults, err := db.RMatchResultsByGameID(game.GameID)
@@ -129,13 +142,13 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 			log.Printf("Error processing game %d: %s", game.GameID, err)
 		}
 
-		// Don't even bother for games with only one legit player. 
+		// Don't even bother for games with only one legit player.
 		if len(rawResults) < 2 {
 			continue
 		}
 
 		// Assemble the input the way skill.WengLinBT expects.
-		matchResult, skills := prepareInput(rawResults, skillsByPlayer)
+		matchResult, skills := prepareInput(rawResults, skillsByPlayer, brandNewKeys)
 
 		// Calculate the skill updates, returning a new skill list.
 		newSkills, err := skill.WengLinBT(matchResult, skills)
@@ -147,7 +160,7 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 		// with the PlayerResults list that we provided in the MatchResult.
 		for i, newSkill := range newSkills {
 			key := fmt.Sprintf("%d-%s", matchResult.PlayerResults[i].PlayerID, game.GameTypeCd)
-			
+
 			// TODO: Determine minimum values here. Prevent gonig below that.
 			skillsByPlayer[key].Mu = newSkill.Mu
 			skillsByPlayer[key].Sigma = newSkill.Sigma
@@ -155,8 +168,11 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 	}
 	log.Printf("Processed %d games in %s.\n", len(games), time.Since(begin))
 
-	log.Printf("New Skills:\n")
-	for key, value := range skillsByPlayer {
-		log.Printf("%s %+v\n", key, value)
+	if simulate {
+		log.Printf("Need to create %d new records.", len(brandNewKeys))
+		log.Printf("New Skills:")
+		for key, value := range skillsByPlayer {
+			log.Printf("%s %+v\n", key, value)
+		}
 	}
 }
