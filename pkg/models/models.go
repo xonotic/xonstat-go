@@ -370,3 +370,14 @@ type PlayerSkillMatchResult struct {
 	Mu         sql.NullFloat64
 	Sigma      sql.NullFloat64
 }
+
+// PlayerSkill represents a player's Weng-Lin skill.
+type PlayerSkill struct {
+	PlayerID   int
+	GameTypeCd string
+	Mu         float64
+	Sigma      float64
+	ActiveInd  bool
+	CreateDt   time.Time
+	UpdateDt   time.Time
+}

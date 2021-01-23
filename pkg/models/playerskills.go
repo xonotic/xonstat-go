@@ -1,6 +1,7 @@
 package models
 
 import (
+	"bytes"
 	"database/sql"
 	"time"
 )
@@ -46,4 +47,49 @@ func (ds *PGDatastore) RMatchResultsByGameID(gameID int) ([]*PlayerSkillMatchRes
 	}
 	defer rows.Close()
 	return scanPlayerSkillMatchResults(rows)
+}
+
+// scanPlayerSkills scans the rows returned by a query to the player_skills table.
+func scanPlayerSkills(rows *sql.Rows) ([]*PlayerSkill, error) {
+	var results []*PlayerSkill
+	for rows.Next() {
+		var s PlayerSkill
+
+		err := rows.Scan(&s.PlayerID, &s.GameTypeCd, &s.Mu, &s.Sigma, &s.ActiveInd, &s.CreateDt, &s.UpdateDt)
+		if err != nil {
+			return nil, err
+		}
+
+		results = append(results, &s)
+	}
+
+	return results, nil
+}
+
+// RPlayerSkills reads PlayerSkill values by PlayerID and optionally the game type.
+func (ds *PGDatastore) RPlayerSkills(playerID int, gameTypeCd string) ([]*PlayerSkill, error) {
+	var sqlBuf bytes.Buffer
+
+	params := make([]interface{}, 0)
+
+	sqlBuf.WriteString(`select player_id, game_type_cd, mu, sigma, active_ind, create_dt, update_dt
+	from player_skills
+	where player_id = $1 and active_ind = true `)
+
+	params = append(params, playerID)
+
+	if !(gameTypeCd == "" || gameTypeCd == "overall" || gameTypeCd == "all") {
+		sqlBuf.WriteString("and gameTypeCd = $2")
+		params = append(params, gameTypeCd)
+	}
+
+	sqlBuf.WriteString("order by Mu desc ")
+
+	rows, err := ds.db.Query(sqlBuf.String(), params...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanPlayerSkills(rows)
+
 }

@@ -97,4 +97,5 @@ type Datastore interface {
 
 	// Queries for skill processing
 	RMatchResultsByGameID(gameID int) ([]*PlayerSkillMatchResult, error)
+	RPlayerSkills(playerID int, gameTypeCd string) ([]*PlayerSkill, error)
 }
