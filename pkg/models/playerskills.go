@@ -106,3 +106,16 @@ func (ds *PGDatastore) CPlayerSkill(tx *sql.Tx, ps PlayerSkill) error {
 
 	return nil
 }
+
+// UPlayerSkill updates a PlayerSkill record in the database.
+func (ds *PGDatastore) UPlayerSkill(tx *sql.Tx, ps PlayerSkill) error {
+	sql := `update player_skills set mu=$1, sigma=$2, update_dt = now() at time zone 'UTC'
+	where player_id = $3 and game_type_cd = $4`
+
+	_, err := tx.Exec(sql, ps.Mu, ps.Sigma, ps.PlayerID, ps.GameTypeCd)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
