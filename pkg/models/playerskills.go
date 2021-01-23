@@ -93,3 +93,16 @@ func (ds *PGDatastore) RPlayerSkills(playerID int, gameTypeCd string) ([]*Player
 	return scanPlayerSkills(rows)
 
 }
+
+// CPlayerSkill inserts a PlayerSkill record into the database.
+func (ds *PGDatastore) CPlayerSkill(tx *sql.Tx, ps PlayerSkill) error {
+	sql := `insert into player_skills (player_id, game_type_cd, mu, sigma, active_ind) 
+		values ($1, $2, $3, $4, $5) `
+
+	_, err := tx.Exec(sql, ps.PlayerID, ps.GameTypeCd, ps.Mu, ps.Sigma, true)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

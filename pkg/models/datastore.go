@@ -96,6 +96,7 @@ type Datastore interface {
 	RMapIndex(start, limit int, nameFragment string) ([]*Map, error)
 
 	// Queries for skill processing
+	CPlayerSkill(tx *sql.Tx, ps PlayerSkill) error
 	RMatchResultsByGameID(gameID int) ([]*PlayerSkillMatchResult, error)
 	RPlayerSkills(playerID int, gameTypeCd string) ([]*PlayerSkill, error)
 }
