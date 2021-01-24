@@ -36,7 +36,7 @@ func (ds *PGDatastore) RMatchResultsByGameID(gameID int) ([]*PlayerSkillMatchRes
 		cast(coalesce(extract(epoch from pgs.alivetime), 0)*1000 as integer) as alivetime, 
 		ps.mu, ps.sigma
 		from player_game_stats pgs join games g on pgs.game_id = g.game_id
-		left outer join player_skills ps on g.game_type_cd = ps.game_type_cd
+		left outer join player_skills ps on g.game_type_cd = ps.game_type_cd and ps.player_id = pgs.player_id
 		where g.game_id = $1
 		and pgs.player_id > 2
 		order by pgs.scoreboardpos`
