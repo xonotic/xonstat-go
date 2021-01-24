@@ -104,6 +104,16 @@ func (r *ResumeFile) Write() error {
 	return nil
 }
 
+// shouldDoSkill determines if we run the skill algorithm on a game or not.
+func shouldDoSkill(gameTypeCd string) bool {
+	switch gameTypeCd {
+	case "duel", "dm", "ca", "ctf", "tdm", "ka", "ft":
+		return true
+	}
+
+	return false
+}
+
 // prepareInput takes the raw data from the database and transforms it into the format that the skill
 // package requires. It also takes the "running" skills maps so we can provide the algorithm with the
 // most recently calculated ratings.
@@ -198,8 +208,7 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 
 	begin = time.Now()
 
-	// skills indexed by player_id-game_type_cd
-	// TODO: This needs to be updated with a PlayerSkill object when ready.
+	// Skills indexed by player_id-game_type_cd.
 	skillsByPlayer := make(map[string]*models.PlayerSkill)
 
 	// Used to keep track of which keys (playerID + gameTypeCd) are brand new, thus
@@ -207,6 +216,10 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 	brandNewKeys := make(map[string]struct{})
 
 	for _, game := range games {
+		if !shouldDoSkill(game.GameTypeCd) {
+			continue
+		}
+
 		rawResults, err := db.RMatchResultsByGameID(game.GameID)
 		if err != nil {
 			log.Printf("Error processing game %d: %s", game.GameID, err)
@@ -236,22 +249,40 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 			skillsByPlayer[key].Sigma = newSkill.Sigma
 		}
 	}
-	log.Printf("Processed %d games in %s.\n", len(games), time.Since(begin))
 
 	if resumeFile != "" {
 		rf := NewResumeFile(resumeFile)
 		rf.LastGameID = games[len(games)-1].GameID
 		err := rf.Write()
 		if err == nil {
-			log.Printf("Will resume next time from game ID %d.", rf.LastGameID)
+			log.Printf("Last game processed was game ID %d.", rf.LastGameID)
 		}
 	}
 
+	// If just simulating, we only print the new values.
 	if simulate {
-		log.Printf("Need to create %d new records.", len(brandNewKeys))
-		log.Printf("New Skills:")
-		for key, value := range skillsByPlayer {
-			log.Printf("%s %+v\n", key, value)
+		for _, value := range skillsByPlayer {
+			log.Printf("%d,%s,%f,%f\n", value.PlayerID, value.GameTypeCd, value.Mu, value.Sigma)
 		}
+	} else {
+		log.Printf("Creating %d new player_skill records.", len(brandNewKeys))
+
+		tx, _ := db.Begin()
+		for key, value := range skillsByPlayer {
+			if _, ok := brandNewKeys[key]; ok {
+				// This is a brand new record. Insert it.
+				err := db.CPlayerSkill(tx, *value)
+				if err != nil {
+					log.Println(err)
+				}
+			} else {
+				err := db.UPlayerSkill(tx, *value)
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}
+		tx.Commit()
 	}
+	log.Printf("Processed %d games in %s.\n", len(games), time.Since(begin))
 }
