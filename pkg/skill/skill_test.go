@@ -11,10 +11,12 @@ func TestMissingData(t *testing.T) {
 			{
 				PlayerID: 1,
 				Score:    5.0,
+				KFactor:  1.0,
 			},
 			{
 				PlayerID: 2,
 				Score:    5.0,
+				KFactor:  1.0,
 			},
 		},
 	}
@@ -39,10 +41,12 @@ func TestDefaultSkills(t *testing.T) {
 			{
 				PlayerID: 1,
 				Score:    10.0,
+				KFactor:  1.0,
 			},
 			{
 				PlayerID: 2,
 				Score:    5.0,
+				KFactor:  1.0,
 			},
 		},
 	}
@@ -72,6 +76,52 @@ func TestDefaultSkills(t *testing.T) {
 	}
 }
 
+func TestDefaultSkillsKFactor(t *testing.T) {
+	// Same as the above, but with an added K factor as if
+	// one person only played 50% of the match.
+	result := MatchResult{
+		MatchID: 1,
+		PlayerResults: []PlayerResult{
+			{
+				PlayerID: 1,
+				Score:    10.0,
+				KFactor:  1.0,
+			},
+			{
+				PlayerID: 2,
+				Score:    5.0,
+				KFactor:  .5,
+			},
+		},
+	}
+
+	skills := []Rating{
+		{
+			Mu:    MU,
+			Sigma: SIGMA,
+		},
+		{
+			Mu:    MU,
+			Sigma: SIGMA,
+		},
+	}
+
+	newSkills, err := WengLinBT(result, skills)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+
+	// Since we have a 50% K factor, we expect that the winner should not gain as much Mu and the loser not
+	// lose as much. Both the Sigmas should stay bigger (the distribution won't get as "narrow").
+	if newSkills[0].Mu >= 27.63523138347365 || newSkills[0].Sigma <= 8.065506316323548 {
+		t.Fatalf("P1 skill calculation is not correct %+v", newSkills[0])
+	}
+
+	if newSkills[1].Mu <= 22.36476861652635 || newSkills[1].Sigma <= 8.065506316323548 {
+		t.Fatalf("P2 skill calculation is not correct %+v", newSkills[1])
+	}
+}
+
 func TestTieDefaultSkills(t *testing.T) {
 	result := MatchResult{
 		MatchID: 1,
@@ -79,10 +129,12 @@ func TestTieDefaultSkills(t *testing.T) {
 			{
 				PlayerID: 1,
 				Score:    5.0,
+				KFactor:  1.0,
 			},
 			{
 				PlayerID: 2,
 				Score:    5.0,
+				KFactor:  1.0,
 			},
 		},
 	}
@@ -115,14 +167,17 @@ func TestThreePlayerGame(t *testing.T) {
 			{
 				PlayerID: 1,
 				Score:    10.0,
+				KFactor:  1.0,
 			},
 			{
 				PlayerID: 2,
 				Score:    5.0,
+				KFactor:  1.0,
 			},
 			{
 				PlayerID: 3,
 				Score:    2.0,
+				KFactor:  1.0,
 			},
 		},
 	}

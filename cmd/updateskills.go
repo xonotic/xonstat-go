@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/skill"
+	"gitlab.com/xonotic/xonstat/pkg/util"
 )
 
 // updateSkillsCmd updates the skills in the database (or simulates the same).
@@ -130,10 +131,18 @@ func prepareInput(rawResults []*models.PlayerSkillMatchResult,
 	// For each entry in the raw results, we transform it into a format that the
 	// skill package expects.
 	for i, result := range rawResults {
+		// People who played less than 50% of the game aren't eligible. Otherwise the skill
+		// updates scale based on how much of the game's duration they played.
+		alivetimeRatio := util.Ratio(int(result.AliveTime.Milliseconds()), int(result.Duration.Milliseconds()))
+		if alivetimeRatio < 0.5 {
+			continue
+		}
+
 		// First we add the player result values.
 		playerResult := skill.PlayerResult{
 			PlayerID: result.PlayerID,
 			Score:    float32(result.Score),
+			KFactor:  alivetimeRatio,
 		}
 		matchResult.PlayerResults = append(matchResult.PlayerResults, playerResult)
 

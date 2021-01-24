@@ -31,8 +31,8 @@ type PlayerResult struct {
 	// calculations, thus it should be normalized across all participants in the.
 	Score float32
 
-	// TODO: K factor to scale skill deltas for those who haven't participated fully, played at
-	// a disadvantage, etc?
+	// K factor to scale skill deltas for those who haven't participated fully, played at a disadvantage, etc.
+	KFactor float32
 }
 
 // MatchResult is the results of a match, and is used to calculate skill updates.
@@ -42,6 +42,14 @@ type MatchResult struct {
 
 	// The player performances that are to be evaluated.
 	PlayerResults []PlayerResult
+}
+
+func minKFactor(a, b float32) float32 {
+	if a <= b {
+		return a
+	} else {
+		return b
+	}
 }
 
 // WengLinBT calculates the updates to the player skills using the Weng-Lin
@@ -94,11 +102,14 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 				s = 0.5
 			}
 
-			omega[p1index] += (p1SigmaSquared / ciq) * (s - p1piq)
-			omega[p2index] += (p2SigmaSquared / ciq) * ((1 - s) - p2piq)
+			// Scaling is done based on the smallest K factor, thus the biggest reduction to the Mu/Sigma delta.
+			k := minKFactor(p1.KFactor, p2.KFactor)
 
-			delta[p1index] += (skills[p1index].Sigma / ciq) * (p1SigmaSquared / ciq) / ciq * p1piq * (1 - p1piq)
-			delta[p2index] += (skills[p2index].Sigma / ciq) * (p2SigmaSquared / ciq) / ciq * p2piq * (1 - p2piq)
+			omega[p1index] += ((p1SigmaSquared / ciq) * (s - p1piq)) * float64(k)
+			omega[p2index] += ((p2SigmaSquared / ciq) * ((1 - s) - p2piq)) * float64(k)
+
+			delta[p1index] += ((skills[p1index].Sigma / ciq) * (p1SigmaSquared / ciq) / ciq * p1piq * (1 - p1piq)) * float64(k)
+			delta[p2index] += ((skills[p2index].Sigma / ciq) * (p2SigmaSquared / ciq) / ciq * p2piq * (1 - p2piq)) * float64(k)
 
 			/* Debugging...
 			fmt.Printf("Comparing player %d and player %d\n", p1.PlayerID, p2.PlayerID)
