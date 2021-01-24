@@ -126,11 +126,11 @@ func prepareInput(rawResults []*models.PlayerSkillMatchResult,
 		PlayerResults: make([]skill.PlayerResult, 0, len(rawResults)),
 	}
 
-	skills := make([]skill.Rating, len(rawResults))
+	skills := make([]skill.Rating, 0, len(rawResults))
 
 	// For each entry in the raw results, we transform it into a format that the
 	// skill package expects.
-	for i, result := range rawResults {
+	for _, result := range rawResults {
 		// People who played less than 50% of the game aren't eligible. Otherwise the skill
 		// updates scale based on how much of the game's duration they played.
 		alivetimeRatio := util.Ratio(int(result.AliveTime.Milliseconds()), int(result.Duration.Milliseconds()))
@@ -179,7 +179,7 @@ func prepareInput(rawResults []*models.PlayerSkillMatchResult,
 			}
 		}
 
-		skills[i] = playerRating
+		skills = append(skills, playerRating)
 	}
 
 	return matchResult, skills
