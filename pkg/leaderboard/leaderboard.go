@@ -3,51 +3,48 @@ package leaderboard
 import (
 	"encoding/json"
 	"html/template"
-	"time"
 
 	"github.com/antzucaro/qstr"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
-// SummaryStatsData retrieves summary stat information for the leaderboard.
-func SummaryStatsData(scope string, db models.Datastore) ([]*models.SummaryStat, error) {
-	return db.RSummaryStats(scope)
+// GameCounts represent how many games have been played for a particular game type.
+type GameCounts struct {
+	GameTypeCd string
+	GameCount  int
 }
 
-// SummaryStatsJSON returns summary stats in JSON form.
-func SummaryStatsJSON(scope string, db models.Datastore) ([]byte, error) {
-	rawData, err := SummaryStatsData(scope, db)
+// SummaryBase provides high-level summary information about what has been recorded by stats
+// over a given time period (scope).
+type SummaryBase struct {
+	Players       int
+	Games         []GameCounts
+	Scope         string
+	LastRefreshed *models.MultiDt
+}
+
+// SummaryData retrieves summary stat information for the leaderboard.
+func SummaryData(scope string, db models.Datastore) (*SummaryBase, error) {
+	rawData, err := db.RSummaryStats(scope)
 	if err != nil {
 		return nil, err
 	}
 
-	// the JSON response
-	type GameCounts struct {
-		GameTypeCd string `json:"game_type_cd"`
-		GameCount  int    `json:"num_games"`
-	}
-
-	type Response struct {
-		Players       int          `json:"players"`
-		Games         []GameCounts `json:"games"`
-		Scope         string       `json:"scope"`
-		LastRefreshed string       `json:"last_refreshed"`
-	}
-
 	var players int
-	lastRefreshed := "unknown"
+	var lastRefreshed *models.MultiDt
 	var games []GameCounts
 
 	for i, ss := range rawData {
 		if i == 0 {
 			// We'll use the first record's refresh date and num_players for all of them.
-			lastRefreshed = ss.RefreshDt.Format(time.RFC3339)
+			lastRefreshed, _ = models.NewMultiDt(ss.RefreshDt)
 			players = ss.PlayerCount
 		}
 		games = append(games, GameCounts{ss.GameTypeCd, ss.GameCount})
 	}
 
-	return json.Marshal(Response{Players: players, Games: games, Scope: scope, LastRefreshed: lastRefreshed})
+	return &SummaryBase{Players: players, Games: games, Scope: scope, LastRefreshed: lastRefreshed}, nil
+
 }
 
 // ActivePlayerBase is the base type used to represent active players for all

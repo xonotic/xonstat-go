@@ -13,28 +13,8 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
-	"gitlab.com/xonotic/xonstat/pkg/models"
 	"golang.org/x/text/message"
 )
-
-// SummaryStatsHandler retrieves information about the summary stats
-func (ae *AppEnv) SummaryStatsHandler(w http.ResponseWriter, r *http.Request) {
-	scope := r.URL.Query().Get("scope")
-	if scope != "all" && scope != "day" {
-		scope = "all"
-	}
-
-	summaryStats, err := leaderboard.SummaryStatsJSON(scope, ae.db)
-	if err != nil {
-		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
-		return
-	}
-
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(summaryStats)
-}
 
 // TopActiveHandler retrieves information about the top active players by playing time
 func (ae *AppEnv) TopActiveHandler(w http.ResponseWriter, r *http.Request) {
@@ -218,42 +198,42 @@ func (ae *AppEnv) TopMapsHandler(w http.ResponseWriter, r *http.Request) {
 
 // Assemble the stats line at the top of the leaderboard. Can accept either the "all" or "day"
 // scoped version of SummaryStat array.
-func makeStatLine(prefix string, summaryStats []*models.SummaryStat, suffix string) template.HTML {
+func makeStatLine(prefix string, summaryStats *leaderboard.SummaryBase, suffix string) template.HTML {
 	// TODO: Add links to the game types when that handler/template is ready.
 	// Derive the URL if possible instead of hard coding it.
 
 	// This is used to get the commas in the output's numbers.
 	p := message.NewPrinter(message.MatchLanguage("en"))
 
-	if len(summaryStats) == 0 {
+	if len(summaryStats.Games) == 0 {
 		return ""
 	}
 
 	// The total number of games.
 	var totalGameCount int
-	for _, v := range summaryStats {
+	for _, v := range summaryStats.Games {
 		totalGameCount += v.GameCount
 	}
 
 	// We can't show the counts for *all* game types, so we'll group all the ones past the top five
 	// into an "other" category.
 	var otherGameCount int
-	if len(summaryStats) > 5 {
-		for _, v := range summaryStats[5:] {
+	if len(summaryStats.Games) > 5 {
+		for _, v := range summaryStats.Games[5:] {
 			otherGameCount += v.GameCount
 		}
 	}
 
 	var buf bytes.Buffer
-	buf.WriteString(p.Sprintf("%d players and %d games (", summaryStats[1].PlayerCount, totalGameCount))
+	buf.WriteString(p.Sprintf("%d players and %d games (", summaryStats.Players, totalGameCount))
 
 	// If for some reason we don't have 5 "top" game types...
 	topN := 5
-	if len(summaryStats) < topN {
-		topN = len(summaryStats)
+	if len(summaryStats.Games) < topN {
+		topN = len(summaryStats.Games)
 	}
 
-	for i, v := range summaryStats[:topN] {
+	for i, v := range summaryStats.Games[:topN] {
 		buf.WriteString(p.Sprintf("%d <a href=\"%s?game_type_cd=%s\">%s</a>", v.GameCount, reverse.Rev("games"), v.GameTypeCd, v.GameTypeCd))
 
 		if i < topN-1 {
@@ -272,7 +252,7 @@ func makeStatLine(prefix string, summaryStats []*models.SummaryStat, suffix stri
 // LeaderboardHandler is the main page of the site
 func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	// The summary stat line for all activity tracked thus far.
-	allSummaryStats, err := leaderboard.SummaryStatsData("all", ae.db)
+	allSummaryStats, err := leaderboard.SummaryData("all", ae.db)
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
@@ -280,7 +260,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The summary stat line typically for the past day's worth of activity.
-	daySummaryStats, err := leaderboard.SummaryStatsData("day", ae.db)
+	daySummaryStats, err := leaderboard.SummaryData("day", ae.db)
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
@@ -301,8 +281,8 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	now := time.Now().UTC()
 	cutoff := now.AddDate(0, 0, -1*recentGamesDays)
 
-	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, game.EmptyMapID, 
-		game.EmptyPlayerID, game.EmptyGameTypeCd, &cutoff, game.EmptyStartGameID, 
+	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, game.EmptyMapID,
+		game.EmptyPlayerID, game.EmptyGameTypeCd, &cutoff, game.EmptyStartGameID,
 		game.EmptyEndGameID, 20)
 
 	// The structure passed to the template.

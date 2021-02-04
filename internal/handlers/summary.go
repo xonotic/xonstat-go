@@ -24,8 +24,8 @@ type summaryJSONResponse struct {
 
 func summaryBaseToJSONResponse(base *leaderboard.SummaryBase) summaryJSONResponse {
 	games := make([]gameCountsJSON, len(base.Games))
-	for _, v := range base.Games {
-		games = append(games, gameCountsJSON{v.GameTypeCd, v.GameCount})
+	for i, v := range base.Games {
+		games[i] = gameCountsJSON{v.GameTypeCd, v.GameCount}
 	}
 
 	return summaryJSONResponse{base.Players, games, base.Scope, base.LastRefreshed.Dt.Format(time.RFC3339)}
