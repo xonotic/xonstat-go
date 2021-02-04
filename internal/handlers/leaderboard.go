@@ -249,6 +249,15 @@ func makeStatLine(prefix string, summaryStats *leaderboard.SummaryBase, suffix s
 	return template.HTML(buf.String())
 }
 
+type leaderboardResponse struct {
+	StatLine      template.HTML
+	DayStatLine   template.HTML
+	ActivePlayers []*leaderboard.ActivePlayerBase
+	ActiveServers []leaderboard.ActiveServerBase
+	ActiveMaps    []leaderboard.ActiveMapBase
+	RecentGames   []game.RecentGameBase
+}
+
 // LeaderboardHandler is the main page of the site
 func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	// The summary stat line for all activity tracked thus far.
@@ -285,17 +294,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 		game.EmptyPlayerID, game.EmptyGameTypeCd, &cutoff, game.EmptyStartGameID,
 		game.EmptyEndGameID, 20)
 
-	// The structure passed to the template.
-	type Data struct {
-		StatLine      template.HTML
-		DayStatLine   template.HTML
-		ActivePlayers []*leaderboard.ActivePlayerBase
-		ActiveServers []leaderboard.ActiveServerBase
-		ActiveMaps    []leaderboard.ActiveMapBase
-		RecentGames   []game.RecentGameBase
-	}
-
-	data := Data{
+	response := leaderboardResponse{
 		StatLine:      makeStatLine("", allSummaryStats, ""),
 		DayStatLine:   makeStatLine("", daySummaryStats, ""),
 		ActivePlayers: activePlayers,
@@ -304,7 +303,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 		RecentGames:   recentGames,
 	}
 
-	err = ae.templates["leaderboard.page.html"].Execute(w, data)
+	err = ae.templates["leaderboard.page.html"].Execute(w, response)
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
