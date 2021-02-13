@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/alehano/reverse"
@@ -15,66 +14,6 @@ import (
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"golang.org/x/text/message"
 )
-
-// TopMapsHandler retrieves information about the top active maps
-func (ae *AppEnv) TopMapsHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
-
-	startStr := r.URL.Query().Get("start")
-	start, err := strconv.Atoi(startStr)
-	if err != nil {
-		start = 1
-	}
-
-	if acceptHeader == "application/json" {
-		// JSON response
-		bytes, err := leaderboard.ActiveMapsJSON(10, start, ae.db)
-		if err != nil {
-			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
-			return
-		}
-
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(bytes)
-	} else {
-		// HTML response
-		activeMaps, err := leaderboard.ActiveMapsData(20, start, ae.db)
-		if err != nil {
-			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
-			return
-		}
-
-		// The structure passed to the template.
-		type Data struct {
-			ActiveMaps   []leaderboard.ActiveMapBase
-			Start        int
-			Next         int
-			ShowMoreLink bool
-		}
-
-		next := 1
-		if len(activeMaps) > 0 {
-			next = activeMaps[len(activeMaps)-1].SortOrder + 1
-		}
-
-		data := Data{
-			ActiveMaps:   activeMaps,
-			Start:        start,
-			Next:         next,
-			ShowMoreLink: len(activeMaps) == 20,
-		}
-
-		err = ae.templates["activemaps.page.html"].Execute(w, data)
-		if err != nil {
-			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
-			return
-		}
-	}
-}
 
 // Assemble the stats line at the top of the leaderboard. Can accept either the "all" or "day"
 // scoped version of SummaryStat array.
