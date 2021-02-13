@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"html/template"
 	"time"
 
@@ -112,34 +111,4 @@ func InfoData(db models.Datastore, serverID int) (*InfoBase, error) {
 		ActiveInd: rawServer.ActiveInd,
 		CreateDt:  dt,
 	}, nil
-}
-
-// InfoJSON returns server records as JSON.
-func InfoJSON(db models.Datastore, serverID int) ([]byte, error) {
-	rawData, err := InfoData(db, serverID)
-	if err != nil {
-		return nil, err
-	}
-
-	type Response struct {
-		ServerID  int    `json:"server_id"`
-		Name      string `json:"name"`
-		IPAddr    string `json:"ip_addr"`
-		Port      int    `json:"port"`
-		Revision  string `json:"revision"`
-		ActiveInd bool   `json:"active_ind"`
-		CreateDt  string `json:"create_dt"`
-	}
-
-	r := Response{
-		ServerID:  rawData.ServerID,
-		Name:      rawData.Name,
-		IPAddr:    rawData.IPAddr,
-		Port:      rawData.Port,
-		Revision:  rawData.Revision,
-		ActiveInd: rawData.ActiveInd,
-		CreateDt:  rawData.CreateDt.UTCStr,
-	}
-
-	return json.Marshal(r)
 }
