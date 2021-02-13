@@ -18,8 +18,8 @@ type serverTopScorerEntry struct {
 	Rank     int    `json:"rank"`
 }
 
-// NewServerTopScorerEntry creates a new ServerTopScorerEntry from its base type.
-func NewServerTopScorerEntry(base *server.TopScorerBase) *serverTopScorerEntry {
+// newServerTopScorerEntry creates a new ServerTopScorerEntry from its base type.
+func newServerTopScorerEntry(base *server.TopScorerBase) *serverTopScorerEntry {
 	return &serverTopScorerEntry{
 		PlayerID: base.PlayerID,
 		Nick:     base.Nick,
@@ -55,7 +55,7 @@ func (ae *AppEnv) ServerTopScorersHandler(w http.ResponseWriter, r *http.Request
 	topScoringPlayers, _ := server.TopScorerData(ae.db, serverID)
 	topScorers := make([]*serverTopScorerEntry, len(topScoringPlayers))
 	for i, base := range topScoringPlayers {
-		topScorers[i] = NewServerTopScorerEntry(base)
+		topScorers[i] = newServerTopScorerEntry(base)
 	}
 
 	response := serverTopScorersResponse{
