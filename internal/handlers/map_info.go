@@ -7,17 +7,31 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/spf13/viper"
 	"github.com/go-chi/chi"
+	"github.com/spf13/viper"
+	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/mmap"
-	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/server"
 	"strconv"
 )
 
-// MapInfoResponse is the view-specific information about a map related information.
-type MapInfoResponse struct {
+type mapInfoJSONResponse struct {
+	MapID    int    `json:"map_id"`
+	Name     string `json:"name"`
+	CreateDt string `json:"create_dt"`
+}
+
+func mapInfoBaseToJSON(m *mmap.InfoBase) ([]byte, error) {
+	r := mapInfoJSONResponse{
+		MapID:    m.MapID,
+		Name:     m.Name,
+		CreateDt: m.CreateDt.Dt.Format(time.RFC3339),
+	}
+	return json.Marshal(r)
+}
+
+type mapInfoResponse struct {
 	Map               *mmap.InfoBase
 	TopScoringPlayers []*server.TopScorerBase
 	TopActivePlayers  []*leaderboard.ActivePlayerBase
@@ -43,29 +57,35 @@ func (ae *AppEnv) MapInfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	topScorers, _ := mmap.TopScorerData(ae.db, mapID)
-	topActive, _ := mmap.TopActivePlayersData(ae.db, mapID)
-	topServers, _ := mmap.TopActiveServersData(ae.db, mapID)
-
-	recentGamesCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
-	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, mapID, game.EmptyPlayerID,
-		game.EmptyGameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20)
-
-	response := &MapInfoResponse{
-		Map:               info,
-		TopScoringPlayers: topScorers,
-		TopActivePlayers:  topActive,
-		TopActiveServers:  topServers,
-		RecentGames: recentGames,
-	}
-
 	if acceptHeader == "application/json" {
-		bytes, _ := json.Marshal(response)
+		// JSON response
+		bytes, err := mapInfoBaseToJSON(info)
+		if err != nil {
+			log.Printf("Error: %s", err)
+			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			return
+		}
 
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(bytes)
 	} else {
+		// HTML response
+		topScorers, _ := mmap.TopScorerData(ae.db, mapID)
+		topActive, _ := mmap.TopActivePlayersData(ae.db, mapID)
+		topServers, _ := mmap.TopActiveServersData(ae.db, mapID)
+
+		recentGamesCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
+		recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, mapID, game.EmptyPlayerID,
+			game.EmptyGameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20)
+
+		response := &mapInfoResponse{
+			Map:               info,
+			TopScoringPlayers: topScorers,
+			TopActivePlayers:  topActive,
+			TopActiveServers:  topServers,
+			RecentGames:       recentGames,
+		}
 		err = ae.templates["mapinfo.page.html"].Execute(w, response)
 		if err != nil {
 			log.Printf("Error: %s", err)
@@ -74,4 +94,3 @@ func (ae *AppEnv) MapInfoHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
-
