@@ -1,7 +1,6 @@
 package game
 
 import (
-	"encoding/json"
 	"html/template"
 	"time"
 
@@ -92,51 +91,4 @@ func RecentGamesData(db models.Datastore, serverID int, mapID int, playerID int,
 	}
 
 	return recentGames, err
-}
-
-// RecentGamesJSON returns recent games in JSON format
-func RecentGamesJSON(db models.Datastore, serverID int, mapID int, playerID int, gameTypeCd string,
-	cutoff *time.Time, startGameID int, endGameID int, limit int) ([]byte, error) {
-
-	rawData, err := RecentGamesData(db, serverID, mapID, playerID, gameTypeCd, cutoff,
-		startGameID, endGameID, limit)
-	if err != nil {
-		return nil, err
-	}
-
-	// the JSON response
-	type Response struct {
-		GameID          int    `json:"game_id"`
-		GameTypeCd      string `json:"game_type_cd"`
-		GameTypeDescr   string `json:"game_type_descr"`
-		ServerID        int    `json:"server_id"`
-		ServerName      string `json:"server_name"`
-		MapID           int    `json:"map_id"`
-		MapName         string `json:"map_name"`
-		WinningTeam     int    `json:"winning_team"`
-		WinningPlayerID int    `json:"winning_player_id"`
-		WinningNick     string `json:"nick"`
-		CreateDt        string `json:"create_dt"`
-	}
-
-	var rgs []Response
-	for _, rg := range rawData {
-		r := Response{
-			GameID:          rg.GameID,
-			GameTypeCd:      rg.GameTypeCd,
-			GameTypeDescr:   rg.GameTypeDescr,
-			ServerID:        rg.ServerID,
-			ServerName:      rg.ServerName,
-			MapID:           rg.MapID,
-			MapName:         rg.MapName,
-			WinningTeam:     rg.WinningTeam,
-			WinningPlayerID: rg.WinningPlayerID,
-			WinningNick:     rg.WinningNick,
-			CreateDt:        rg.CreateDt.Dt.Format(time.RFC3339),
-		}
-
-		rgs = append(rgs, r)
-	}
-
-	return json.Marshal(rgs)
 }
