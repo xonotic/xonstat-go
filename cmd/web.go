@@ -87,7 +87,7 @@ func web(port string, printRoutes bool) {
 
 	// Register all "regular" routes and handlers.
 	r.Get(reverse.Add("leaderboard", "/"), env.LeaderboardHandler)
-	r.Get(reverse.Add("summary", "/summary"), env.SummaryStatsHandler)
+	r.Get(reverse.Add("summary", "/summary"), env.SummaryHandler)
 	r.Get(reverse.Add("topactive", "/topactive"), env.TopActiveHandler)
 	r.Get(reverse.Add("topservers", "/topservers"), env.TopServersHandler)
 	r.Get(reverse.Add("topmaps", "/topmaps"), env.TopMapsHandler)
