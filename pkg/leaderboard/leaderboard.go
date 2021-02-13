@@ -87,36 +87,6 @@ func ActivePlayersData(limit, start int, db models.Datastore) ([]*ActivePlayerBa
 	return ActivePlayerToActivePlayerBase(rawActivePlayers), nil
 }
 
-// ActivePlayersJSON returns active player stats in JSON form.
-func ActivePlayersJSON(limit, start int, db models.Datastore) ([]byte, error) {
-	rawData, err := ActivePlayersData(limit, start, db)
-	if err != nil {
-		return nil, err
-	}
-
-	// the JSON response (a single entry in the list)
-	type Response struct {
-		Rank      int    `json:"rank"`
-		PlayerID  int    `json:"player_id"`
-		Nick      string `json:"nick"`
-		AliveTime string `json:"alivetime"`
-	}
-
-	var activePlayers []Response
-	for _, ap := range rawData {
-		resp := Response{
-			Rank:      ap.SortOrder,
-			PlayerID:  ap.PlayerID,
-			Nick:      ap.StrippedNick,
-			AliveTime: ap.AliveTime,
-		}
-
-		activePlayers = append(activePlayers, resp)
-	}
-
-	return json.Marshal(activePlayers)
-}
-
 // ActiveServerBase is the base type for marshalling active servers to other formats (HTML, JSON, etc).
 type ActiveServerBase struct {
 	SortOrder  int
