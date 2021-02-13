@@ -116,35 +116,6 @@ func ActiveServersData(limit, start int, db models.Datastore) ([]ActiveServerBas
 	return activeServers, nil
 }
 
-// ActiveServersJSON returns active server stats in JSON form.
-func ActiveServersJSON(limit, start int, db models.Datastore) ([]byte, error) {
-	rawData, err := ActiveServersData(limit, start, db)
-	if err != nil {
-		return nil, err
-	}
-
-	// the JSON response (a single entry in the list)
-	type Response struct {
-		Rank       int    `json:"rank"`
-		ServerID   int    `json:"server_id"`
-		ServerName string `json:"server_name"`
-		PlayTime   string `json:"playtime"`
-	}
-
-	var activeServers []Response
-	for _, as := range rawData {
-		resp := Response{
-			Rank:       as.SortOrder,
-			ServerID:   as.ServerID,
-			ServerName: as.ServerName,
-			PlayTime:   as.PlayTime,
-		}
-		activeServers = append(activeServers, resp)
-	}
-
-	return json.Marshal(activeServers)
-}
-
 // ActiveMapBase is the base type returned for all formats (HTML, JSON, etc.).
 type ActiveMapBase struct {
 	SortOrder int
