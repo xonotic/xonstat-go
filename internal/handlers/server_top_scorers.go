@@ -10,8 +10,8 @@ import (
 	"gitlab.com/xonotic/xonstat/pkg/server"
 )
 
-// ServerTopScorerEntry is one entry in the list of a server's top scoring players.
-type ServerTopScorerEntry struct {
+// serverTopScorerEntry is one entry in the list of a server's top scoring players.
+type serverTopScorerEntry struct {
 	PlayerID int    `json:"player_id"`
 	Nick     string `json:"nick"`
 	Score    int    `json:"score"`
@@ -19,8 +19,8 @@ type ServerTopScorerEntry struct {
 }
 
 // NewServerTopScorerEntry creates a new ServerTopScorerEntry from its base type.
-func NewServerTopScorerEntry(base *server.TopScorerBase) *ServerTopScorerEntry {
-	return &ServerTopScorerEntry{
+func NewServerTopScorerEntry(base *server.TopScorerBase) *serverTopScorerEntry {
+	return &serverTopScorerEntry{
 		PlayerID: base.PlayerID,
 		Nick:     base.Nick,
 		Score:    base.Score,
@@ -28,10 +28,10 @@ func NewServerTopScorerEntry(base *server.TopScorerBase) *ServerTopScorerEntry {
 	}
 }
 
-// ServerTopScorersResponse is the response type for the ServerTopScorersHandler (JSON only).
-type ServerTopScorersResponse struct {
+// serverTopScorersResponse is the response type for the ServerTopScorersHandler (JSON only).
+type serverTopScorersResponse struct {
 	ServerID   int                     `json:"server_id"`
-	TopScorers []*ServerTopScorerEntry `json:"top_scorers"`
+	TopScorers []*serverTopScorerEntry `json:"top_scorers"`
 }
 
 // ServerTopScorersHandler retrieves information about the top scoring players on a given server.
@@ -53,12 +53,12 @@ func (ae *AppEnv) ServerTopScorersHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	topScoringPlayers, _ := server.TopScorerData(ae.db, serverID)
-	topScorers := make([]*ServerTopScorerEntry, len(topScoringPlayers))
+	topScorers := make([]*serverTopScorerEntry, len(topScoringPlayers))
 	for i, base := range topScoringPlayers {
 		topScorers[i] = NewServerTopScorerEntry(base)
 	}
 
-	response := ServerTopScorersResponse{
+	response := serverTopScorersResponse{
 		ServerID:   serverID,
 		TopScorers: topScorers,
 	}
