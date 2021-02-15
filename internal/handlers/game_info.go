@@ -9,7 +9,32 @@ import (
 
 	"github.com/go-chi/chi"
 	"gitlab.com/xonotic/xonstat/pkg/game"
+	"gitlab.com/xonotic/xonstat/pkg/mmap"
+	"gitlab.com/xonotic/xonstat/pkg/models"
+	"gitlab.com/xonotic/xonstat/pkg/server"
 )
+
+type gameInfoResponse struct {
+	GameID                int
+	GameTypeCd            string
+	GameTypeDescr         string
+	Duration              *models.MultiDuration
+	Winner                int
+	MatchID               string
+	Mod                   string
+	CreateDt              *models.MultiDt
+	Server                *server.InfoBase
+	Map                   *mmap.InfoBase
+	TeamGameStatsByTeam   map[int]*game.TeamGameStatBase
+	TeamOrdering          []int
+	PlayerGameStats       []*game.PlayerGameStatBase
+	PlayerGameStatsByTeam map[int][]*game.PlayerGameStatBase
+	ShowFragMatrix        bool
+	FragMatrix            map[int][]int
+	Forfeits              []*game.NonParticipantBase
+	Spectators            []*game.NonParticipantBase
+	ShowWeaponCharts      bool
+}
 
 // GameInfoHandler retrieves information about a game by its ID.
 func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
@@ -22,6 +47,27 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	gameInfo, err := game.InfoData(ae.db, gameID)
+	if err != nil {
+		log.Printf("Error: %s", err)
+		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		return
+	}
+
+	serverInfo, err := server.InfoData(ae.db, gameInfo.ServerID)
+	if err != nil {
+		log.Printf("Error: %s", err)
+		ae.NotFoundHandler(w, r)
+		return
+	}
+
+	mapInfo, err := mmap.InfoData(ae.db, gameInfo.MapID)
+	if err != nil {
+		log.Printf("Error: %s", err)
+		ae.NotFoundHandler(w, r)
+		return
+	}
+
 	if acceptHeader == "application/json" {
 		// JSON response
 		w.Header().Add("Content-Type", "application/json")
@@ -29,14 +75,28 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 		// w.Write()
 	} else {
 		// HTML response
-		gameInfo, err := game.GameInfoData(ae.db, gameID)
-		if err != nil {
-			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
-			return
+		response := gameInfoResponse{
+			GameID:                gameInfo.GameID,
+			GameTypeCd:            gameInfo.GameTypeCd,
+			GameTypeDescr:         gameInfo.GameTypeDescr,
+			Duration:              gameInfo.Duration,
+			Winner:                gameInfo.Winner,
+			MatchID:               gameInfo.MatchID,
+			Mod:                   gameInfo.Mod,
+			CreateDt:              gameInfo.CreateDt,
+			Server:                serverInfo,
+			Map:                   mapInfo,
+			TeamGameStatsByTeam:   gameInfo.TeamGameStatsByTeam,
+			TeamOrdering:          gameInfo.TeamOrdering,
+			PlayerGameStats:       gameInfo.PlayerGameStats,
+			PlayerGameStatsByTeam: gameInfo.PlayerGameStatsByTeam,
+			ShowFragMatrix:        gameInfo.ShowFragMatrix,
+			FragMatrix:            gameInfo.FragMatrix,
+			Forfeits:              gameInfo.Forfeits,
+			Spectators:            gameInfo.Spectators,
+			ShowWeaponCharts:      gameInfo.ShowWeaponCharts,
 		}
-
-		err = ae.templates["gameinfo.page.html"].Execute(w, gameInfo)
+		err = ae.templates["gameinfo.page.html"].Execute(w, response)
 		if err != nil {
 			log.Printf("Error: %s", err)
 			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)

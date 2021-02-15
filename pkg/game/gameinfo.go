@@ -5,9 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/xonotic/xonstat/pkg/mmap"
 	"gitlab.com/xonotic/xonstat/pkg/models"
-	"gitlab.com/xonotic/xonstat/pkg/server"
 	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
 
@@ -199,8 +197,8 @@ func NewNonParticipantBase(np *models.PlayerGameNonParticipant) *NonParticipantB
 	}
 }
 
-// GameInfoBase is the view-agnostic representation of a Game.
-type GameInfoBase struct {
+// InfoBase is the view-agnostic representation of a Game.
+type InfoBase struct {
 	GameID                int
 	GameTypeCd            string
 	GameTypeDescr         string
@@ -209,8 +207,8 @@ type GameInfoBase struct {
 	MatchID               string
 	Mod                   string
 	CreateDt              *models.MultiDt
-	Server                *server.InfoBase
-	Map                   *mmap.InfoBase
+	ServerID              int
+	MapID                 int
 	TeamGameStatsByTeam   map[int]*TeamGameStatBase
 	TeamOrdering          []int
 	PlayerGameStats       []*PlayerGameStatBase
@@ -231,19 +229,9 @@ func shouldShowWeaponCharts(gameTypeCd string) bool {
 	}
 }
 
-// GameInfoData returns the view-agnostic data for a given game by its ID.
-func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
+// InfoData returns the view-agnostic data for a given game by its ID.
+func InfoData(db models.Datastore, gameID int) (*InfoBase, error) {
 	game, err := db.RGameByID(gameID)
-	if err != nil {
-		return nil, err
-	}
-
-	server, err := server.InfoData(db, game.ServerID)
-	if err != nil {
-		return nil, err
-	}
-
-	theMap, err := mmap.InfoData(db, game.MapID)
 	if err != nil {
 		return nil, err
 	}
@@ -353,7 +341,7 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		showFragMatrix = true
 	}
 
-	return &GameInfoBase{
+	return &InfoBase{
 		GameID:                gameID,
 		GameTypeCd:            game.GameTypeCd,
 		GameTypeDescr:         game.GameTypeDescr,
@@ -362,8 +350,8 @@ func GameInfoData(db models.Datastore, gameID int) (*GameInfoBase, error) {
 		MatchID:               game.MatchID.String,
 		Mod:                   game.Mod.String,
 		CreateDt:              dt,
-		Server:                server,
-		Map:                   theMap,
+		ServerID:              game.ServerID,
+		MapID:                 game.MapID,
 		TeamGameStatsByTeam:   teamGameStatsByTeam,
 		TeamOrdering:          teamOrdering,
 		PlayerGameStats:       playerGameStats,

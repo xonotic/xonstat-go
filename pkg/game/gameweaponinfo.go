@@ -7,6 +7,7 @@ import (
 	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
+// WeaponInfoBase is the weapon info by a single player in a match, with some added fields for convenience.
 type WeaponInfoBase struct {
 	PlayerWeaponStatID int
 	PlayerID           int
