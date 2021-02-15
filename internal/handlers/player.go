@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"sort"
@@ -586,93 +585,4 @@ func (ae *AppEnv) PlayerHashkeyInfoHandler(w http.ResponseWriter, r *http.Reques
 	w.Write(buf.Bytes())
 }
 
-// PlayerIndexJSONResponse is the response type for the player index.
-type PlayerIndexJSONResponse struct {
-	Start    int           `json:"start"`
-	Next     int           `json:"next"`
-	ShowMore bool          `json:"show_more"`
-	HTML     template.HTML `json:"HTML"`
-}
 
-// PlayerIndexResponse is the response type for the player index.
-type PlayerIndexResponse struct {
-	Start        int
-	Next         int
-	NickFragment string
-	ShowMore     bool
-	Players      []*player.InfoBase
-}
-
-// PlayerIndexHandler is the web handler for showing the player index and player search results.
-func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
-
-	limit := 20
-
-	params := r.URL.Query()
-	var start int
-
-	start, err := strconv.Atoi(params.Get("start"))
-	if err != nil {
-		start = models.BlankStart
-	}
-
-	nickFragment := params.Get("nick")
-
-	players, err := player.IndexData(ae.db, start, limit, nickFragment)
-	if err != nil {
-		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
-		return
-	}
-
-	var next int
-	if len(players) < 1 {
-		next = -1
-	} else {
-		next = players[len(players)-1].PlayerID
-	}
-
-	var showMore bool
-	if len(players) >= limit {
-		showMore = true
-	}
-
-	response := PlayerIndexResponse{
-		Start:        start,
-		Next:         next,
-		NickFragment: nickFragment,
-		ShowMore:     showMore,
-		Players:      players,
-	}
-
-	if acceptHeader == "application/json" {
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		var fragment bytes.Buffer
-		err := ae.templates["playerindex.fragment.page.html"].Execute(&fragment, response)
-		if err != nil {
-			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
-			return
-		}
-
-		jsonResponse := PlayerIndexJSONResponse{
-			Start:    response.Start,
-			Next:     response.Next,
-			ShowMore: response.ShowMore,
-			HTML:     template.HTML(fragment.String()),
-		}
-
-		bytes, _ := json.Marshal(jsonResponse)
-		w.Write(bytes)
-	} else {
-		err := ae.templates["playerindex.page.html"].Execute(w, response)
-		if err != nil {
-			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
-			return
-		}
-	}
-}
