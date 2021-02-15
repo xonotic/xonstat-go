@@ -213,20 +213,58 @@ type InfoBase struct {
 	TeamOrdering          []int
 	PlayerGameStats       []*PlayerGameStatBase
 	PlayerGameStatsByTeam map[int][]*PlayerGameStatBase
-	ShowFragMatrix        bool
 	FragMatrix            map[int][]int
 	Forfeits              []*NonParticipantBase
 	Spectators            []*NonParticipantBase
-	ShowWeaponCharts      bool
 }
 
-func shouldShowWeaponCharts(gameTypeCd string) bool {
-	switch gameTypeCd {
-	case "cts", "nb", "nexball":
-		return false
-	default:
-		return true
+// Build the frag matrix.
+func assembleFragMatrix(db models.Datastore, gameID int, gameTypeCd string, playerGameStats []*PlayerGameStatBase) (map[int][]int, error) {
+	fragMatrix := make(map[int][]int)
+
+	if submission.ShouldDoFragMatrix(gameTypeCd) {
+		rawMatrix, err := db.RPlayerGameFragMatrixByGameID(gameID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Map the matrix records to their player game stat records for easier display processing.
+		matrixByPGSID := make(map[int]*models.PlayerGameFragMatrix)
+		for _, v := range rawMatrix {
+			matrixByPGSID[v.PlayerGameStatID] = v
+		}
+
+		for _, fragger := range playerGameStats {
+			var cells []int
+			for _, victim := range playerGameStats {
+				if fragger.PlayerGameStatID == victim.PlayerGameStatID {
+					// TODO: This is where the fragger is equal to the victim. Use suicides here?
+					cells = append(cells, 0)
+				} else {
+					// Populate the cell for the intersection of the fragger and victim,
+					// i.e. how many times fragger has fragged the victim in the match.
+					fraggerMatrix := matrixByPGSID[fragger.PlayerGameStatID]
+					victimMatrix := matrixByPGSID[victim.PlayerGameStatID]
+
+					// Sometimes there are no entries for a given PGStatID. In these cases,
+					// we treat that as a NULL intersection, assigning zero frags and moving on.
+					if fraggerMatrix == nil || victimMatrix == nil {
+						cells = append(cells, 0)
+						continue
+					}
+
+					if frags, ok := fraggerMatrix.Matrix[victimMatrix.PlayerIndex]; ok {
+						cells = append(cells, frags)
+					} else {
+						cells = append(cells, 0)
+					}
+				}
+			}
+			fragMatrix[fragger.PlayerGameStatID] = cells
+		}
 	}
+
+	return fragMatrix, nil
 }
 
 // InfoData returns the view-agnostic data for a given game by its ID.
@@ -293,52 +331,9 @@ func InfoData(db models.Datastore, gameID int) (*InfoBase, error) {
 		playerGameStatsByTeam[pgsb.Team] = append(playerGameStatsByTeam[pgsb.Team], pgsb)
 	}
 
-	// Frag matrix processing.
-	showFragMatrix := false
-	fragMatrix := make(map[int][]int)
-
-	if submission.ShouldDoFragMatrix(game.GameTypeCd) {
-		rawMatrix, err := db.RPlayerGameFragMatrixByGameID(game.GameID)
-		if err != nil {
-			return nil, err
-		}
-
-		// Map the matrix records to their player game stat records for easier display processing.
-		matrixByPGSID := make(map[int]*models.PlayerGameFragMatrix)
-		for _, v := range rawMatrix {
-			matrixByPGSID[v.PlayerGameStatID] = v
-		}
-
-		for _, fragger := range playerGameStats {
-			var cells []int
-			for _, victim := range playerGameStats {
-				if fragger.PlayerGameStatID == victim.PlayerGameStatID {
-					// TODO: This is where the fragger is equal to the victim. Use suicides here?
-					cells = append(cells, 0)
-				} else {
-					// Populate the cell for the intersection of the fragger and victim,
-					// i.e. how many times fragger has fragged the victim in the match.
-					fraggerMatrix := matrixByPGSID[fragger.PlayerGameStatID]
-					victimMatrix := matrixByPGSID[victim.PlayerGameStatID]
-
-					// Sometimes there are no entries for a given PGStatID. In these cases,
-					// we treat that as a NULL intersection, assigning zero frags and moving on.
-					if fraggerMatrix == nil || victimMatrix == nil {
-						cells = append(cells, 0)
-						continue
-					}
-
-					if frags, ok := fraggerMatrix.Matrix[victimMatrix.PlayerIndex]; ok {
-						cells = append(cells, frags)
-					} else {
-						cells = append(cells, 0)
-					}
-				}
-			}
-			fragMatrix[fragger.PlayerGameStatID] = cells
-		}
-
-		showFragMatrix = true
+	fragMatrix, err := assembleFragMatrix(db, game.GameID, game.GameTypeCd, playerGameStats)
+	if err != nil {
+		return nil, err
 	}
 
 	return &InfoBase{
@@ -356,10 +351,8 @@ func InfoData(db models.Datastore, gameID int) (*InfoBase, error) {
 		TeamOrdering:          teamOrdering,
 		PlayerGameStats:       playerGameStats,
 		PlayerGameStatsByTeam: playerGameStatsByTeam,
-		ShowFragMatrix:        showFragMatrix,
 		FragMatrix:            fragMatrix,
 		Forfeits:              forfeits,
 		Spectators:            spectators,
-		ShowWeaponCharts:      shouldShowWeaponCharts(game.GameTypeCd),
 	}, nil
 }

@@ -14,6 +14,73 @@ import (
 	"gitlab.com/xonotic/xonstat/pkg/server"
 )
 
+type teamGameStatJSON struct {
+	Score  int    `json:"score"`
+	Rounds int    `json:"rounds"`
+	Caps   int    `json:"caps"`
+	Color  string `json:"color"`
+}
+
+type playerGameStatJSON struct {
+	PlayerGameStatID int    `json:"player_game_stat_id"`
+	PlayerID         int    `json:"player_id"`
+	Nick             string `json:"nick"`
+	Team             int    `json:"team"`
+	Color            string `json:"color"`
+	AliveTime        string `json:"alivetime"`
+	AliveTimeMS      int    `json:"alivetime_ms"`
+	Kills            int    `json:"kill"`
+	Deaths           int    `json:"deaths"`
+	Suicides         int    `json:"suicides"`
+	Score            int    `json:"score"`
+	Time             string `json:"time"`
+	TimeMS           string `json:"time_ms"`
+	Captures         int    `json:"captures"`
+	Pickups          int    `json:"pickups"`
+	Drops            int    `json:"drops"`
+	Returns          int    `json:"returns"`
+	Collects         int    `json:"collects"`
+	Destroys         int    `json:"destroys"`
+	Pushes           int    `json:"pushes"`
+	CarrierFrags     int    `json:"carrier_frags"`
+	Fastest          string `json:"fastest"`
+	FastestMS        int    `json:"fastest_ms"`
+	AvgLatency       int    `json:"avg_latency"`
+	ScoreboardPos    int    `json:"scoreboard_pos"`
+	Laps             int    `json:"laps"`
+	Revivals         int    `json:"revivals"`
+	Lives            int    `json:"lives"`
+}
+
+type nonParticipantJSON struct {
+	PlayerGameNonParticipantID int    `json:"player_game_nonparticipant_id"`
+	PlayerID                   int    `json:"player_id"`
+	GameID                     int    `json:"game_id"`
+	Nick                       string `json:"nick"`
+	AliveTime                  string `json:"alivetime"`
+	AliveTimeMS                int    `json:"alivetime_ms"`
+	Score                      int    `json:"score"`
+}
+
+type gameInfoJSONResponse struct {
+	GameID              int                        `json:"game_id"`
+	GameTypeCd          string                     `json:"game_type_cd"`
+	GameTypeDescr       string                     `json:"game_type_descr"`
+	Duration            string                     `json:"duration"`
+	Winner              int                        `json:"winner"`
+	MatchID             string                     `json:"match_id"`
+	Mod                 string                     `json:"mod"`
+	CreateDt            string                     `json:"create_dt"`
+	CreateDtFuzzy       string                     `json:"create_dt_fuzzy"`
+	ServerID            int                        `json:"server_id"`
+	MapID               int                        `json:"map_id"`
+	TeamGameStatsByTeam map[int]teamGameStatJSON   `json:"team_game_stats"`
+	PlayerGameStats     []playerGameStatJSON       `json:"player_game_stats"`
+	FragMatrix          map[int][]int              `json:"frag_matrix"`
+	Forfeits            []*game.NonParticipantBase `json:"forfeits"`
+	Spectators          []*game.NonParticipantBase `json:"spectators"`
+}
+
 type gameInfoResponse struct {
 	GameID                int
 	GameTypeCd            string
@@ -29,11 +96,21 @@ type gameInfoResponse struct {
 	TeamOrdering          []int
 	PlayerGameStats       []*game.PlayerGameStatBase
 	PlayerGameStatsByTeam map[int][]*game.PlayerGameStatBase
-	ShowFragMatrix        bool
 	FragMatrix            map[int][]int
 	Forfeits              []*game.NonParticipantBase
 	Spectators            []*game.NonParticipantBase
 	ShowWeaponCharts      bool
+	ShowFragMatrix        bool
+}
+
+// It doesn't make sense to show weapon charts for certain game modes.
+func shouldShowWeaponCharts(gameTypeCd string) bool {
+	switch gameTypeCd {
+	case "cts", "nb", "nexball":
+		return false
+	default:
+		return true
+	}
 }
 
 // GameInfoHandler retrieves information about a game by its ID.
@@ -54,20 +131,6 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serverInfo, err := server.InfoData(ae.db, gameInfo.ServerID)
-	if err != nil {
-		log.Printf("Error: %s", err)
-		ae.NotFoundHandler(w, r)
-		return
-	}
-
-	mapInfo, err := mmap.InfoData(ae.db, gameInfo.MapID)
-	if err != nil {
-		log.Printf("Error: %s", err)
-		ae.NotFoundHandler(w, r)
-		return
-	}
-
 	if acceptHeader == "application/json" {
 		// JSON response
 		w.Header().Add("Content-Type", "application/json")
@@ -75,6 +138,20 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 		// w.Write()
 	} else {
 		// HTML response
+		serverInfo, err := server.InfoData(ae.db, gameInfo.ServerID)
+		if err != nil {
+			log.Printf("Error: %s", err)
+			ae.NotFoundHandler(w, r)
+			return
+		}
+
+		mapInfo, err := mmap.InfoData(ae.db, gameInfo.MapID)
+		if err != nil {
+			log.Printf("Error: %s", err)
+			ae.NotFoundHandler(w, r)
+			return
+		}
+
 		response := gameInfoResponse{
 			GameID:                gameInfo.GameID,
 			GameTypeCd:            gameInfo.GameTypeCd,
@@ -90,12 +167,13 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 			TeamOrdering:          gameInfo.TeamOrdering,
 			PlayerGameStats:       gameInfo.PlayerGameStats,
 			PlayerGameStatsByTeam: gameInfo.PlayerGameStatsByTeam,
-			ShowFragMatrix:        gameInfo.ShowFragMatrix,
 			FragMatrix:            gameInfo.FragMatrix,
 			Forfeits:              gameInfo.Forfeits,
 			Spectators:            gameInfo.Spectators,
-			ShowWeaponCharts:      gameInfo.ShowWeaponCharts,
+			ShowWeaponCharts:      shouldShowWeaponCharts(gameInfo.GameTypeCd),
+			ShowFragMatrix:        len(gameInfo.FragMatrix) > 1,
 		}
+
 		err = ae.templates["gameinfo.page.html"].Execute(w, response)
 		if err != nil {
 			log.Printf("Error: %s", err)
