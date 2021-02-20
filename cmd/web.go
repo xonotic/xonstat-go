@@ -17,7 +17,24 @@ import (
 	"gitlab.com/xonotic/xonstat/internal/handlers"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gopkg.in/natefinch/lumberjack.v2"
+	"github.com/swaggo/http-swagger"
 )
+
+// @title XonStat API
+// @version 1.0
+// @description JSON and textual API for Xonotic statistics.
+// @termsOfService http://xonotic.org/tos
+
+// @contact.name Support
+// @contact.url https://gitlab.com/xonotic/xonstat-go/-/issues
+// @contact.email antibody@xonotic.org
+
+// @license.name AGPL 3.0
+// @license.url https://www.gnu.org/licenses/agpl-3.0.en.html
+
+// @host https://stats.xonotic.org
+// @BasePath /
+// @query.collection.format multi
 
 // FileServer conveniently sets up a http.FileServer handler to serve
 // static files from a http.FileSystem.
@@ -109,6 +126,11 @@ func web(port string, printRoutes bool) {
 	cwd, _ := os.Getwd()
 	staticDir := http.Dir(filepath.Join(cwd, "web/static"))
 	FileServer(r, "/static", staticDir)
+
+	// Swagger documentation via "swag" and "swag-http" libraries.
+	r.Get("/docs/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:6543/static/swagger.json"), //The url pointing to API definition"
+	))
 
 	if printRoutes {
 		opts := docgen.MarkdownOpts{
