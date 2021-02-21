@@ -22,34 +22,34 @@ type teamGameStatJSON struct {
 }
 
 type playerGameStatJSON struct {
-	PlayerGameStatID int    `json:"player_game_stat_id"`
-	PlayerID         int    `json:"player_id"`
-	Nick             string `json:"nick"`
-	Team             int    `json:"team"`
-	Color            string `json:"color"`
-	AliveTime        string `json:"alivetime"`
-	AliveTimeMS      int    `json:"alivetime_ms"`
-	Kills            int    `json:"kills"`
-	Deaths           int    `json:"deaths"`
-	Suicides         int    `json:"suicides"`
-	Score            int    `json:"score"`
-	Time             string `json:"time"`
-	TimeMS           int    `json:"time_ms"`
-	Captures         int    `json:"captures"`
-	Pickups          int    `json:"pickups"`
-	Drops            int    `json:"drops"`
-	Returns          int    `json:"returns"`
-	Collects         int    `json:"collects"`
-	Destroys         int    `json:"destroys"`
-	Pushes           int    `json:"pushes"`
-	CarrierFrags     int    `json:"carrier_frags"`
-	Fastest          string `json:"fastest"`
-	FastestMS        int    `json:"fastest_ms"`
-	AvgLatency       int    `json:"avg_latency"`
-	ScoreboardPos    int    `json:"scoreboard_pos"`
-	Laps             int    `json:"laps"`
-	Revivals         int    `json:"revivals"`
-	Lives            int    `json:"lives"`
+	PlayerGameStatID int     `json:"player_game_stat_id"`
+	PlayerID         int     `json:"player_id"`
+	Nick             string  `json:"nick"`
+	Team             int     `json:"team"`
+	Color            string  `json:"color"`
+	AliveTime        string  `json:"alivetime"`
+	AliveTimeMS      int     `json:"alivetime_ms"`
+	Kills            int     `json:"kills"`
+	Deaths           int     `json:"deaths"`
+	Suicides         int     `json:"suicides"`
+	Score            int     `json:"score"`
+	Time             string  `json:"time"`
+	TimeMS           int     `json:"time_ms"`
+	Captures         int     `json:"captures"`
+	Pickups          int     `json:"pickups"`
+	Drops            int     `json:"drops"`
+	Returns          int     `json:"returns"`
+	Collects         int     `json:"collects"`
+	Destroys         int     `json:"destroys"`
+	Pushes           int     `json:"pushes"`
+	CarrierFrags     int     `json:"carrier_frags"`
+	Fastest          float64 `json:"fastest"`
+	FastestMS        int     `json:"fastest_ms"`
+	AvgLatency       int     `json:"avg_latency"`
+	ScoreboardPos    int     `json:"scoreboard_pos"`
+	Laps             int     `json:"laps"`
+	Revivals         int     `json:"revivals"`
+	Lives            int     `json:"lives"`
 }
 
 type nonParticipantJSON struct {
@@ -102,13 +102,13 @@ func gameInfoBaseToJSON(ib game.InfoBase) ([]byte, error) {
 			Team:             v.Team,
 			Color:            v.Color,
 			AliveTime:        v.AliveTime.Short,
-			AliveTimeMS:      int(v.AliveTime.Duration.Microseconds()),
+			AliveTimeMS:      int(v.AliveTime.Milliseconds),
 			Kills:            v.Kills,
 			Deaths:           v.Deaths,
 			Suicides:         v.Suicides,
 			Score:            v.Score,
 			Time:             v.Time.Short,
-			TimeMS:           int(v.Time.Duration.Milliseconds()),
+			TimeMS:           int(v.Time.Milliseconds),
 			Captures:         v.Captures,
 			Pickups:          v.Pickups,
 			Drops:            v.Drops,
@@ -117,8 +117,8 @@ func gameInfoBaseToJSON(ib game.InfoBase) ([]byte, error) {
 			Destroys:         v.Destroys,
 			Pushes:           v.Pushes,
 			CarrierFrags:     v.CarrierFrags,
-			Fastest:          v.Fastest.Short,
-			FastestMS:        int(v.Fastest.Duration.Milliseconds()),
+			Fastest:          v.Fastest.Seconds,
+			FastestMS:        int(v.Fastest.Milliseconds),
 			AvgLatency:       v.AvgLatency,
 			ScoreboardPos:    v.ScoreboardPos,
 			Laps:             v.Laps,
@@ -136,7 +136,7 @@ func gameInfoBaseToJSON(ib game.InfoBase) ([]byte, error) {
 				GameID:                     v.GameID,
 				Nick:                       v.Nick.NickStripped,
 				AliveTime:                  v.AliveTime.Short,
-				AliveTimeMS:                int(v.AliveTime.Duration.Milliseconds()),
+				AliveTimeMS:                int(v.AliveTime.Milliseconds),
 				Score:                      int(v.Score),
 			}
 		}
@@ -151,7 +151,7 @@ func gameInfoBaseToJSON(ib game.InfoBase) ([]byte, error) {
 		GameTypeCd:          ib.GameTypeCd,
 		GameTypeDescr:       ib.GameTypeDescr,
 		Duration:            ib.Duration.Short,
-		DurationSecs:        int(ib.Duration.Duration.Seconds()),
+		DurationSecs:        int(ib.Duration.Seconds),
 		Winner:              ib.Winner,
 		MatchID:             ib.MatchID,
 		Mod:                 ib.Mod,
