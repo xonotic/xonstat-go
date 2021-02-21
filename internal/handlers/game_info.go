@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -221,7 +220,7 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 	gameInfo, err := game.InfoData(ae.db, gameID)
 	if err != nil {
 		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		ae.FiveHundredHandler(w, r)
 		return
 	}
 
@@ -230,7 +229,7 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 		bytes, err := gameInfoBaseToJSON(*gameInfo)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			ae.FiveHundredHandler(w, r)
 			return
 		}
 
@@ -278,7 +277,7 @@ func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 		err = ae.templates["gameinfo.page.html"].Execute(w, response)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			ae.FiveHundredHandler(w, r)
 			return
 		}
 	}

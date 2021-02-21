@@ -42,7 +42,7 @@ func (ae *AppEnv) PlayerHashkeyInfoHandler(w http.ResponseWriter, r *http.Reques
 	summaries, err := player.GameTypeSummaryData(ae.db, playerID)
 	if err != nil {
 		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		ae.FiveHundredHandler(w, r)
 		return
 	}
 
@@ -57,7 +57,7 @@ func (ae *AppEnv) PlayerHashkeyInfoHandler(w http.ResponseWriter, r *http.Reques
 	overallStats, err := player.OverallStatsData(ae.db, playerID)
 	if err != nil {
 		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		ae.FiveHundredHandler(w, r)
 		return
 	}
 

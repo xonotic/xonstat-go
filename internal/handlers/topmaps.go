@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -52,7 +51,7 @@ func (ae *AppEnv) TopMapsHandler(w http.ResponseWriter, r *http.Request) {
 	activeMaps, err := leaderboard.ActiveMapsData(20, start, ae.db)
 	if err != nil {
 		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		ae.FiveHundredHandler(w, r)
 		return
 	}
 
@@ -61,7 +60,7 @@ func (ae *AppEnv) TopMapsHandler(w http.ResponseWriter, r *http.Request) {
 		bytes, err := activeMapsBaseToJSON(activeMaps)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			ae.FiveHundredHandler(w, r)
 			return
 		}
 
@@ -86,7 +85,7 @@ func (ae *AppEnv) TopMapsHandler(w http.ResponseWriter, r *http.Request) {
 		err = ae.templates["activemaps.page.html"].Execute(w, data)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			ae.FiveHundredHandler(w, r)
 			return
 		}
 	}

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -47,7 +46,7 @@ func (ae *AppEnv) SummaryHandler(w http.ResponseWriter, r *http.Request) {
 	summaryStats, err := leaderboard.SummaryData(scope, ae.db)
 	if err != nil {
 		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		ae.FiveHundredHandler(w, r)
 		return
 	}
 
@@ -55,7 +54,7 @@ func (ae *AppEnv) SummaryHandler(w http.ResponseWriter, r *http.Request) {
 	bytes, err := json.Marshal(response)
 	if err != nil {
 		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		ae.FiveHundredHandler(w, r)
 		return
 	}
 

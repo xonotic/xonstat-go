@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -49,7 +48,7 @@ func (ae *AppEnv) MapIndexHandler(w http.ResponseWriter, r *http.Request) {
 	maps, err := mmap.IndexData(ae.db, start, limit, nameFragment)
 	if err != nil {
 		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		ae.FiveHundredHandler(w, r)
 		return
 	}
 
@@ -82,7 +81,7 @@ func (ae *AppEnv) MapIndexHandler(w http.ResponseWriter, r *http.Request) {
 		err := ae.templates["mapindex.fragment.page.html"].Execute(&fragment, response)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			ae.FiveHundredHandler(w, r)
 			return
 		}
 
@@ -100,7 +99,7 @@ func (ae *AppEnv) MapIndexHandler(w http.ResponseWriter, r *http.Request) {
 		err := ae.templates["mapindex.page.html"].Execute(w, response)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			ae.FiveHundredHandler(w, r)
 			return
 		}
 	}

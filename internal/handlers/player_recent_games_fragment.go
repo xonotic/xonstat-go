@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -36,7 +35,7 @@ func (ae *AppEnv) PlayerRecentGamesFragmentHandler(w http.ResponseWriter, r *htt
 	err = ae.templates["recentgames.fragment.page.html"].Execute(w, recentGames)
 	if err != nil {
 		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		ae.FiveHundredHandler(w, r)
 		return
 	}
 }

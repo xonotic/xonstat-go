@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -105,7 +104,7 @@ func (ae *AppEnv) ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		err = ae.templates["serverinfo.page.html"].Execute(w, response)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			ae.FiveHundredHandler(w, r)
 			return
 		}
 	}

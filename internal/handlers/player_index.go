@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -49,7 +48,7 @@ func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 	players, err := player.IndexData(ae.db, start, limit, nickFragment)
 	if err != nil {
 		log.Printf("Error: %s", err)
-		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		ae.FiveHundredHandler(w, r)
 		return
 	}
 
@@ -81,7 +80,7 @@ func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 		err := ae.templates["playerindex.fragment.page.html"].Execute(&fragment, response)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			ae.FiveHundredHandler(w, r)
 			return
 		}
 
@@ -98,7 +97,7 @@ func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 		err := ae.templates["playerindex.page.html"].Execute(w, response)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+			ae.FiveHundredHandler(w, r)
 			return
 		}
 	}
