@@ -219,7 +219,13 @@ type gameWeaponInfoJSONResponse struct {
 	AccuracyData    []*AccuracyDataset `json:"accuracy_data"`
 }
 
-// GameWeaponInfoHandler retrieves information about the weapons in a game by its ID.
+// GameWeaponInfoHandler godoc
+// @Summary Weapon information for a given game formatted for Chart.js
+// @Accept  json
+// @Produce  json
+// @Param id path int false "game_id"
+// @Success 200 {object} gameWeaponInfoJSONResponse
+// @Router /game/{id}/weapons [get]
 func (ae *AppEnv) GameWeaponInfoHandler(w http.ResponseWriter, r *http.Request) {
 	gameID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {

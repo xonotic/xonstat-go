@@ -39,7 +39,13 @@ type topServersResponse struct {
 	ShowMoreLink  bool
 }
 
-// TopServersHandler retrieves information about the top active servers by player aggregate playtime
+// TopServersHandler godoc
+// @Summary Top servers by number of matches hosted.
+// @Accept  json
+// @Produce  json
+// @Param start query int false "rank pagination offset"
+// @Success 200 {object} topServerJSONResponse
+// @Router /topservers [get]
 func (ae *AppEnv) TopServersHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
 

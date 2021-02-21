@@ -48,7 +48,13 @@ type serverInfoResponse struct {
 	RecentGames       []game.RecentGameBase
 }
 
-// ServerInfoHandler retrieves information about individual servers.
+// ServerInfoHandler godoc
+// @Summary Server information
+// @Accept  json
+// @Produce  json
+// @Param id path int true "server_id"
+// @Success 200 {object} serverInfoJSONResponse
+// @Router /server/{id} [get]
 func (ae *AppEnv) ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
 

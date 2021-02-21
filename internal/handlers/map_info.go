@@ -39,7 +39,13 @@ type mapInfoResponse struct {
 	RecentGames       []game.RecentGameBase
 }
 
-// MapInfoHandler is the web handler for retrieving map information
+// MapInfoHandler godoc
+// @Summary Map information
+// @Accept  json
+// @Produce  json
+// @Param id path int true "map_id"
+// @Success 200 {object} mapInfoJSONResponse
+// @Router /map/{id} [get]
 func (ae *AppEnv) MapInfoHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
 

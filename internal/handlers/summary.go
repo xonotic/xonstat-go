@@ -31,7 +31,13 @@ func summaryBaseToJSONResponse(base *leaderboard.SummaryBase) summaryJSONRespons
 	return summaryJSONResponse{base.Players, games, base.Scope, base.LastRefreshed.Dt.Format(time.RFC3339)}
 }
 
-// SummaryHandler retrieves information about the summary stats
+// SummaryHandler godoc
+// @summary Summary information about the games processed by the server in a given period of time.
+// @Accept  json
+// @Produce  json
+// @Param scope query string false "scope (either 'day' or 'all')"
+// @Success 200 {object} summaryJSONResponse
+// @Router /summary [get]
 func (ae *AppEnv) SummaryHandler(w http.ResponseWriter, r *http.Request) {
 	scope := r.URL.Query().Get("scope")
 	if scope != "all" && scope != "day" {

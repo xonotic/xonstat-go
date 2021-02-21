@@ -201,7 +201,13 @@ func shouldShowWeaponCharts(gameTypeCd string) bool {
 	}
 }
 
-// GameInfoHandler retrieves information about a game by its ID.
+// GameInfoHandler godoc
+// @Summary Game information
+// @Accept  json
+// @Produce  json
+// @Param id path int true "game_id"
+// @Success 200 {object} gameInfoJSONResponse
+// @Router /game/{id} [get]
 func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
 

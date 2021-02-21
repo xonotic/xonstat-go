@@ -40,7 +40,13 @@ type topActiveResponse struct {
 	ShowMoreLink  bool
 }
 
-// TopActiveHandler retrieves information about the top active players by playing time
+// TopActiveHandler godoc
+// @Summary Top active players by playing time
+// @Accept  json
+// @Produce  json
+// @Param start query int false "rank pagination offset"
+// @Success 200 {object} topActiveJSONResponse
+// @Router /topactive [get]
 func (ae *AppEnv) TopActiveHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
 

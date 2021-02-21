@@ -58,7 +58,18 @@ type recentGamesResponse struct {
 	NextQueryStr     template.URL
 }
 
-// RecentGamesHandler retrieves information about games played by varios filter criteria
+// RecentGamesHandler godoc
+// @Summary Games played by various filter criteria
+// @Accept  json
+// @Produce  json
+// @Param server_id query int false "server_id filter"
+// @Param map_id query int false "map_id filter"
+// @Param player_id query int false "player_id filter"
+// @Param game_type_cd query string false "game_type_cd filter"
+// @Param start_game_id query int false "game_id range lower bound"
+// @Param end_game_id query int false "game_id range upper bound"
+// @Success 200 {object} []recentGamesJSONResponse
+// @Router /games [get]
 func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
 

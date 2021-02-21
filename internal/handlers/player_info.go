@@ -108,7 +108,13 @@ func newPlayerInfoJSONResponse(response *playerInfoResponse) playerInfoJSONRespo
 	return jsonResponse
 }
 
-// PlayerInfoHandler is the web handler for retrieving player information
+// PlayerInfoHandler godoc
+// @Summary Player information
+// @Accept  json
+// @Produce  json
+// @Param id path int true "player_id"
+// @Success 200 {object} playerInfoJSONResponse
+// @Router /player/{id} [get]
 func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
 

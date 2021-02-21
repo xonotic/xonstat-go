@@ -168,7 +168,14 @@ func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*p
 	return datasetList, totalDamagePerGame
 }
 
-// PlayerWeaponInfoHandler is the web handler for retrieving player weapon information
+// PlayerWeaponInfoHandler godoc
+// @Summary Player weapon information for a fixed (recent) period of time formatted for Chart.js
+// @Accept  json
+// @Produce  json
+// @Param id path int true "player_id"
+// @Param game_type_cd query string false "game_type_cd"
+// @Success 200 {object} playerWeaponInfoJSONResponse
+// @Router /player/{id}/weapons [get]
 func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request) {
 	playerID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {

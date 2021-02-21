@@ -34,7 +34,13 @@ type serverTopScorersResponse struct {
 	TopScorers []*serverTopScorerEntry `json:"top_scorers"`
 }
 
-// ServerTopScorersHandler retrieves information about the top scoring players on a given server.
+// ServerTopScorersHandler godoc
+// @Summary Top scoring players on a particular server over a fixed time period
+// @Accept  json
+// @Produce  json
+// @Param id path int false "server_id"
+// @Success 200 {object} topServerJSONResponse
+// @Router /server/{id}/topscorers [get]
 func (ae *AppEnv) ServerTopScorersHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
 

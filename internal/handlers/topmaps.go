@@ -33,7 +33,13 @@ type topMapsResponse struct {
 	ShowMoreLink bool
 }
 
-// TopMapsHandler retrieves information about the top active maps
+// TopMapsHandler godoc
+// @Summary Top maps by number of games played
+// @Accept  json
+// @Produce  json
+// @Param start query int false "rank pagination offset"
+// @Success 200 {object} topMapsJSONResponse
+// @Router /topmaps [get]
 func (ae *AppEnv) TopMapsHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
 
