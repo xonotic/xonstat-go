@@ -8,6 +8,10 @@ test:
 coverage: test
 	go tool cover -html=coverage.out
 
+swagger:
+	swag init -g cmd/web.go
+	mv docs/swagger* web/static/
+
 clean:
 	rm coverage.out
 	rm xonstat
