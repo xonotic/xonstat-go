@@ -1,0 +1,35 @@
+{{template "base" .}}
+
+{{define "subtitle"}}Not Found - {{end}}
+
+{{define "body"}}
+<div class="grid-x grid-padding-x">
+    <div class="cell small-8 small-offset-2">
+        {{if eq .SayingIndex 0}}
+        <h2>Antibody dropped the mic on this page. Sorry!</h2>
+        <p>(you should get back to playing instead, <b>yeah</b>?)</p>
+        {{else if eq .SayingIndex 1}}
+        <h2>Mario squashed this page like a goomba.</h2>
+        <p>(you can hum the SMB death jingle now)</p>
+        {{else if eq .SayingIndex 2}}
+        <h2>divVerent put his energy into the engine instead of this page. Whoops!</h2>
+        <p>(engine go brrrr, though)</p>
+        {{else if eq .SayingIndex 3}}
+        <h2>bones_was_here turned this page upside down.</h2>
+        <p>(he's from Australia, you know)</p>
+        {{else if eq .SayingIndex 4}}
+        <h2>morosophos tried to fix this page through RCON</h2>
+        <p>...but it didn't listen</p>
+        {{else if eq .SayingIndex 5}}
+        <h2>MrBougo can explain to you exactly how this page imploded.</h2>
+        <p>...but you have to ask him politely</p>
+        {{else if eq .SayingIndex 6}}
+        <h2>Freddy requested that I put this page into his IRC bot</h2>
+        <p>...but I made it go boom instead.</p>
+        {{else if eq .SayingIndex 7}}
+        <h2>This page went kablooey.</h2>
+        <p>(I blame Spike)</p>
+        {{end}}
+    </div>
+</div>
+{{end}}
