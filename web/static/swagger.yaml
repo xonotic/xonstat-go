@@ -1,0 +1,760 @@
+basePath: /
+definitions:
+  handlers.AccuracyDataset:
+    properties:
+      backgroundColor:
+        type: string
+      borderColor:
+        type: string
+      data:
+        items:
+          type: number
+        type: array
+      label:
+        type: string
+      maxBarThickness:
+        type: integer
+      richData:
+        items:
+          $ref: '#/definitions/handlers.AccuracyRichData'
+        type: array
+    type: object
+  handlers.AccuracyRichData:
+    properties:
+      fired:
+        type: integer
+      frags:
+        type: integer
+      game_id:
+        type: integer
+      hit:
+        type: integer
+      nick:
+        type: string
+      pct_accuracy:
+        type: number
+      player_game_stat_id:
+        type: integer
+      player_id:
+        type: integer
+      weapon_cd:
+        type: string
+      weapon_cd_init_caps:
+        type: string
+    type: object
+  handlers.DamageDataset:
+    properties:
+      backgroundColor:
+        type: string
+      borderColor:
+        type: string
+      data:
+        items:
+          type: integer
+        type: array
+      label:
+        type: string
+      maxBarThickness:
+        type: integer
+      richData:
+        items:
+          $ref: '#/definitions/handlers.DamageRichData'
+        type: array
+    type: object
+  handlers.DamageRichData:
+    properties:
+      actual:
+        type: integer
+      frags:
+        type: integer
+      game_id:
+        type: integer
+      max:
+        type: integer
+      nick:
+        type: string
+      pct_total_damage:
+        type: number
+      player_game_stat_id:
+        type: integer
+      player_id:
+        type: integer
+      weapon_cd:
+        type: string
+      weapon_cd_init_caps:
+        type: string
+    type: object
+  handlers.gameCountsJSON:
+    properties:
+      game_type_cd:
+        type: string
+      num_games:
+        type: integer
+    type: object
+  handlers.gameInfoJSONResponse:
+    properties:
+      create_dt:
+        type: string
+      create_dt_fuzzy:
+        type: string
+      duration:
+        type: string
+      duration_secs:
+        type: integer
+      forfeits:
+        items:
+          $ref: '#/definitions/handlers.nonParticipantJSON'
+        type: array
+      game_id:
+        type: integer
+      game_type_cd:
+        type: string
+      game_type_descr:
+        type: string
+      map_id:
+        type: integer
+      match_id:
+        type: string
+      mod:
+        type: string
+      player_game_stats:
+        items:
+          $ref: '#/definitions/handlers.playerGameStatJSON'
+        type: array
+      server_id:
+        type: integer
+      spectators:
+        items:
+          $ref: '#/definitions/handlers.nonParticipantJSON'
+        type: array
+      team_game_stats:
+        additionalProperties:
+          $ref: '#/definitions/handlers.teamGameStatJSON'
+        type: object
+      winner:
+        type: integer
+    type: object
+  handlers.gameWeaponInfoJSONResponse:
+    properties:
+      accuracy_data:
+        items:
+          $ref: '#/definitions/handlers.AccuracyDataset'
+        type: array
+      damage_data:
+        items:
+          $ref: '#/definitions/handlers.DamageDataset'
+        type: array
+      distinct_players:
+        items:
+          type: string
+        type: array
+      distinct_weapons:
+        items:
+          type: string
+        type: array
+      duration:
+        type: string
+      game_id:
+        type: integer
+      game_type_cd:
+        type: string
+      game_type_descr:
+        type: string
+      match_id:
+        type: string
+      mod:
+        type: string
+      winning_team:
+        type: integer
+    type: object
+  handlers.gamesPlayedJSON:
+    properties:
+      game_type_cd:
+        type: string
+      games:
+        type: integer
+      losses:
+        type: integer
+      win_pct:
+        type: number
+      wins:
+        type: integer
+    type: object
+  handlers.mapInfoJSONResponse:
+    properties:
+      create_dt:
+        type: string
+      map_id:
+        type: integer
+      name:
+        type: string
+    type: object
+  handlers.nonParticipantJSON:
+    properties:
+      alivetime:
+        type: string
+      alivetime_ms:
+        type: integer
+      game_id:
+        type: integer
+      nick:
+        type: string
+      player_game_nonparticipant_id:
+        type: integer
+      player_id:
+        type: integer
+      score:
+        type: integer
+    type: object
+  handlers.overallStatsJSON:
+    properties:
+      cap_ratio:
+        type: number
+      game_type_cd:
+        type: string
+      k_d_ratio:
+        type: number
+      last_played:
+        type: string
+      last_played_epoch:
+        type: integer
+      last_played_fuzzy:
+        type: string
+      total_captures:
+        type: integer
+      total_carrier_frags:
+        type: integer
+      total_deaths:
+        type: integer
+      total_kills:
+        type: integer
+      total_pickups:
+        type: integer
+      total_playing_time:
+        type: integer
+    type: object
+  handlers.playerAccuracyDataset:
+    properties:
+      backgroundColor:
+        type: string
+      borderColor:
+        type: string
+      data:
+        items:
+          type: number
+        type: array
+      fill:
+        type: boolean
+      label:
+        type: string
+      lineTension:
+        type: number
+      pointHitRadius:
+        type: integer
+      summary:
+        $ref: '#/definitions/handlers.playerAccuracySummary'
+    type: object
+  handlers.playerAccuracySummary:
+    properties:
+      fired:
+        type: integer
+      hit:
+        type: integer
+      pct_accuracy:
+        type: number
+      weapon_cd:
+        type: string
+      weapon_cd_init_caps:
+        type: string
+    type: object
+  handlers.playerDamageDataset:
+    properties:
+      backgroundColor:
+        type: string
+      borderColor:
+        type: string
+      data:
+        items:
+          type: integer
+        type: array
+      label:
+        type: string
+      richData:
+        items:
+          $ref: '#/definitions/handlers.playerDamageRichData'
+        type: array
+    type: object
+  handlers.playerDamageRichData:
+    properties:
+      t_damage:
+        type: integer
+      weapon_cd:
+        type: string
+      weapon_cd_init_caps:
+        type: string
+    type: object
+  handlers.playerGameStatJSON:
+    properties:
+      alivetime:
+        type: string
+      alivetime_ms:
+        type: integer
+      avg_latency:
+        type: integer
+      captures:
+        type: integer
+      carrier_frags:
+        type: integer
+      collects:
+        type: integer
+      color:
+        type: string
+      deaths:
+        type: integer
+      destroys:
+        type: integer
+      drops:
+        type: integer
+      fastest:
+        type: string
+      fastest_ms:
+        type: integer
+      kills:
+        type: integer
+      laps:
+        type: integer
+      lives:
+        type: integer
+      nick:
+        type: string
+      pickups:
+        type: integer
+      player_game_stat_id:
+        type: integer
+      player_id:
+        type: integer
+      pushes:
+        type: integer
+      returns:
+        type: integer
+      revivals:
+        type: integer
+      score:
+        type: integer
+      scoreboard_pos:
+        type: integer
+      suicides:
+        type: integer
+      team:
+        type: integer
+      time:
+        type: string
+      time_ms:
+        type: integer
+    type: object
+  handlers.playerInfoJSONResponse:
+    properties:
+      games_played:
+        additionalProperties:
+          $ref: '#/definitions/handlers.gamesPlayedJSON'
+        type: object
+      overall_stats:
+        additionalProperties:
+          $ref: '#/definitions/handlers.overallStatsJSON'
+        type: object
+      player:
+        $ref: '#/definitions/handlers.playerJSON'
+    type: object
+  handlers.playerJSON:
+    properties:
+      active_ind:
+        type: boolean
+      joined:
+        type: string
+      joined_epoch:
+        type: integer
+      joined_fuzzy:
+        type: string
+      nick:
+        type: string
+      player_id:
+        type: integer
+      stripped_nick:
+        type: string
+    type: object
+  handlers.playerWeaponInfoJSONResponse:
+    properties:
+      accuracy:
+        items:
+          $ref: '#/definitions/handlers.playerAccuracyDataset'
+        type: array
+      damage:
+        items:
+          $ref: '#/definitions/handlers.playerDamageDataset'
+        type: array
+      game_ids:
+        items:
+          type: integer
+        type: array
+      player_id:
+        type: integer
+      total_damage_per_game:
+        items:
+          type: integer
+        type: array
+      weapons:
+        items:
+          type: string
+        type: array
+    type: object
+  handlers.recentGamesJSONResponse:
+    properties:
+      create_dt:
+        type: string
+      game_id:
+        type: integer
+      game_type_cd:
+        type: string
+      game_type_descr:
+        type: string
+      map_id:
+        type: integer
+      map_name:
+        type: string
+      nick:
+        type: string
+      server_id:
+        type: integer
+      server_name:
+        type: string
+      winning_player_id:
+        type: integer
+      winning_team:
+        type: integer
+    type: object
+  handlers.serverInfoJSONResponse:
+    properties:
+      active_ind:
+        type: boolean
+      create_dt:
+        type: string
+      ip_addr:
+        type: string
+      name:
+        type: string
+      port:
+        type: integer
+      revision:
+        type: string
+      server_id:
+        type: integer
+    type: object
+  handlers.summaryJSONResponse:
+    properties:
+      games:
+        items:
+          $ref: '#/definitions/handlers.gameCountsJSON'
+        type: array
+      last_refreshed:
+        type: string
+      players:
+        type: integer
+      scope:
+        type: string
+    type: object
+  handlers.teamGameStatJSON:
+    properties:
+      caps:
+        type: integer
+      color:
+        type: string
+      rounds:
+        type: integer
+      score:
+        type: integer
+    type: object
+  handlers.topActiveJSONResponse:
+    properties:
+      alivetime:
+        type: string
+      nick:
+        type: string
+      player_id:
+        type: integer
+      rank:
+        type: integer
+    type: object
+  handlers.topMapsJSONResponse:
+    properties:
+      games:
+        type: integer
+      map_id:
+        type: integer
+      map_name:
+        type: string
+      rank:
+        type: integer
+    type: object
+  handlers.topServerJSONResponse:
+    properties:
+      playtime:
+        type: string
+      rank:
+        type: integer
+      server_id:
+        type: integer
+      server_name:
+        type: string
+    type: object
+host: https://stats.xonotic.org
+info:
+  contact:
+    email: antibody@xonotic.org
+    name: Support
+    url: https://gitlab.com/xonotic/xonstat-go/-/issues
+  description: JSON and textual API for Xonotic statistics.
+  license:
+    name: AGPL 3.0
+    url: https://www.gnu.org/licenses/agpl-3.0.en.html
+  termsOfService: http://xonotic.org/tos
+  title: XonStat API
+  version: "1.0"
+paths:
+  /game/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: game_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.gameInfoJSONResponse'
+      summary: Game information
+  /game/{id}/weapons:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: game_id
+        in: path
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.gameWeaponInfoJSONResponse'
+      summary: Weapon information for a given game formatted for Chart.js
+  /games:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: server_id filter
+        in: query
+        name: server_id
+        type: integer
+      - description: map_id filter
+        in: query
+        name: map_id
+        type: integer
+      - description: player_id filter
+        in: query
+        name: player_id
+        type: integer
+      - description: game_type_cd filter
+        in: query
+        name: game_type_cd
+        type: string
+      - description: game_id range lower bound
+        in: query
+        name: start_game_id
+        type: integer
+      - description: game_id range upper bound
+        in: query
+        name: end_game_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.recentGamesJSONResponse'
+            type: array
+      summary: Games played by various filter criteria
+  /map/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: map_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.mapInfoJSONResponse'
+      summary: Map information
+  /player/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: player_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.playerInfoJSONResponse'
+      summary: Player information
+  /player/{id}/weapons:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: player_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: game_type_cd
+        in: query
+        name: game_type_cd
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.playerWeaponInfoJSONResponse'
+      summary: Player weapon information for a fixed (recent) period of time formatted
+        for Chart.js
+  /server/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: server_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.serverInfoJSONResponse'
+      summary: Server information
+  /server/{id}/topscorers:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: server_id
+        in: path
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.topServerJSONResponse'
+      summary: Top scoring players on a particular server over a fixed time period
+  /summary:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: scope (either 'day' or 'all')
+        in: query
+        name: scope
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.summaryJSONResponse'
+      summary: Summary information about the games processed by the server in a given
+        period of time.
+  /topactive:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: rank pagination offset
+        in: query
+        name: start
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.topActiveJSONResponse'
+      summary: Top active players by playing time
+  /topmaps:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: rank pagination offset
+        in: query
+        name: start
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.topMapsJSONResponse'
+      summary: Top maps by number of games played
+  /topservers:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: rank pagination offset
+        in: query
+        name: start
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.topServerJSONResponse'
+      summary: Top servers by number of matches hosted.
+swagger: "2.0"

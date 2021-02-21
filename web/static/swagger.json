@@ -1,0 +1,1164 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "JSON and textual API for Xonotic statistics.",
+        "title": "XonStat API",
+        "termsOfService": "http://xonotic.org/tos",
+        "contact": {
+            "name": "Support",
+            "url": "https://gitlab.com/xonotic/xonstat-go/-/issues",
+            "email": "antibody@xonotic.org"
+        },
+        "license": {
+            "name": "AGPL 3.0",
+            "url": "https://www.gnu.org/licenses/agpl-3.0.en.html"
+        },
+        "version": "1.0"
+    },
+    "host": "https://stats.xonotic.org",
+    "basePath": "/",
+    "paths": {
+        "/game/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Game information",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "game_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.gameInfoJSONResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/game/{id}/weapons": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Weapon information for a given game formatted for Chart.js",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "game_id",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.gameWeaponInfoJSONResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/games": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Games played by various filter criteria",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "server_id filter",
+                        "name": "server_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "map_id filter",
+                        "name": "map_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "player_id filter",
+                        "name": "player_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "game_type_cd filter",
+                        "name": "game_type_cd",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "game_id range lower bound",
+                        "name": "start_game_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "game_id range upper bound",
+                        "name": "end_game_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handlers.recentGamesJSONResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/map/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Map information",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "map_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.mapInfoJSONResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/player/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Player information",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "player_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.playerInfoJSONResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/player/{id}/weapons": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Player weapon information for a fixed (recent) period of time formatted for Chart.js",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "player_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "game_type_cd",
+                        "name": "game_type_cd",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.playerWeaponInfoJSONResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/server/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Server information",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "server_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.serverInfoJSONResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/server/{id}/topscorers": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Top scoring players on a particular server over a fixed time period",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "server_id",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.topServerJSONResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/summary": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Summary information about the games processed by the server in a given period of time.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "scope (either 'day' or 'all')",
+                        "name": "scope",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.summaryJSONResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/topactive": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Top active players by playing time",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "rank pagination offset",
+                        "name": "start",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.topActiveJSONResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/topmaps": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Top maps by number of games played",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "rank pagination offset",
+                        "name": "start",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.topMapsJSONResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/topservers": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Top servers by number of matches hosted.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "rank pagination offset",
+                        "name": "start",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.topServerJSONResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handlers.AccuracyDataset": {
+            "type": "object",
+            "properties": {
+                "backgroundColor": {
+                    "type": "string"
+                },
+                "borderColor": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "label": {
+                    "type": "string"
+                },
+                "maxBarThickness": {
+                    "type": "integer"
+                },
+                "richData": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.AccuracyRichData"
+                    }
+                }
+            }
+        },
+        "handlers.AccuracyRichData": {
+            "type": "object",
+            "properties": {
+                "fired": {
+                    "type": "integer"
+                },
+                "frags": {
+                    "type": "integer"
+                },
+                "game_id": {
+                    "type": "integer"
+                },
+                "hit": {
+                    "type": "integer"
+                },
+                "nick": {
+                    "type": "string"
+                },
+                "pct_accuracy": {
+                    "type": "number"
+                },
+                "player_game_stat_id": {
+                    "type": "integer"
+                },
+                "player_id": {
+                    "type": "integer"
+                },
+                "weapon_cd": {
+                    "type": "string"
+                },
+                "weapon_cd_init_caps": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.DamageDataset": {
+            "type": "object",
+            "properties": {
+                "backgroundColor": {
+                    "type": "string"
+                },
+                "borderColor": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "label": {
+                    "type": "string"
+                },
+                "maxBarThickness": {
+                    "type": "integer"
+                },
+                "richData": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.DamageRichData"
+                    }
+                }
+            }
+        },
+        "handlers.DamageRichData": {
+            "type": "object",
+            "properties": {
+                "actual": {
+                    "type": "integer"
+                },
+                "frags": {
+                    "type": "integer"
+                },
+                "game_id": {
+                    "type": "integer"
+                },
+                "max": {
+                    "type": "integer"
+                },
+                "nick": {
+                    "type": "string"
+                },
+                "pct_total_damage": {
+                    "type": "number"
+                },
+                "player_game_stat_id": {
+                    "type": "integer"
+                },
+                "player_id": {
+                    "type": "integer"
+                },
+                "weapon_cd": {
+                    "type": "string"
+                },
+                "weapon_cd_init_caps": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.gameCountsJSON": {
+            "type": "object",
+            "properties": {
+                "game_type_cd": {
+                    "type": "string"
+                },
+                "num_games": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.gameInfoJSONResponse": {
+            "type": "object",
+            "properties": {
+                "create_dt": {
+                    "type": "string"
+                },
+                "create_dt_fuzzy": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string"
+                },
+                "duration_secs": {
+                    "type": "integer"
+                },
+                "forfeits": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.nonParticipantJSON"
+                    }
+                },
+                "game_id": {
+                    "type": "integer"
+                },
+                "game_type_cd": {
+                    "type": "string"
+                },
+                "game_type_descr": {
+                    "type": "string"
+                },
+                "map_id": {
+                    "type": "integer"
+                },
+                "match_id": {
+                    "type": "string"
+                },
+                "mod": {
+                    "type": "string"
+                },
+                "player_game_stats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.playerGameStatJSON"
+                    }
+                },
+                "server_id": {
+                    "type": "integer"
+                },
+                "spectators": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.nonParticipantJSON"
+                    }
+                },
+                "team_game_stats": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/handlers.teamGameStatJSON"
+                    }
+                },
+                "winner": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.gameWeaponInfoJSONResponse": {
+            "type": "object",
+            "properties": {
+                "accuracy_data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.AccuracyDataset"
+                    }
+                },
+                "damage_data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.DamageDataset"
+                    }
+                },
+                "distinct_players": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "distinct_weapons": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "duration": {
+                    "type": "string"
+                },
+                "game_id": {
+                    "type": "integer"
+                },
+                "game_type_cd": {
+                    "type": "string"
+                },
+                "game_type_descr": {
+                    "type": "string"
+                },
+                "match_id": {
+                    "type": "string"
+                },
+                "mod": {
+                    "type": "string"
+                },
+                "winning_team": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.gamesPlayedJSON": {
+            "type": "object",
+            "properties": {
+                "game_type_cd": {
+                    "type": "string"
+                },
+                "games": {
+                    "type": "integer"
+                },
+                "losses": {
+                    "type": "integer"
+                },
+                "win_pct": {
+                    "type": "number"
+                },
+                "wins": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.mapInfoJSONResponse": {
+            "type": "object",
+            "properties": {
+                "create_dt": {
+                    "type": "string"
+                },
+                "map_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.nonParticipantJSON": {
+            "type": "object",
+            "properties": {
+                "alivetime": {
+                    "type": "string"
+                },
+                "alivetime_ms": {
+                    "type": "integer"
+                },
+                "game_id": {
+                    "type": "integer"
+                },
+                "nick": {
+                    "type": "string"
+                },
+                "player_game_nonparticipant_id": {
+                    "type": "integer"
+                },
+                "player_id": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.overallStatsJSON": {
+            "type": "object",
+            "properties": {
+                "cap_ratio": {
+                    "type": "number"
+                },
+                "game_type_cd": {
+                    "type": "string"
+                },
+                "k_d_ratio": {
+                    "type": "number"
+                },
+                "last_played": {
+                    "type": "string"
+                },
+                "last_played_epoch": {
+                    "type": "integer"
+                },
+                "last_played_fuzzy": {
+                    "type": "string"
+                },
+                "total_captures": {
+                    "type": "integer"
+                },
+                "total_carrier_frags": {
+                    "type": "integer"
+                },
+                "total_deaths": {
+                    "type": "integer"
+                },
+                "total_kills": {
+                    "type": "integer"
+                },
+                "total_pickups": {
+                    "type": "integer"
+                },
+                "total_playing_time": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.playerAccuracyDataset": {
+            "type": "object",
+            "properties": {
+                "backgroundColor": {
+                    "type": "string"
+                },
+                "borderColor": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "fill": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "lineTension": {
+                    "type": "number"
+                },
+                "pointHitRadius": {
+                    "type": "integer"
+                },
+                "summary": {
+                    "$ref": "#/definitions/handlers.playerAccuracySummary"
+                }
+            }
+        },
+        "handlers.playerAccuracySummary": {
+            "type": "object",
+            "properties": {
+                "fired": {
+                    "type": "integer"
+                },
+                "hit": {
+                    "type": "integer"
+                },
+                "pct_accuracy": {
+                    "type": "number"
+                },
+                "weapon_cd": {
+                    "type": "string"
+                },
+                "weapon_cd_init_caps": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.playerDamageDataset": {
+            "type": "object",
+            "properties": {
+                "backgroundColor": {
+                    "type": "string"
+                },
+                "borderColor": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "label": {
+                    "type": "string"
+                },
+                "richData": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.playerDamageRichData"
+                    }
+                }
+            }
+        },
+        "handlers.playerDamageRichData": {
+            "type": "object",
+            "properties": {
+                "t_damage": {
+                    "type": "integer"
+                },
+                "weapon_cd": {
+                    "type": "string"
+                },
+                "weapon_cd_init_caps": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.playerGameStatJSON": {
+            "type": "object",
+            "properties": {
+                "alivetime": {
+                    "type": "string"
+                },
+                "alivetime_ms": {
+                    "type": "integer"
+                },
+                "avg_latency": {
+                    "type": "integer"
+                },
+                "captures": {
+                    "type": "integer"
+                },
+                "carrier_frags": {
+                    "type": "integer"
+                },
+                "collects": {
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "deaths": {
+                    "type": "integer"
+                },
+                "destroys": {
+                    "type": "integer"
+                },
+                "drops": {
+                    "type": "integer"
+                },
+                "fastest": {
+                    "type": "string"
+                },
+                "fastest_ms": {
+                    "type": "integer"
+                },
+                "kills": {
+                    "type": "integer"
+                },
+                "laps": {
+                    "type": "integer"
+                },
+                "lives": {
+                    "type": "integer"
+                },
+                "nick": {
+                    "type": "string"
+                },
+                "pickups": {
+                    "type": "integer"
+                },
+                "player_game_stat_id": {
+                    "type": "integer"
+                },
+                "player_id": {
+                    "type": "integer"
+                },
+                "pushes": {
+                    "type": "integer"
+                },
+                "returns": {
+                    "type": "integer"
+                },
+                "revivals": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "scoreboard_pos": {
+                    "type": "integer"
+                },
+                "suicides": {
+                    "type": "integer"
+                },
+                "team": {
+                    "type": "integer"
+                },
+                "time": {
+                    "type": "string"
+                },
+                "time_ms": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.playerInfoJSONResponse": {
+            "type": "object",
+            "properties": {
+                "games_played": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/handlers.gamesPlayedJSON"
+                    }
+                },
+                "overall_stats": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/handlers.overallStatsJSON"
+                    }
+                },
+                "player": {
+                    "$ref": "#/definitions/handlers.playerJSON"
+                }
+            }
+        },
+        "handlers.playerJSON": {
+            "type": "object",
+            "properties": {
+                "active_ind": {
+                    "type": "boolean"
+                },
+                "joined": {
+                    "type": "string"
+                },
+                "joined_epoch": {
+                    "type": "integer"
+                },
+                "joined_fuzzy": {
+                    "type": "string"
+                },
+                "nick": {
+                    "type": "string"
+                },
+                "player_id": {
+                    "type": "integer"
+                },
+                "stripped_nick": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.playerWeaponInfoJSONResponse": {
+            "type": "object",
+            "properties": {
+                "accuracy": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.playerAccuracyDataset"
+                    }
+                },
+                "damage": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.playerDamageDataset"
+                    }
+                },
+                "game_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "player_id": {
+                    "type": "integer"
+                },
+                "total_damage_per_game": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "weapons": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "handlers.recentGamesJSONResponse": {
+            "type": "object",
+            "properties": {
+                "create_dt": {
+                    "type": "string"
+                },
+                "game_id": {
+                    "type": "integer"
+                },
+                "game_type_cd": {
+                    "type": "string"
+                },
+                "game_type_descr": {
+                    "type": "string"
+                },
+                "map_id": {
+                    "type": "integer"
+                },
+                "map_name": {
+                    "type": "string"
+                },
+                "nick": {
+                    "type": "string"
+                },
+                "server_id": {
+                    "type": "integer"
+                },
+                "server_name": {
+                    "type": "string"
+                },
+                "winning_player_id": {
+                    "type": "integer"
+                },
+                "winning_team": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.serverInfoJSONResponse": {
+            "type": "object",
+            "properties": {
+                "active_ind": {
+                    "type": "boolean"
+                },
+                "create_dt": {
+                    "type": "string"
+                },
+                "ip_addr": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "revision": {
+                    "type": "string"
+                },
+                "server_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.summaryJSONResponse": {
+            "type": "object",
+            "properties": {
+                "games": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.gameCountsJSON"
+                    }
+                },
+                "last_refreshed": {
+                    "type": "string"
+                },
+                "players": {
+                    "type": "integer"
+                },
+                "scope": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.teamGameStatJSON": {
+            "type": "object",
+            "properties": {
+                "caps": {
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "rounds": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.topActiveJSONResponse": {
+            "type": "object",
+            "properties": {
+                "alivetime": {
+                    "type": "string"
+                },
+                "nick": {
+                    "type": "string"
+                },
+                "player_id": {
+                    "type": "integer"
+                },
+                "rank": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.topMapsJSONResponse": {
+            "type": "object",
+            "properties": {
+                "games": {
+                    "type": "integer"
+                },
+                "map_id": {
+                    "type": "integer"
+                },
+                "map_name": {
+                    "type": "string"
+                },
+                "rank": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.topServerJSONResponse": {
+            "type": "object",
+            "properties": {
+                "playtime": {
+                    "type": "string"
+                },
+                "rank": {
+                    "type": "integer"
+                },
+                "server_id": {
+                    "type": "integer"
+                },
+                "server_name": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
