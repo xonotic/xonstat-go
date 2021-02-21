@@ -96,6 +96,14 @@ table thead tr th, table thead tr td, table tr th, table tr td {
   background:rgb(40, 40, 40);
 }
 
+.drilldown a {
+  background: none;
+}
+
+.drilldown .is-drilldown-submenu {
+  background: black;
+}
+
 .panel {
   background-color: #151515;
   border-color: rgb(40, 40, 40);
