@@ -118,17 +118,21 @@ func NewMultiDt(dt time.Time) (*MultiDt, error) {
 
 // MultiDuration is like MultiDt, but for time.Duration-s.
 type MultiDuration struct {
-	Duration time.Duration
-	Short    string
-	Long     string
+	Duration     time.Duration
+	Seconds      float64
+	Milliseconds int64
+	Short        string
+	Long         string
 }
 
 // NewMultiDuration creates a new MultiDuration.
 func NewMultiDuration(d time.Duration) *MultiDuration {
 	return &MultiDuration{
-		Duration: d,
-		Short:    DurationString(d, true),
-		Long:     DurationString(d, false),
+		Duration:     d,
+		Milliseconds: d.Milliseconds(),
+		Seconds:      d.Seconds(),
+		Short:        DurationString(d, true),
+		Long:         DurationString(d, false),
 	}
 }
 
@@ -143,8 +147,8 @@ type MultiNick struct {
 func NewMultiNick(nick string) *MultiNick {
 	n := qstr.QStr(nick)
 	return &MultiNick{
-		Nick: nick,
+		Nick:         nick,
 		NickStripped: n.Stripped(),
-		NickHTML: n.HTML(),
+		NickHTML:     n.HTML(),
 	}
 }
