@@ -1,0 +1,35 @@
+<table class="table-hover table-condensed">
+    <thead>
+        <tr>
+            <th class="show-for-medium medium-1">Ping</th>
+            <th class="small-5 medium-3">Nick</th>
+            <th>Fastest Time</th>
+            <th class="show-for-medium">Deaths</th>
+            <th class="small-3 medium-1">Score</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {{range .}}
+        <tr>
+            {{if eq .AvgLatency 0}}
+            <td class="show-for-medium text-center">-</td>
+            {{else}}
+            <td class="show-for-medium text-center">{{.AvgLatency}}</td>
+            {{end}}
+            <td class="small-5 medium-3 no-stretch">
+                {{if gt .PlayerID 2}}
+                <a href="{{urlFor "player_info" (intToString .PlayerID)}}" title="Go to the info page for this player">
+                    {{.Nick.NickHTML}}
+                </a>
+                {{else}}
+                    {{.Nick.NickHTML}}
+                {{end}}
+            </td>
+            <td class="small-3">{{printf "%.2f" .Fastest.Seconds}}</td>
+            <td class="show-for-medium">{{.Deaths}}</td>
+            <td class="small-3 player-score">{{.Score}}</td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
