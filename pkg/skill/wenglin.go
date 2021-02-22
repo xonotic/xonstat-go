@@ -133,8 +133,14 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 			d = 0.0001
 		}
 
+		// The floor for Mu is 0.0.
+		newMu := skills[i].Mu + omega[i]
+		if newMu < 0.0 {
+			newMu = 0.0
+		}
+
 		newSkills[i] = Rating{
-			Mu:    skills[i].Mu + omega[i],
+			Mu:    newMu,
 			Sigma: skills[i].Sigma * math.Sqrt(d),
 		}
 	}
