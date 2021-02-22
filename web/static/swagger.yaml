@@ -316,7 +316,7 @@ definitions:
       drops:
         type: integer
       fastest:
-        type: string
+        type: number
       fastest_ms:
         type: integer
       kills:
@@ -380,6 +380,23 @@ definitions:
       player_id:
         type: integer
       stripped_nick:
+        type: string
+    type: object
+  handlers.playerSkillJSONResponse:
+    properties:
+      active_ind:
+        type: boolean
+      create_dt:
+        type: string
+      game_type_cd:
+        type: string
+      mu:
+        type: number
+      player_id:
+        type: integer
+      sigma:
+        type: number
+      update_dt:
         type: string
     type: object
   handlers.playerWeaponInfoJSONResponse:
@@ -630,6 +647,30 @@ paths:
           schema:
             $ref: '#/definitions/handlers.playerInfoJSONResponse'
       summary: Player information
+  /player/{id}/skill:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: player_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: game_type_cd
+        in: query
+        name: game_type_cd
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.playerSkillJSONResponse'
+            type: array
+      summary: Player skill information
   /player/{id}/weapons:
     get:
       consumes:

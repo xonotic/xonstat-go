@@ -189,6 +189,43 @@
                 }
             }
         },
+        "/player/{id}/skill": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Player skill information",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "player_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "game_type_cd",
+                        "name": "game_type_cd",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handlers.playerSkillJSONResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/player/{id}/weapons": {
             "get": {
                 "consumes": [
@@ -869,7 +906,7 @@
                     "type": "integer"
                 },
                 "fastest": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "fastest_ms": {
                     "type": "integer"
@@ -966,6 +1003,32 @@
                     "type": "integer"
                 },
                 "stripped_nick": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.playerSkillJSONResponse": {
+            "type": "object",
+            "properties": {
+                "active_ind": {
+                    "type": "boolean"
+                },
+                "create_dt": {
+                    "type": "string"
+                },
+                "game_type_cd": {
+                    "type": "string"
+                },
+                "mu": {
+                    "type": "number"
+                },
+                "player_id": {
+                    "type": "integer"
+                },
+                "sigma": {
+                    "type": "number"
+                },
+                "update_dt": {
                     "type": "string"
                 }
             }
