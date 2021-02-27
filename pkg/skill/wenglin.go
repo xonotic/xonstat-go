@@ -7,10 +7,10 @@ import (
 )
 
 // MU is the mean skill value for a brand new player.
-const MU = 25.0
+const MU = 1500.0
 
 // SIGMA is the standard deviation for skill of a brand new player.
-const SIGMA = MU / 3
+const SIGMA = 350.0
 
 // BETA is a component used in calculating Weng-Lin values.
 const BETA = SIGMA / 2
