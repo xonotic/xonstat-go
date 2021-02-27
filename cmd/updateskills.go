@@ -229,6 +229,11 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 			continue
 		}
 
+		// We have a five minute minimum for ranking games.
+		if game.Duration.Seconds() < 300 {
+			continue
+		}
+
 		rawResults, err := db.RMatchResultsByGameID(game.GameID)
 		if err != nil {
 			log.Printf("Error processing game %d: %s", game.GameID, err)
