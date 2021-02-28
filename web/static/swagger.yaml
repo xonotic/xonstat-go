@@ -729,6 +729,26 @@ paths:
           schema:
             $ref: '#/definitions/handlers.topServerJSONResponse'
       summary: Top scoring players on a particular server over a fixed time period
+  /skill:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: hashkey
+        in: query
+        name: hashkey
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.playerSkillJSONResponse'
+            type: array
+      summary: Player skill information by hashkey
   /summary:
     get:
       consumes:

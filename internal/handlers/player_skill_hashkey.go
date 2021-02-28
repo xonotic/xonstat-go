@@ -7,7 +7,13 @@ import (
 
 )
 
-// PlayerSkillHashkeyHandler is the web handler for retrieving player skill information by hashkey.
+// PlayerSkillHashkeyHandler godoc
+// @Summary Player skill information by hashkey
+// @Accept  json
+// @Produce  json
+// @Param hashkey query string true "hashkey"
+// @Success 200 {object} []playerSkillJSONResponse
+// @Router /skill [get]
 func (ae *AppEnv) PlayerSkillHashkeyHandler(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	hashkey := params.Get("hashkey")

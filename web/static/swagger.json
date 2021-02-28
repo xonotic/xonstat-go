@@ -315,6 +315,37 @@
                 }
             }
         },
+        "/skill": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Player skill information by hashkey",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "hashkey",
+                        "name": "hashkey",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handlers.playerSkillJSONResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/summary": {
             "get": {
                 "consumes": [
