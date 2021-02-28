@@ -120,6 +120,7 @@ func web(port string) {
 	r.Get(reverse.Add("player_weapon_info", "/player/{id:\\d+}/weapons", "{id:\\d+}"), env.PlayerWeaponInfoHandler)
 	r.Get(reverse.Add("player_recent_games_fragment", "/player/{id:\\d+}/recentGamesFragment", "{id:\\d+}"), env.PlayerRecentGamesFragmentHandler)
 	r.Get(reverse.Add("player_skill", "/player/{id:\\d+}/skill", "{id:\\d+}"), env.PlayerSkillHandler)
+	r.Get("/skill", env.PlayerSkillHashkeyHandler)
 	r.NotFound(env.NotFoundHandler)
 
 	// Static files
