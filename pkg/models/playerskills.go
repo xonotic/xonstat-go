@@ -49,6 +49,27 @@ func (ds *PGDatastore) RMatchResultsByGameID(gameID int) ([]*PlayerSkillMatchRes
 	return scanPlayerSkillMatchResults(rows)
 }
 
+// RNPMatchResultsByGameID retrives match results suitable for input to the skill 
+// calculation algorithm. It retrieves forfeits instead of actual game stats.
+func (ds *PGDatastore) RNPMatchResultsByGameID(gameID int) ([]*PlayerSkillMatchResult, error) {
+	sql := `select np.player_id, g.game_id, g.game_type_cd, coalesce(cast(extract(epoch
+		from g.duration) as integer)) as duration, np.score,
+		cast(coalesce(extract(epoch from np.alivetime), 0)*1000 as integer) as alivetime, 
+		ps.mu, ps.sigma
+		from player_game_nonparticipants np join games g on np.game_id = g.game_id
+		left outer join player_skills ps on g.game_type_cd = ps.game_type_cd and ps.player_id = np.player_id
+		where g.game_id = $1
+		and np.player_id > 2
+		and np.status = 'forfeit'`
+
+	rows, err := ds.db.Query(sql, gameID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanPlayerSkillMatchResults(rows)
+}
+
 // scanPlayerSkills scans the rows returned by a query to the player_skills table.
 func scanPlayerSkills(rows *sql.Rows) ([]*PlayerSkill, error) {
 	var results []*PlayerSkill

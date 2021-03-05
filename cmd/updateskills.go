@@ -237,7 +237,17 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 		rawResults, err := db.RMatchResultsByGameID(game.GameID)
 		if err != nil {
 			log.Printf("Error processing game %d: %s", game.GameID, err)
+			continue
 		}
+
+		rawForfeitResults, err := db.RNPMatchResultsByGameID(game.GameID)
+		if err != nil {
+			log.Printf("Error processing game %d: %s", game.GameID, err)
+			continue
+		}
+
+		// Include forfeits.
+		rawResults = append(rawResults, rawForfeitResults...)
 
 		// Don't even bother for games with only one legit player.
 		if len(rawResults) < 2 {
