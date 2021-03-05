@@ -27,11 +27,15 @@ type RawSubmission struct {
 	// raw player events: key/value pairs related to players
 	PlayerEvents []map[string]string
 
-	// humans who played in the match
+	// humans who played in the match fully (were not spectating at endmatch)
 	Humans []map[string]string
 
-	// bots who played in the match
+	// bots who played in the match fully (were not spectating at endmatch)
 	Bots []map[string]string
+
+	// Number of humans who played in the match either fully or
+	// who joined and then quit/spectated.
+	NumHumansPlayed int
 
 	// humans who either spectated the entire match or forfeited before its end
 	NonParticipants []map[string]string
@@ -170,10 +174,14 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 	joined := joinedGame(events)
 	playedTillEnd := playedInGame(events)
 	if human {
-		if (joined && !playedTillEnd) || (!joined && !playedTillEnd) {
-			// If they joined the match but didn't actually finish it, they forfeited.
-			// If they did not join, they spectated. The actual designation is done later,
-			// after we have parsed AliveTime properly.
+		if !playedTillEnd {
+			if joined {
+				// They forfeited, thus count towards the active count.
+				s.NumHumansPlayed++
+			}
+
+			// Otherwise they just spectated the whole time. Both forfeiters
+			// and spectators equally go into the non-participants list.
 			s.NonParticipants = append(s.NonParticipants, events)
 		} else if joined && playedTillEnd {
 			if firedWeapon {
@@ -189,6 +197,7 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 			}
 
 			s.Humans = append(s.Humans, events)
+			s.NumHumansPlayed++
 		}
 	} else if !human && playedTillEnd {
 		s.Bots = append(s.Bots, events)

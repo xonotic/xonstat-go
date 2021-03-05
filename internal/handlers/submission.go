@@ -41,7 +41,13 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	minimumRequiredPlayers := viper.GetInt("MinimumRequiredPlayers")
-	if len(rawSubmission.Humans) < minimumRequiredPlayers {
+	gtc := rawSubmission.GameMeta["G"]
+	if rawSubmission.NumHumansPlayed < minimumRequiredPlayers {
+		// CTS is allowed to record games with only one player.
+		if gtc == "cts" && rawSubmission.NumHumansPlayed == 1 {
+			return
+		}
+
 		log.Printf("Error: not enough players (want %d, found %d)", minimumRequiredPlayers,
 			len(rawSubmission.Humans))
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
