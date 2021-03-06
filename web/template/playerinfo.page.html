@@ -19,12 +19,12 @@
   <div class="cell small-12">
     <ul class="tabs text-center" data-tabs id="gametype-tabs">
       {{range .GameTypeSummaries}}
-      <li class="tabs-title {{if eq .GameTypeCd " overall"}}is-active{{end}}" data-game-type-cd="{{.GameTypeCd}}"
-        data-player-id="{{$.Player.PlayerID}}">
-        <a href="#tab-{{.GameTypeCd}}" title="{{.GameTypeCd}}">
+      <li class='tabs-title {{if eq .GameTypeCd "overall"}}is-active{{end}}' data-game-type-cd="{{.GameTypeCd}}" data-player-id="{{$.Player.PlayerID}}">
+        <a href="#tab-{{.GameTypeCd}}" {{if eq .GameTypeCd "overall"}}aria-selected="true"{{end}} title="{{.GameTypeCd}}">
           <span class="sprite sprite-{{.GameTypeCd}}"></span> <br />
           {{.GameTypeCd}} <br />
-          <small>({{.Games}})</small></a>
+          <small>({{.Games}})</small>
+        </a>
       </li>
       {{end}}
     </ul>
@@ -33,7 +33,7 @@
 
 <div class="tabs-content" data-tabs-content="gametype-tabs">
   {{range .GameTypeSummaries}}
-  <div class="tabs-panel {{if eq .GameTypeCd " overall"}}is-active{{end}}" id="tab-{{.GameTypeCd}}">
+  <div class='tabs-panel {{if eq .GameTypeCd "overall"}}is-active{{end}}' id="tab-{{.GameTypeCd}}">
     <div class="grid-x grid-padding-x">
 
       <!-- LEFT PANEL -->
