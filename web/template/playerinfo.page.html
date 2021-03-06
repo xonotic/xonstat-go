@@ -19,7 +19,7 @@
   <div class="cell small-12">
     <ul class="tabs text-center" data-tabs id="gametype-tabs">
       {{range .GameTypeSummaries}}
-      <li class="tabs-title {{if eq .GameTypeCd "overall"}}is-active{{end}}" data-game-type-cd="{{.GameTypeCd}}"
+      <li class="tabs-title {{if eq .GameTypeCd " overall"}}is-active{{end}}" data-game-type-cd="{{.GameTypeCd}}"
         data-player-id="{{$.Player.PlayerID}}">
         <a href="#tab-{{.GameTypeCd}}" title="{{.GameTypeCd}}">
           <span class="sprite sprite-{{.GameTypeCd}}"></span> <br />
@@ -33,7 +33,7 @@
 
 <div class="tabs-content" data-tabs-content="gametype-tabs">
   {{range .GameTypeSummaries}}
-  <div class="tabs-panel {{if eq .GameTypeCd "overall"}}is-active{{end}}" id="tab-{{.GameTypeCd}}">
+  <div class="tabs-panel {{if eq .GameTypeCd " overall"}}is-active{{end}}" id="tab-{{.GameTypeCd}}">
     <div class="grid-x grid-padding-x">
 
       <!-- LEFT PANEL -->
@@ -48,7 +48,8 @@
         </p>
 
         <p>
-          Last Played: <small><span class="abstime" data-epoch="{{.LastPlayed.Epoch}}" title="{{.LastPlayed.UTCStr}}">{{.LastPlayed.Fuzzy}}</span> <br /></small>
+          Last Played: <small><span class="abstime" data-epoch="{{.LastPlayed.Epoch}}"
+              title="{{.LastPlayed.UTCStr}}">{{.LastPlayed.Fuzzy}}</span> <br /></small>
         </p>
         {{end}}
       </div>
@@ -77,14 +78,14 @@
   {{end}}
 </div>
 
-<div class="grid-x grid-padding-x">
+<div id="accuracyPanel" class="grid-x grid-padding-x">
   <div class="cell small-12">
     <h3><a id="playerAccuracy"></a>Accuracy</h3>
     <canvas id="playerAccuracyChart"></canvas>
   </div>
 </div>
 
-<div class="grid-x grid-padding-x">
+<div id="damagePanel" class="grid-x grid-padding-x">
   <div class="cell small-12">
     <h3><a id="playerDamage"></a>Damage</h3>
     <canvas id="playerDamageChart"></canvas>
@@ -92,7 +93,8 @@
 </div>
 
 <div class="cell small-12 large-12">
-  <h5>Recent Games <a id="more-recent-games" href="{{urlFor "games"}}?player_id={{.Player.PlayerID}}"><i class="fa fa-plus-circle"></i></a></h5>
+  <h5>Recent Games <a id="more-recent-games" href="{{urlFor " games"}}?player_id={{.Player.PlayerID}}"><i
+        class="fa fa-plus-circle"></i></a></h5>
   <div id="recent-games"></div>
 </div>
 
@@ -103,11 +105,17 @@
 <script type='text/javascript' src='/static/js/weaponCharts.js'></script>
 <script type="text/javascript">
   jQuery.getJSON("/player/{{.Player.PlayerID}}/weapons", function (data) {
-    drawPlayerAccuracyChart("playerAccuracyChart", data);
-    drawPlayerDamageChart("playerDamageChart", data);
+    if (data.game_ids.length > 3) {
+      drawPlayerAccuracyChart("playerAccuracyChart", data);
+      drawPlayerDamageChart("playerDamageChart", data);
+    } else {
+      // If we don't have much data, we'll remove the panels entirely.
+      document.getElementById("accuracyPanel").remove();
+      document.getElementById("damagePanel").remove();
+    }
   });
 
-  jQuery.get("/player/{{.Player.PlayerID}}/recentGamesFragment", function(html){
+  jQuery.get("/player/{{.Player.PlayerID}}/recentGamesFragment", function (html) {
     $("#recent-games").replaceWith(html);
   });
 
@@ -122,19 +130,25 @@
       var weaponURL = `/player/${e.dataset.playerId}/weapons?game_type_cd=${e.dataset.gameTypeCd}`;
 
       jQuery.getJSON(weaponURL, function (data) {
-        window.playerAccuracyChart.data.labels = data.game_ids;
-        window.playerAccuracyChart.data.datasets = data.accuracy;
-        window.playerAccuracyChart.update();
+        try {
 
-        window.playerDamageChart.data.labels = data.game_ids;
-        window.playerDamageChart.data.datasets = data.damage;
-        window.playerDamageChart.update();
+          window.playerAccuracyChart.data.labels = data.game_ids;
+          window.playerAccuracyChart.data.datasets = data.accuracy;
+          window.playerAccuracyChart.update();
+
+          window.playerDamageChart.data.labels = data.game_ids;
+          window.playerDamageChart.data.datasets = data.damage;
+          window.playerDamageChart.update();
+        } 
+        catch {
+          console.log("No accuracy or damage panels defined.");
+        }
       });
 
       // Update the data in the recent games table.
       var recentGamesURL = `/player/${e.dataset.playerId}/recentGamesFragment?game_type_cd=${e.dataset.gameTypeCd}`;
 
-      jQuery.get(recentGamesURL, function(html){
+      jQuery.get(recentGamesURL, function (html) {
         $("#recent-games").replaceWith(html);
       });
 
