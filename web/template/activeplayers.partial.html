@@ -1,9 +1,9 @@
       <table class="table-hover table-condensed">
         <thead>
           <tr>
-            <th class="small-2">#</th>
+            <th class="small-1">#</th>
             <th class="small-7">Nick</th>
-            <th class="small-3">Time</th>
+            <th class="small-4">Time</th>
           </tr>
         </thead>
         <tbody>
@@ -11,7 +11,7 @@
           <tr>
             <td>{{.SortOrder}}</td>
             <td class="no-stretch"><a href="{{urlFor "player_info" (intToString .PlayerID)}}" title="Go to the player info page for this player">{{.HTMLNick}}</a></td>
-            <td>{{.AliveTime}}</td>
+            <td class="no-stretch">{{.AliveTime}}</td>
           </tr>
         {{end}}
         </tbody>
