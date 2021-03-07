@@ -51,8 +51,7 @@ Usage:
 
 Flags:
   -h, --help          help for web
-  -p, --port string   port number (default "8080")
-  -r, --routes        print routing information
+  -a, --addr string   listen address (default "0.0.0.0:6543")
 
 Global Flags:
   -c, --config string   config file (default is $HOME/.xonstat.toml)
