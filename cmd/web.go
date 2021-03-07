@@ -123,7 +123,7 @@ func web(addr string) {
 	r.NotFound(env.NotFoundHandler)
 
 	// Static files
-	cwd, _ := os.Getwd()
+	cwd, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	staticDir := http.Dir(filepath.Join(cwd, "web/static"))
 	FileServer(r, "/static", staticDir)
 
