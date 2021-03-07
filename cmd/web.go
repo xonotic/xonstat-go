@@ -30,7 +30,8 @@ import (
 // @license.name AGPL 3.0
 // @license.url https://www.gnu.org/licenses/agpl-3.0.en.html
 
-// @host https://stats.xonotic.org
+// @schemes https
+// @host stats.xonotic.org
 // @BasePath /
 // @query.collection.format multi
 

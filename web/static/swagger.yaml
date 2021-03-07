@@ -523,7 +523,7 @@ definitions:
       server_name:
         type: string
     type: object
-host: https://stats.xonotic.org
+host: stats.xonotic.org
 info:
   contact:
     email: antibody@xonotic.org
@@ -818,4 +818,6 @@ paths:
           schema:
             $ref: '#/definitions/handlers.topServerJSONResponse'
       summary: Top servers by number of matches hosted.
+schemes:
+- https
 swagger: "2.0"
