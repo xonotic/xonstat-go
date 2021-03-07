@@ -129,7 +129,7 @@ func web(addr string) {
 
 	// Swagger documentation via "swag" and "swag-http" libraries.
 	r.Get("/docs/*", httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:6543/static/swagger.json"), //The url pointing to API definition"
+		httpSwagger.URL("/static/swagger.json"), //The url pointing to API definition"
 	))
 
 	// Start the web application server on the specified port.
