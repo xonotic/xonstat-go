@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -27,9 +29,9 @@ func loadTemplates(templateDir string) map[string]*template.Template {
 
 	// These functions will be available to all templates.
 	funcMap := template.FuncMap{
-		"urlFor": reverse.Rev,
-		"inc":    func(i int) int { return i + 1 },
-		"intToString":    func(i int) string { return fmt.Sprintf("%d", i) },
+		"urlFor":      reverse.Rev,
+		"inc":         func(i int) int { return i + 1 },
+		"intToString": func(i int) string { return fmt.Sprintf("%d", i) },
 	}
 
 	// First, grab the filenames of all of the templates in the directory.
@@ -39,7 +41,7 @@ func loadTemplates(templateDir string) map[string]*template.Template {
 	}
 
 	// Then we separate out the pages from the rest to avoid re-defining blocks multiple times
-	// which leads to unexpected renders. 
+	// which leads to unexpected renders.
 	var baseFilenames, pageFilenames []string
 	for _, t := range allFiles {
 		if strings.Contains(t, "page") {
@@ -72,10 +74,13 @@ func loadTemplates(templateDir string) map[string]*template.Template {
 
 // NewAppEnv creates a new AppEnv
 func NewAppEnv(db models.Datastore, rl io.WriteCloser) *AppEnv {
+	cwd, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	templatePath := path.Join(cwd, "web/template")
+
 	ae := AppEnv{
 		db:            db,
 		requestLogger: rl,
-		templates:     loadTemplates("web/template"),
+		templates:     loadTemplates(templatePath),
 	}
 
 	return &ae
