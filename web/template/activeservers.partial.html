@@ -1,17 +1,17 @@
     <table class="table-hover table-condensed">
       <thead>
         <tr>
-          <th class="small-2">#</th>
-          <th class="small-7">Server</th>
-          <th class="small-3" title="Total accumulated player time on the server">Time</th>
+          <th class="small-1">#</th>
+          <th class="small-6">Server</th>
+          <th class="small-5" title="Total accumulated player time on the server">Time</th>
         </tr>
       </thead>
       <tbody>
       {{range .}}
         <tr>
           <td>{{.SortOrder}}</td>
-          <td class="no-stretch"><a href="{{urlFor "server_info" (intToString .ServerID)}}" name="Server info page for {{.ServerName}}">{{.ServerName}}</a></td>
-          <td>{{.PlayTime}}</td>
+          <td><a href="{{urlFor "server_info" (intToString .ServerID)}}" name="Server info page for {{.ServerName}}">{{.ServerName}}</a></td>
+          <td class="no-stretch">{{.PlayTime}}</td>
         </tr>
       {{end}}
       </tbody>
