@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -56,7 +55,7 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 	})
 }
 
-func web(port string) {
+func web(addr string) {
 	dsn := viper.GetString("ConnStr")
 	db, err := models.NewPGDatastore(dsn)
 	if err != nil {
@@ -134,8 +133,7 @@ func web(port string) {
 	))
 
 	// Start the web application server on the specified port.
-	log.Printf("Starting XonStat web application server on port %s...", port)
-	addr := fmt.Sprintf(":%s", port)
+	log.Printf("Starting XonStat web application server on %s...", addr)
 	http.ListenAndServe(addr, r)
 }
 
@@ -145,8 +143,8 @@ var webCmd = &cobra.Command{
 	Short: "Run the web application server",
 	Long:  `Run the XonStat web application server.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		port, _ := cmd.Flags().GetString("port")
-		web(port)
+		addr, _ := cmd.Flags().GetString("addr")
+		web(addr)
 	},
 }
 
@@ -158,5 +156,5 @@ func init() {
 	}
 
 	rootCmd.AddCommand(webCmd)
-	webCmd.Flags().StringP("port", "p", "6543", "port number")
+	webCmd.Flags().StringP("addr", "a", "0.0.0.0:6543", "address")
 }
