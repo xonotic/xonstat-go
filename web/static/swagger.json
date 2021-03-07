@@ -1,4 +1,7 @@
 {
+    "schemes": [
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "JSON and textual API for Xonotic statistics.",
@@ -15,7 +18,7 @@
         },
         "version": "1.0"
     },
-    "host": "https://stats.xonotic.org",
+    "host": "stats.xonotic.org",
     "basePath": "/",
     "paths": {
         "/game/{id}": {
