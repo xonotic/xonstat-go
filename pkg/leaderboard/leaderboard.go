@@ -68,7 +68,7 @@ func ActivePlayerToActivePlayerBase(in []*models.ActivePlayer) []*ActivePlayerBa
 			Nick:         nick,
 			HTMLNick:     nick.HTML(),
 			StrippedNick: nick.Stripped(),
-			AliveTime:    models.DurationString(v.AliveTime, true),
+			AliveTime:    models.DurationString(v.AliveTime, "short"),
 		}
 		out = append(out, &ap)
 	}
@@ -107,7 +107,7 @@ func ActiveServersData(limit, start int, db models.Datastore) ([]ActiveServerBas
 			SortOrder:  v.SortOrder,
 			ServerID:   v.ServerID,
 			ServerName: v.ServerName,
-			PlayTime:   models.DurationString(v.PlayTime, true),
+			PlayTime:   models.DurationString(v.PlayTime, "short"),
 		}
 		activeServers = append(activeServers, as)
 	}

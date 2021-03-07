@@ -110,7 +110,7 @@ func TopActiveServersData(db models.Datastore, mapID int) ([]*leaderboard.Active
 			SortOrder:  v.SortOrder,
 			ServerID:   v.ServerID,
 			ServerName: v.ServerName,
-			PlayTime:   models.DurationString(v.PlayTime, true),
+			PlayTime:   models.DurationString(v.PlayTime, "short"),
 		}
 		activeServers = append(activeServers, &as)
 	}
