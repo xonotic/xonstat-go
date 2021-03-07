@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"strings"
 	"time"
 
 	"github.com/antzucaro/qstr"
@@ -20,6 +21,35 @@ func durationToMSStr(t *time.Duration) string {
 	}
 
 	return durationLiteral
+}
+
+// ShortDurationString returns a "short" form of a duration string. Components include
+// days, hours, and minutes (no seconds).
+func ShortDurationString(d time.Duration) string {
+	// The smallest grain is minutes, so let's get the total number of those.
+	// As we take out chunks for the larger grained items, this gets decremented.
+	minutes := uint64(d.Minutes())
+
+	days := uint64(minutes / 1440)
+	minutes -= days * 1440
+
+	hours := uint64(minutes / 60)
+	minutes -= hours * 60
+
+	var buffer bytes.Buffer
+	if days > 0 {
+		buffer.WriteString(fmt.Sprintf("%dd ", days))
+	}
+
+	if hours > 0 {
+		buffer.WriteString(fmt.Sprintf("%dh ", hours))
+	}
+
+	if minutes > 0 {
+		buffer.WriteString(fmt.Sprintf("%dm ", minutes))
+	}
+
+	return strings.TrimRight(buffer.String(), " ")
 }
 
 // DurationString creates a human-readable duration string with a days component.
