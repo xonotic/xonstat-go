@@ -10,7 +10,6 @@ import (
 	"net/http"
 
 	"github.com/spf13/viper"
-	"gitlab.com/xonotic/xonstat/pkg/d0"
 	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
 
@@ -62,18 +61,15 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Pull the D0 verification information out, if it is present.
-	value := r.Context().Value(D0VerifyResultKey)
-	d0Result, ok := value.(d0.VerifyResult)
-	if ok {
-		if d0Result.IDFP != "" {
-			sub.Server.HashKey = sql.NullString{Valid: true, String: d0Result.IDFP}
-		}
+	idfp := r.Header.Get("X-D0-Blind-Id-IDFP")
+	if idfp != "" {
+		sub.Server.HashKey = sql.NullString{Valid: true, String: idfp}
 	}
 
 	if !logAllRequests {
 		// If we've gotten here, it's likely that we have a valid submission, so we'll log it.
 		bodyLogMsg := fmt.Sprintf("----- BEGIN REQUEST BODY -----\n%s%s----- END REQUEST BODY -----\n\n",
-			fmt.Sprintf("IDFP %s\n", d0Result.IDFP), string(body))
+			fmt.Sprintf("IDFP %s\n", idfp), string(body))
 		ae.requestLogger.Write([]byte(bodyLogMsg))
 	}
 
