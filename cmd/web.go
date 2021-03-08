@@ -12,10 +12,10 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/swaggo/http-swagger"
 	"gitlab.com/xonotic/xonstat/internal/handlers"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"github.com/swaggo/http-swagger"
 )
 
 // @title XonStat API
@@ -127,6 +127,10 @@ func web(addr string) {
 	cwd, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	staticDir := http.Dir(filepath.Join(cwd, "web/static"))
 	FileServer(r, "/static", staticDir)
+
+	r.Get(reverse.Add("robots", "/robots.txt"), func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(cwd, "web/static/robots.txt"))
+	})
 
 	// Swagger documentation via "swag" and "swag-http" libraries.
 	r.Get("/docs/*", httpSwagger.Handler(
