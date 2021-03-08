@@ -25,7 +25,7 @@ func scanActivePlayers(rows *sql.Rows) ([]*ActivePlayer, error) {
 
 // RActivePlayers retrieves the active players from the "materialized view".
 func (ds *PGDatastore) RActivePlayers(limit, start int) ([]*ActivePlayer, error) {
-	sql := `SELECT sort_order, player_id, nick, extract(epoch from alivetime) alivetime, create_dt
+	sql := `SELECT sort_order, player_id, nick, cast(extract(epoch from alivetime) as INTEGER) alivetime, create_dt
 	FROM active_players_mv
 	WHERE sort_order >= $2
 	LIMIT $1`
