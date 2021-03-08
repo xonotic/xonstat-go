@@ -1,7 +1,6 @@
 package server
 
 import (
-	"github.com/antzucaro/qstr"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
@@ -14,7 +13,7 @@ func IndexData(db models.Datastore, start, limit int, nameFragment string) ([]*I
 
 	servers := make([]*InfoBase, len(rawServers))
 	for i, s := range rawServers {
-		name := qstr.QStr(s.Name.String)
+		name := models.NewMultiNick(s.Name.String)
 		dt, err := models.NewMultiDt(s.CreateDt)
 		if err != nil {
 			return nil, err
@@ -23,7 +22,7 @@ func IndexData(db models.Datastore, start, limit int, nameFragment string) ([]*I
 		ib := &InfoBase{
 			ServerID:  s.ServerID,
 			Name:      s.Name.String,
-			NameHTML:  name.HTML(),
+			NameHTML:  name.NickHTML,
 			IPAddr:    s.IPAddr.String,
 			Port:      int(s.Port.Int64),
 			Revision:  s.Revision.String,

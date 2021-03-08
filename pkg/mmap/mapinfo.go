@@ -1,7 +1,6 @@
 package mmap
 
 import (
-	"github.com/antzucaro/qstr"
 	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/models"
@@ -54,13 +53,13 @@ func TopScorerData(db models.Datastore, mapID int) ([]*server.TopScorerBase, err
 
 	var topScorers []*server.TopScorerBase
 	for _, v := range rawActivePlayerScores {
-		nick := qstr.QStr(v.Nick)
+		nick := models.NewMultiNick(v.Nick)
 		ts := server.TopScorerBase{
 			SortOrder:    v.SortOrder,
 			PlayerID:     v.PlayerID,
 			Nick:         v.Nick,
-			NickStripped: nick.Stripped(),
-			NickHTML:     nick.HTML(),
+			NickStripped: nick.NickStripped,
+			NickHTML:     nick.NickHTML,
 		}
 
 		topScorers = append(topScorers, &ts)

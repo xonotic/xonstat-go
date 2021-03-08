@@ -61,13 +61,13 @@ type ActivePlayerBase struct {
 func ActivePlayerToActivePlayerBase(in []*models.ActivePlayer) []*ActivePlayerBase {
 	var out []*ActivePlayerBase
 	for _, v := range in {
-		nick := qstr.QStr(v.Nick)
+		nick := models.NewMultiNick(v.Nick)
 		ap := ActivePlayerBase{
 			SortOrder:    v.SortOrder,
 			PlayerID:     v.PlayerID,
-			Nick:         nick,
-			HTMLNick:     nick.HTML(),
-			StrippedNick: nick.Stripped(),
+			Nick:         qstr.QStr(nick.Nick),
+			HTMLNick:     nick.NickHTML,
+			StrippedNick: nick.NickStripped,
 			AliveTime:    models.DurationString(v.AliveTime, "short"),
 		}
 		out = append(out, &ap)

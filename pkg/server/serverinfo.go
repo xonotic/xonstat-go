@@ -31,13 +31,13 @@ func TopScorerData(db models.Datastore, serverID int) ([]*TopScorerBase, error) 
 
 	var topScorers []*TopScorerBase
 	for _, v := range rawActivePlayerScores {
-		nick := qstr.QStr(v.Nick)
+		nick := models.NewMultiNick(v.Nick)
 		ts := TopScorerBase{
 			SortOrder:    v.SortOrder,
 			PlayerID:     v.PlayerID,
 			Nick:         v.Nick,
-			NickStripped: nick.Stripped(),
-			NickHTML:     nick.HTML(),
+			NickStripped: nick.NickStripped,
+			NickHTML:     nick.NickHTML,
 			Score:        v.Score,
 		}
 

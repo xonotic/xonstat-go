@@ -4,7 +4,6 @@ import (
 	"html/template"
 	"time"
 
-	"github.com/antzucaro/qstr"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
@@ -61,7 +60,7 @@ func RecentGamesData(db models.Datastore, serverID int, mapID int, playerID int,
 
 	var recentGames []RecentGameBase
 	for _, v := range rawRecentGames {
-		nick := qstr.QStr(v.WinningNick)
+		nick := models.NewMultiNick(v.WinningNick)
 		winningTeam := -1
 		if v.WinningTeam.Valid {
 			winningTeam = int(v.WinningTeam.Int32)
@@ -82,8 +81,8 @@ func RecentGamesData(db models.Datastore, serverID int, mapID int, playerID int,
 			MapName:         v.MapName,
 			WinningTeam:     winningTeam,
 			WinningPlayerID: v.WinningPlayerID,
-			WinningNick:     nick.Stripped(),
-			WinningNickHTML: nick.HTML(),
+			WinningNick:     nick.NickStripped,
+			WinningNickHTML: nick.NickHTML,
 			CreateDt:        dt,
 		}
 

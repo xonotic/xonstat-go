@@ -137,7 +137,8 @@ type MultiNick struct {
 
 // NewMultiNick creates a MultiNick
 func NewMultiNick(nick string) *MultiNick {
-	n := qstr.QStr(nick)
+	raw := qstr.QStr(nick)
+	n := raw.Decode(qstr.XonoticDecodeKey)
 	return &MultiNick{
 		Nick:         nick,
 		NickStripped: n.Stripped(),
