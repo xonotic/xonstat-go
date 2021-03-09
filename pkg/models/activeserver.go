@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"time"
 )
 
@@ -38,17 +39,28 @@ func (ds *PGDatastore) RActiveServers(limit, start int) ([]*ActiveServer, error)
 // RActiveServersByMap finds the servers who have played a given map (by its ID) most frequently
 // over a given time period.
 func (ds *PGDatastore) RActiveServersByMap(mapID int, cutoff *time.Time, limit int) ([]*ActiveServer, error) {
-	sql := `SELECT row_number() over(order by sum(extract(epoch from pgs.alivetime)) desc) as rank,
-	s.server_id, s.name, sum(extract(epoch from pgs.alivetime)) play_time, now() at time zone 'utc' 
-	FROM player_game_stats pgs join games g on pgs.game_id = g.game_id
-	JOIN servers s on s.server_id = g.server_id
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	sql := `SELECT 
+	row_number() over(order by sum(extract(epoch from pgs.alivetime)) desc) as rank,
+	s.server_id, s.name, sum(extract(epoch from pgs.alivetime)) time_played, 
+	now() at time zone 'utc' 
+
+	FROM player_game_stats pgs
+	INNER JOIN games g USING (game_id)
+	INNER JOIN servers s USING (server_id)
+
 	WHERE g.map_id = $1
 	AND pgs.player_id > 1
-	AND pgs.create_dt > $2
+	AND pgs.create_dt BETWEEN $2 AND (now() at time zone 'UTC' + interval '1 day')
+	AND g.create_dt BETWEEN $2 AND (now() at time zone 'UTC' + interval '1 day')
+
 	GROUP BY s.server_id, s.name
+	ORDER BY time_played desc
 	LIMIT $3`
 
-	rows, err := ds.db.Query(sql, mapID, cutoff, limit)
+	rows, err := ds.db.QueryContext(ctx, sql, mapID, cutoff, limit)
 	if err != nil {
 		return nil, err
 	}

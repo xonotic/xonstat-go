@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"database/sql"
 	"time"
 )
@@ -38,18 +39,25 @@ func (ds *PGDatastore) RActiveMaps(limit, start int) ([]*ActiveMap, error) {
 
 // RActiveMapsByServer finds the most active maps played on a server over a given time period.
 func (ds *PGDatastore) RActiveMapsByServer(serverID int, cutoff *time.Time, limit int) ([]*ActiveMap, error) {
-	sql := `SELECT row_number() OVER (ORDER BY count(*) DESC) AS rank, 
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	sql := `SELECT 
+	row_number() OVER (ORDER BY count(*) DESC) AS rank, 
 	games.map_id AS games_map_id, maps.name AS maps_name, count(*) AS times_played,
 	now() at time zone 'UTC' AS create_dt
-	FROM games, maps
-	WHERE maps.map_id = games.map_id 
-	AND games.server_id = $1 
-	AND games.create_dt > $2 
+
+	FROM games
+	INNER JOIN maps USING (map_id)
+
+	WHERE games.server_id = $1 
+	AND games.create_dt BETWEEN $2 AND (now() at time zone 'UTC' + interval '1 day')
+
 	GROUP BY games.map_id, maps.name 
-	ORDER BY count(*) DESC
+	ORDER BY times_played DESC
 	LIMIT $3`
 
-	rows, err := ds.db.Query(sql, serverID, cutoff, limit)
+	rows, err := ds.db.QueryContext(ctx, sql, serverID, cutoff, limit)
 	if err != nil {
 		return nil, err
 	}
