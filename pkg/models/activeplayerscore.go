@@ -31,7 +31,7 @@ func scanActivePlayerScores(rows *sql.Rows) ([]*ActivePlayerScore, error) {
 
 // RServerActivePlayerScores retrieves the top scoring players for a server over a given period of time.
 func (ds *PGDatastore) RServerActivePlayerScores(serverID int, cutoff *time.Time, limit int) ([]*ActivePlayerScore, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	sql := `SELECT 

@@ -39,7 +39,7 @@ func (ds *PGDatastore) RActiveServers(limit, start int) ([]*ActiveServer, error)
 // RActiveServersByMap finds the servers who have played a given map (by its ID) most frequently
 // over a given time period.
 func (ds *PGDatastore) RActiveServersByMap(mapID int, cutoff *time.Time, limit int) ([]*ActiveServer, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	sql := `SELECT 
