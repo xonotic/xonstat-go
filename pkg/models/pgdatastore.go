@@ -8,7 +8,10 @@ import (
 )
 
 // IdleConnections is the maximum number of idle connections we should maintain for the database.
-const IdleConnections = 10 
+const IdleConnections = 2
+
+// OpenConnections is the maximum number of open connections we should maintain for the database.
+const OpenConnections = 5
 
 // PGDatastore is an implementation of the Datastore interface for a Postgresql database.
 type PGDatastore struct {
@@ -30,6 +33,7 @@ func NewPGDatastore(dsn string) (*PGDatastore, error) {
 
 	// connection pooling
 	db.SetMaxIdleConns(IdleConnections)
+	db.SetMaxOpenConns(OpenConnections)
 
 	return &PGDatastore{db}, nil
 }
