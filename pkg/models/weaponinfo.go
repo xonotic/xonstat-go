@@ -1,9 +1,11 @@
 package models
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
+	"time"
 )
 
 // scanWeaponInfos is a helper function to parse the query results for weapons
@@ -51,6 +53,9 @@ func (ds *PGDatastore) RWeaponInfoByGameID(gameID int) ([]*WeaponInfo, error) {
 
 // RPlayerWeaponStatsByGameList retrieves PlayerWeaponsStat rows for a list of game IDs using an IN list.
 func (ds *PGDatastore) RPlayerWeaponStatsByGameList(playerID int, gameIDs []int) ([]*PlayerWeaponStat, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	// Convert the game IDs to strings... 
 	var strGameIDs []string
 	for _, gameID := range gameIDs {
@@ -60,14 +65,16 @@ func (ds *PGDatastore) RPlayerWeaponStatsByGameList(playerID int, gameIDs []int)
 	// ... and build IN list from those strings
 	gameIDINstr := strings.Join(strGameIDs, ",")
 
+	// NOTE: The date window here is constrained to the past year for performance reasons.
 	sql := fmt.Sprintf(`select ws.player_weapon_stats_id, ws.player_id, ws.game_id, 
 	ws.player_game_stat_id, ws.weapon_cd, ws.actual, ws.max, ws.hit, ws.fired, ws.frags
 	from player_weapon_stats ws 
 	where ws.player_id = $1
 	and ws.game_id in (%s) 
+	and ws.create_dt > (now() at time zone 'utc' - interval '1 year') 
 	order by ws.game_id, ws.weapon_cd;`, gameIDINstr)
 	
-	rows, err := ds.db.Query(sql, playerID)
+	rows, err := ds.db.QueryContext(ctx, sql, playerID)
 	if err != nil {
 		return nil, err
 	}
