@@ -44,20 +44,19 @@ func (ds *PGDatastore) RActiveMapsByServer(serverID int, cutoff *time.Time, limi
 
 	sql := `SELECT 
 	row_number() OVER (ORDER BY count(*) DESC) AS rank, 
-	games.map_id AS games_map_id, maps.name AS maps_name, count(*) AS times_played,
+	rgs.map_id, m.name, count(*) AS times_played,
 	now() at time zone 'UTC' AS create_dt
 
-	FROM games
-	INNER JOIN maps USING (map_id)
+	FROM recent_game_stats_mv rgs
+	INNER JOIN maps m USING (map_id)
 
-	WHERE games.server_id = $1 
-	AND games.create_dt BETWEEN $2 AND (now() at time zone 'UTC' + interval '1 day')
+	WHERE rgs.server_id = $1 
 
-	GROUP BY games.map_id, maps.name 
+	GROUP BY rgs.map_id, m.name 
 	ORDER BY times_played DESC
-	LIMIT $3`
+	LIMIT $2`
 
-	rows, err := ds.db.QueryContext(ctx, sql, serverID, cutoff, limit)
+	rows, err := ds.db.QueryContext(ctx, sql, serverID, limit)
 	if err != nil {
 		return nil, err
 	}

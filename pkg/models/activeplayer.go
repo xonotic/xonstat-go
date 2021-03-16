@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 )
 
@@ -46,26 +47,23 @@ func (ds *PGDatastore) RActivePlayersByServer(serverID int, cutoff *time.Time, l
 	defer cancel()
 
 	sql := `SELECT 
-	row_number() OVER (ORDER BY sum(player_game_stats.alivetime) DESC) AS rank, 
-	players.player_id AS players_player_id, players.nick AS players_nick, 
-	cast(extract(epoch from sum(player_game_stats.alivetime)) AS INTEGER) AS total_alivetime,
+	row_number() OVER (ORDER BY sum(rgs.alivetime) DESC) AS rank, 
+	p.player_id, p.nick, 
+	cast(extract(epoch from sum(rgs.alivetime)) AS INTEGER) AS total_alivetime,
 	now() at time zone 'UTC' AS create_dt
 
-	FROM player_game_stats
-	INNER JOIN players USING (player_id)
-	INNER JOIN games USING (game_id)
+	FROM recent_game_stats_mv rgs
+	INNER JOIN players p USING (player_id)
 
-	WHERE games.server_id = $1
-	AND players.player_id > 2
-	AND player_game_stats.create_dt BETWEEN $2 AND (now() at time zone 'UTC' + interval '1 day')
-	AND games.create_dt BETWEEN $2 AND (now() at time zone 'UTC' + interval '1 day')
+	WHERE rgs.server_id = $1
 
-	GROUP BY players.nick, players.player_id 
+	GROUP BY p.nick, p.player_id 
 	ORDER BY total_alivetime DESC
-	LIMIT $3`
+	LIMIT $2`
 
-	rows, err := ds.db.QueryContext(ctx, sql, serverID, cutoff, limit)
+	rows, err := ds.db.QueryContext(ctx, sql, serverID, limit)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -79,25 +77,21 @@ func (ds *PGDatastore) RActivePlayersByMap(mapID int, cutoff *time.Time, limit i
 	defer cancel()
 
 	sql := `SELECT 
-	row_number() OVER (ORDER BY sum(player_game_stats.alivetime) DESC) AS rank, 
-	players.player_id AS players_player_id, players.nick AS players_nick, 
-	cast(extract(epoch from sum(player_game_stats.alivetime)) AS INTEGER) AS total_alivetime,
+	row_number() OVER (ORDER BY sum(rgs.alivetime) DESC) AS rank, 
+	p.player_id, p.nick, 
+	cast(extract(epoch from sum(rgs.alivetime)) AS INTEGER) AS total_alivetime,
 	now() at time zone 'UTC' AS create_dt
 
-	FROM player_game_stats
-	INNER JOIN players USING (player_id)
-	INNER JOIN games USING (game_id)
+	FROM recent_game_stats_mv rgs
+	INNER JOIN players p USING (player_id)
 
-	WHERE games.map_id = $1
-	AND players.player_id > 2
-	AND player_game_stats.create_dt BETWEEN $2 AND (now() at time zone 'UTC' + interval '1 day')
-	AND games.create_dt BETWEEN $2 AND (now() at time zone 'UTC' + interval '1 day')
+	WHERE rgs.map_id = $1
 
-	GROUP BY players.nick, players.player_id 
+	GROUP BY p.nick, p.player_id 
 	ORDER BY total_alivetime DESC
-	LIMIT $3`
+	LIMIT $2`
 
-	rows, err := ds.db.QueryContext(ctx, sql, mapID, cutoff, limit)
+	rows, err := ds.db.QueryContext(ctx, sql, mapID, limit)
 	if err != nil {
 		return nil, err
 	}
