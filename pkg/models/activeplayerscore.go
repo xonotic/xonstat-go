@@ -30,7 +30,7 @@ func scanActivePlayerScores(rows *sql.Rows) ([]*ActivePlayerScore, error) {
 }
 
 // RServerActivePlayerScores retrieves the top scoring players for a server over a given period of time.
-func (ds *PGDatastore) RServerActivePlayerScores(serverID int, cutoff *time.Time, limit int) ([]*ActivePlayerScore, error) {
+func (ds *PGDatastore) RServerActivePlayerScores(serverID int, limit int) ([]*ActivePlayerScore, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -58,7 +58,7 @@ func (ds *PGDatastore) RServerActivePlayerScores(serverID int, cutoff *time.Time
 }
 
 // RMapActivePlayerScores retrieves the top scoring players for a map over a given period of time.
-func (ds *PGDatastore) RMapActivePlayerScores(mapID int, cutoff *time.Time, limit int) ([]*ActivePlayerScore, error) {
+func (ds *PGDatastore) RMapActivePlayerScores(mapID int, limit int) ([]*ActivePlayerScore, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 

@@ -42,7 +42,7 @@ func (ds *PGDatastore) RActivePlayers(limit, start int) ([]*ActivePlayer, error)
 }
 
 // RActivePlayersByServer retrieves the active players for a given server.
-func (ds *PGDatastore) RActivePlayersByServer(serverID int, cutoff *time.Time, limit int) ([]*ActivePlayer, error) {
+func (ds *PGDatastore) RActivePlayersByServer(serverID int, limit int) ([]*ActivePlayer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -72,7 +72,7 @@ func (ds *PGDatastore) RActivePlayersByServer(serverID int, cutoff *time.Time, l
 }
 
 // RActivePlayersByMap retrieves the active players for a given map.
-func (ds *PGDatastore) RActivePlayersByMap(mapID int, cutoff *time.Time, limit int) ([]*ActivePlayer, error) {
+func (ds *PGDatastore) RActivePlayersByMap(mapID int, limit int) ([]*ActivePlayer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

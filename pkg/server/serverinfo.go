@@ -2,10 +2,8 @@ package server
 
 import (
 	"html/template"
-	"time"
 
 	"github.com/antzucaro/qstr"
-	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 )
@@ -23,8 +21,7 @@ type TopScorerBase struct {
 
 // TopScorerData returns view-agnostic data for the top scorers on a given server.
 func TopScorerData(db models.Datastore, serverID int) ([]*TopScorerBase, error) {
-	activePlayerScoresCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("TopPlayersByScoreDays"))
-	rawActivePlayerScores, err := db.RServerActivePlayerScores(serverID, &activePlayerScoresCutoff, 10)
+	rawActivePlayerScores, err := db.RServerActivePlayerScores(serverID, 10)
 	if err != nil {
 		return nil, err
 	}
@@ -50,8 +47,7 @@ func TopScorerData(db models.Datastore, serverID int) ([]*TopScorerBase, error) 
 // NOTE: the base type returned here is shared with the leaderboard package.
 func TopActivePlayersData(db models.Datastore, serverID int) ([]*leaderboard.ActivePlayerBase, error) {
 	// Top players by alive time over the time period.
-	activePlayersCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("TopPlayersByTimeDays"))
-	rawActivePlayers, err := db.RActivePlayersByServer(serverID, &activePlayersCutoff, 10)
+	rawActivePlayers, err := db.RActivePlayersByServer(serverID, 10)
 	if err != nil {
 		return nil, err
 	}
@@ -65,8 +61,7 @@ func TopActivePlayersData(db models.Datastore, serverID int) ([]*leaderboard.Act
 // or hiding is required.
 func TopMapsData(db models.Datastore, serverID int) ([]*models.ActiveMap, error) {
 	// Top maps by times played over the time period.
-	activeMapsCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("TopMapsByGamesDays"))
-	activeMaps, err := db.RActiveMapsByServer(serverID, &activeMapsCutoff, 10)
+	activeMaps, err := db.RActiveMapsByServer(serverID, 10)
 	if err != nil {
 		return nil, err
 	}

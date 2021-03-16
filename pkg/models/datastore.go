@@ -65,20 +65,20 @@ type Datastore interface {
 
 	// Top Players by time played
 	RActivePlayers(limit, start int) ([]*ActivePlayer, error)
-	RActivePlayersByServer(serverID int, cutoff *time.Time, limit int) ([]*ActivePlayer, error)
-	RActivePlayersByMap(mapID int, cutoff *time.Time, limit int) ([]*ActivePlayer, error)
+	RActivePlayersByServer(serverID int, limit int) ([]*ActivePlayer, error)
+	RActivePlayersByMap(mapID int, limit int) ([]*ActivePlayer, error)
 
 	// Top Servers by aggregate play time
 	RActiveServers(limit, start int) ([]*ActiveServer, error)
-	RActiveServersByMap(mapID int, cutoff *time.Time, limit int) ([]*ActiveServer, error)
+	RActiveServersByMap(mapID int, limit int) ([]*ActiveServer, error)
 
 	// Top Maps by times played
 	RActiveMaps(limit, start int) ([]*ActiveMap, error)
-	RActiveMapsByServer(serverID int, cutoff *time.Time, limit int) ([]*ActiveMap, error)
+	RActiveMapsByServer(serverID int, limit int) ([]*ActiveMap, error)
 
 	// Top scoring players by server or map
-	RServerActivePlayerScores(serverID int, cutoff *time.Time, limit int) ([]*ActivePlayerScore, error)
-	RMapActivePlayerScores(mapID int, cutoff *time.Time, limit int) ([]*ActivePlayerScore, error)
+	RServerActivePlayerScores(serverID int, limit int) ([]*ActivePlayerScore, error)
+	RMapActivePlayerScores(mapID int, limit int) ([]*ActivePlayerScore, error)
 
 	// RecentGames by various means
 	RRecentGames(serverID int, mapID int, playerID int, gameTypeCd string, cutoff *time.Time, startGameID int, endGameID int, limit int) ([]*RecentGame, error)

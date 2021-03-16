@@ -38,7 +38,7 @@ func (ds *PGDatastore) RActiveMaps(limit, start int) ([]*ActiveMap, error) {
 }
 
 // RActiveMapsByServer finds the most active maps played on a server over a given time period.
-func (ds *PGDatastore) RActiveMapsByServer(serverID int, cutoff *time.Time, limit int) ([]*ActiveMap, error) {
+func (ds *PGDatastore) RActiveMapsByServer(serverID int, limit int) ([]*ActiveMap, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

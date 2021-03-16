@@ -18,8 +18,4 @@ RequestsMaxAge = 14
 
 # Time limits controlling how much history is shown on various pages
 SummaryStatsDays = 30
-TopPlayersByTimeDays = 30
-TopPlayersByScoreDays = 30
-TopServersByPlaytimeDays = 30
-TopMapsByGamesDays = 30
 RecentGamesDays = 30
