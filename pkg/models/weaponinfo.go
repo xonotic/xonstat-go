@@ -8,20 +8,53 @@ import (
 	"time"
 )
 
+var supportedWeapons = map[string]struct{}{
+	"arc":             {},
+	"laser":           {},
+	"blaster":         {},
+	"shotgun":         {},
+	"uzi":             {},
+	"machinegun":      {},
+	"grenadelauncher": {},
+	"mortar":          {},
+	"minelayer":       {},
+	"electro":         {},
+	"crylink":         {},
+	"nex":             {},
+	"vortex":          {},
+	"hagar":           {},
+	"rocketlauncher":  {},
+	"devastator":      {},
+	"porto":           {},
+	"minstanex":       {},
+	"vaporizer":       {},
+	"hook":            {},
+	"hlac":            {},
+	"seeker":          {},
+	"rifle":           {},
+	"tuba":            {},
+	"fireball":        {},
+}
+
 // scanWeaponInfos is a helper function to parse the query results for weapons
 func scanWeaponInfos(rows *sql.Rows) ([]*WeaponInfo, error) {
 	var weapons []*WeaponInfo
 	for rows.Next() {
 		var wi WeaponInfo
 
-		err := rows.Scan(&wi.PlayerWeaponStatID, &wi.PlayerID, &wi.Nick, &wi.GameID, &wi.PlayerGameStatID, 
+		err := rows.Scan(&wi.PlayerWeaponStatID, &wi.PlayerID, &wi.Nick, &wi.GameID, &wi.PlayerGameStatID,
 			&wi.WeaponCd, &wi.Actual, &wi.Max, &wi.Hit, &wi.Fired, &wi.Frags)
 
 		if err != nil {
 			return nil, err
 		}
 
-		weapons = append(weapons, &wi)
+		// All weapons sent to us are stored, but we don't know how to present
+		// all of them back out to the user (background color, hitscan/splash, etc) so we
+		// allow-list the ones returned here to prevent oddities.
+		if _, supported := supportedWeapons[wi.WeaponCd]; supported {
+			weapons = append(weapons, &wi)
+		}
 	}
 
 	return weapons, nil
@@ -56,7 +89,7 @@ func (ds *PGDatastore) RPlayerWeaponStatsByGameList(playerID int, gameIDs []int)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Convert the game IDs to strings... 
+	// Convert the game IDs to strings...
 	var strGameIDs []string
 	for _, gameID := range gameIDs {
 		strGameIDs = append(strGameIDs, fmt.Sprintf("%d", gameID))
@@ -73,7 +106,7 @@ func (ds *PGDatastore) RPlayerWeaponStatsByGameList(playerID int, gameIDs []int)
 	and ws.game_id in (%s) 
 	and ws.create_dt > (now() at time zone 'utc' - interval '1 year') 
 	order by ws.game_id, ws.weapon_cd;`, gameIDINstr)
-	
+
 	rows, err := ds.db.QueryContext(ctx, sql, playerID)
 	if err != nil {
 		return nil, err
@@ -83,7 +116,7 @@ func (ds *PGDatastore) RPlayerWeaponStatsByGameList(playerID int, gameIDs []int)
 	for rows.Next() {
 		var ws PlayerWeaponStat
 
-		err := rows.Scan(&ws.PlayerWeaponStatID, &ws.PlayerID, &ws.GameID, &ws.PlayerGameStatID, 
+		err := rows.Scan(&ws.PlayerWeaponStatID, &ws.PlayerID, &ws.GameID, &ws.PlayerGameStatID,
 			&ws.WeaponCd, &ws.Actual, &ws.Max, &ws.Hit, &ws.Fired, &ws.Frags)
 
 		if err != nil {
