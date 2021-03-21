@@ -5,7 +5,10 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"net/http/httptest"
+	"time"
 
 	"github.com/spf13/viper"
 	"gitlab.com/xonotic/xonstat/pkg/d0"
@@ -58,4 +61,43 @@ func D0Verify(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func (ae *AppEnv) Cached(duration time.Duration, handler func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// Most of the HandlerFuncs do their own content negotiation by checking the 
+		// Accept header instead of having a different route/URI. To account for this
+		// we will tack on the value of the accept header to the cache key itself to
+		// differentiate.
+		accept := r.Header.Get("Accept")
+
+		var key string
+		if accept == "application/json" {
+			key = fmt.Sprintf("%s-%s", r.RequestURI, r.Header.Get("Accept"))
+		} else {
+			key = r.RequestURI
+		}
+		
+		content := ae.cache.Get(key)
+		if content != nil {
+			log.Print("Cache Hit for ", key)
+			w.Write(content)
+		} else {
+			log.Print("Cache miss for ", key, " storing under a new key")
+			c := httptest.NewRecorder()
+			handler(c, r)
+
+			for k, v := range c.HeaderMap {
+				w.Header()[k] = v
+			}
+
+			w.WriteHeader(c.Code)
+			content := c.Body.Bytes()
+
+			ae.cache.Set(key, content, duration)
+
+			w.Write(content)
+		}
+	}
 }

@@ -40,16 +40,16 @@ func NewRedisCache(options *redis.Options) *RedisCache {
 }
 
 // Get retrieves a key from the cache if it exists.
-func (r *RedisCache) Get(key string) ([]byte, error) {
+func (r *RedisCache) Get(key string) []byte {
 	ctx := context.TODO()
 	var content []byte
 
 	err := r.cache.Get(ctx, key, &content)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
-	return content, nil
+	return content
 }
 
 // Set stores content in the cache for a given duration of time.
