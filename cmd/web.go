@@ -16,6 +16,8 @@ import (
 	"gitlab.com/xonotic/xonstat/internal/handlers"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gopkg.in/natefinch/lumberjack.v2"
+
+	"github.com/go-redis/redis/v8"
 )
 
 // @title XonStat API
@@ -63,6 +65,11 @@ func web(addr string) {
 		log.Fatal("Unable to initialize database connection.")
 	}
 
+	redisAddr := viper.GetString("RedisAddr")
+	cache := models.NewRedisCache(&redis.Options{
+		Addr: redisAddr,
+	})
+
 	requestLogger := lumberjack.Logger{
 		Filename:   viper.GetString("RequestsLogFile"),
 		MaxSize:    viper.GetInt("RequestsMaxSize"),
@@ -71,7 +78,7 @@ func web(addr string) {
 		Compress:   true,
 	}
 
-	env := handlers.NewAppEnv(db, &requestLogger)
+	env := handlers.NewAppEnv(db, cache, &requestLogger)
 
 	r := chi.NewRouter()
 

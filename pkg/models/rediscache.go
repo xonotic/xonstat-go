@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/go-redis/cache/v8"
@@ -19,11 +20,17 @@ type RedisCache struct {
 
 // NewRedisCache creates a new Redis cache instance.
 func NewRedisCache(options *redis.Options) *RedisCache {
+	ctx := context.TODO()
 	client := redis.NewClient(options)
+
+	pong := client.Ping(ctx)
+	if pong.Val() != "PONG" {
+		log.Printf("Could not connect to Redis. Cache is disabled.")
+		return nil
+	}
 
 	cache := cache.New(&cache.Options{
 		Redis:      client,
-		LocalCache: cache.NewTinyLFU(1000, time.Minute),
 	})
 
 	return &RedisCache{

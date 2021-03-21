@@ -18,6 +18,7 @@ import (
 // All web handlers are methods off of the application environment.
 type AppEnv struct {
 	db            models.Datastore
+	cache         models.Cache
 	requestLogger io.WriteCloser
 	templates     map[string]*template.Template
 }
@@ -73,12 +74,13 @@ func loadTemplates(templateDir string) map[string]*template.Template {
 }
 
 // NewAppEnv creates a new AppEnv
-func NewAppEnv(db models.Datastore, rl io.WriteCloser) *AppEnv {
+func NewAppEnv(db models.Datastore, cache models.Cache, rl io.WriteCloser) *AppEnv {
 	cwd, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	templatePath := path.Join(cwd, "web/template")
 
 	ae := AppEnv{
 		db:            db,
+		cache:         cache,
 		requestLogger: rl,
 		templates:     loadTemplates(templatePath),
 	}
