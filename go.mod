@@ -8,6 +8,8 @@ require (
 	github.com/antzucaro/qstr v0.0.0-20170524223403-585819fc85f4
 	github.com/go-chi/chi v4.1.1+incompatible
 	github.com/go-openapi/spec v0.20.3 // indirect
+	github.com/go-redis/cache/v8 v8.3.1
+	github.com/go-redis/redis/v8 v8.4.4
 	github.com/lib/pq v1.6.0
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/nleeper/goment v1.2.0
