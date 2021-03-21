@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/alehano/reverse"
 	"github.com/go-chi/chi"
@@ -109,25 +110,44 @@ func web(addr string) {
 	})
 
 	// Register all "regular" routes and handlers.
-	r.Get(reverse.Add("leaderboard", "/"), env.LeaderboardHandler)
-	r.Get(reverse.Add("summary", "/summary"), env.SummaryHandler)
-	r.Get(reverse.Add("topactive", "/topactive"), env.TopActiveHandler)
-	r.Get(reverse.Add("topservers", "/topservers"), env.TopServersHandler)
-	r.Get(reverse.Add("topmaps", "/topmaps"), env.TopMapsHandler)
-	r.Get(reverse.Add("games", "/games"), env.RecentGamesHandler)
-	r.Get(reverse.Add("server_index", "/servers"), env.ServerIndexHandler)
-	r.Get(reverse.Add("server_info", "/server/{id:\\d+}", "{id:\\d+}"), env.ServerInfoHandler)
-	r.Get(reverse.Add("server_top_scorers", "/server/{id:\\d+}/topscorers", "{id:\\d+}"), env.ServerTopScorersHandler)
-	r.Get(reverse.Add("map_index", "/maps"), env.MapIndexHandler)
-	r.Get(reverse.Add("map_info", "/map/{id:\\d+}", "{id:\\d+}"), env.MapInfoHandler)
-	r.Get(reverse.Add("game_info", "/game/{id:\\d+}", "{id:\\d+}"), env.GameInfoHandler)
-	r.Get(reverse.Add("game_weapon_info", "/game/{id:\\d+}/weapons", "{id:\\d+}"), env.GameWeaponInfoHandler)
-	r.Get(reverse.Add("player_index", "/players"), env.PlayerIndexHandler)
-	r.Get(reverse.Add("player_info", "/player/{id:\\d+}", "{id:\\d+}"), env.PlayerInfoHandler)
-	r.Get(reverse.Add("player_weapon_info", "/player/{id:\\d+}/weapons", "{id:\\d+}"), env.PlayerWeaponInfoHandler)
-	r.Get(reverse.Add("player_recent_games_fragment", "/player/{id:\\d+}/recentGamesFragment", "{id:\\d+}"), env.PlayerRecentGamesFragmentHandler)
-	r.Get(reverse.Add("player_skill", "/player/{id:\\d+}/skill", "{id:\\d+}"), env.PlayerSkillHandler)
-	r.Get("/skill", env.PlayerSkillHashkeyHandler)
+	r.Get(reverse.Add("leaderboard", "/"),
+		env.Cached(5*time.Minute, env.LeaderboardHandler))
+	r.Get(reverse.Add("summary", "/summary"),
+		env.Cached(1*time.Hour, env.SummaryHandler))
+	r.Get(reverse.Add("topactive", "/topactive"),
+		env.Cached(1*time.Hour, env.TopActiveHandler))
+	r.Get(reverse.Add("topservers", "/topservers"),
+		env.Cached(1*time.Hour, env.TopServersHandler))
+	r.Get(reverse.Add("topmaps", "/topmaps"),
+		env.Cached(1*time.Hour, env.TopMapsHandler))
+	r.Get(reverse.Add("games", "/games"),
+		env.RecentGamesHandler)
+	r.Get(reverse.Add("server_index", "/servers"),
+		env.ServerIndexHandler)
+	r.Get(reverse.Add("server_info", "/server/{id:\\d+}", "{id:\\d+}"),
+		env.Cached(5*time.Minute, env.ServerInfoHandler))
+	r.Get(reverse.Add("server_top_scorers", "/server/{id:\\d+}/topscorers", "{id:\\d+}"),
+		env.Cached(5*time.Minute, env.ServerTopScorersHandler))
+	r.Get(reverse.Add("map_index", "/maps"),
+		env.MapIndexHandler)
+	r.Get(reverse.Add("map_info", "/map/{id:\\d+}", "{id:\\d+}"),
+		env.Cached(5*time.Minute, env.MapInfoHandler))
+	r.Get(reverse.Add("game_info", "/game/{id:\\d+}", "{id:\\d+}"),
+		env.Cached(5*time.Minute, env.GameInfoHandler))
+	r.Get(reverse.Add("game_weapon_info", "/game/{id:\\d+}/weapons", "{id:\\d+}"),
+		env.Cached(5*time.Minute, env.GameWeaponInfoHandler))
+	r.Get(reverse.Add("player_index", "/players"),
+		env.PlayerIndexHandler)
+	r.Get(reverse.Add("player_info", "/player/{id:\\d+}", "{id:\\d+}"),
+		env.Cached(5*time.Minute, env.PlayerInfoHandler))
+	r.Get(reverse.Add("player_weapon_info", "/player/{id:\\d+}/weapons", "{id:\\d+}"),
+		env.Cached(5*time.Minute, env.PlayerWeaponInfoHandler))
+	r.Get(reverse.Add("player_recent_games_fragment", "/player/{id:\\d+}/recentGamesFragment", "{id:\\d+}"),
+		env.PlayerRecentGamesFragmentHandler)
+	r.Get(reverse.Add("player_skill", "/player/{id:\\d+}/skill", "{id:\\d+}"),
+		env.PlayerSkillHandler)
+	r.Get("/skill",
+		env.PlayerSkillHashkeyHandler)
 	r.NotFound(env.NotFoundHandler)
 
 	// Static files

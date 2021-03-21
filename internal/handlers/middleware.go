@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -81,10 +80,8 @@ func (ae *AppEnv) Cached(duration time.Duration, handler func(w http.ResponseWri
 		
 		content := ae.cache.Get(key)
 		if content != nil {
-			log.Print("Cache Hit for ", key)
 			w.Write(content)
 		} else {
-			log.Print("Cache miss for ", key, " storing under a new key")
 			c := httptest.NewRecorder()
 			handler(c, r)
 
