@@ -7,6 +7,7 @@ require (
 	github.com/alehano/reverse v0.0.0-20170809190552-bf1a1f8f8b82
 	github.com/antzucaro/qstr v0.0.0-20170524223403-585819fc85f4
 	github.com/go-chi/chi v4.1.1+incompatible
+	github.com/go-chi/httprate v0.4.0
 	github.com/go-openapi/spec v0.20.3 // indirect
 	github.com/go-redis/cache/v8 v8.3.1
 	github.com/go-redis/redis/v8 v8.4.4

@@ -11,6 +11,7 @@ import (
 	"github.com/alehano/reverse"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/httprate"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/swaggo/http-swagger"
@@ -88,6 +89,9 @@ func web(addr string) {
 
 	// Recover from panics
 	r.Use(middleware.Recoverer)
+
+	// Rate limiting
+	r.Use(httprate.LimitByIP(100, 1*time.Minute))
 
 	// Log request metadata: the URI, the response, and how long it took.
 	formatter := middleware.DefaultLogFormatter{Logger: logger, NoColor: true}
