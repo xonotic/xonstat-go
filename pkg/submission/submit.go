@@ -142,10 +142,17 @@ func CreateGame(tx *sql.Tx, db models.Datastore, s *Submission) error {
 		}
 	}
 
+	// Identify non-participants by their pids.
+	nonPartipants := make(map[int]struct{})
+	for _, np := range s.NonParticipants {
+		nonPartipants[np.PlayerID] = struct{}{}
+	}
+
 	// For easier queries later, we store the PIDs right on the game entry as an array.
 	var humansInGame []int
 	for _, player := range s.Players {
-		if player.PlayerID > 2 {
+		_, isNonParticipant := nonPartipants[player.PlayerID]
+		if player.PlayerID > 2 && !isNonParticipant {
 			humansInGame = append(humansInGame, player.PlayerID)
 		}
 	}
