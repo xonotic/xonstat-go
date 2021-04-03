@@ -16,6 +16,9 @@ import (
 	"gitlab.com/xonotic/xonstat/pkg/util"
 )
 
+// If we ever need to override the Weng-Lin parameters, do so here.
+var params = skill.DefaultParams
+
 // updateSkillsCmd updates the skills in the database (or simulates the same).
 var updateSkillsCmd = &cobra.Command{
 	Use:   "updateskills",
@@ -165,8 +168,8 @@ func prepareInput(rawResults []*models.PlayerSkillMatchResult,
 				playerRating.Sigma = result.Sigma.Float64
 			} else {
 				// We haven't seen this player before and the do not have a rating in the DB.
-				playerRating.Mu = skill.MU
-				playerRating.Sigma = skill.SIGMA
+				playerRating.Mu = params.DefaultMu
+				playerRating.Sigma = params.DefaultSigma
 
 				brandNewKeys[key] = struct{}{}
 			}
@@ -258,7 +261,7 @@ func updateSkills(start, end, limit int, resume bool, resumeFile string, simulat
 		matchResult, skills := prepareInput(rawResults, skillsByPlayer, brandNewKeys)
 
 		// Calculate the skill updates, returning a new skill list.
-		newSkills, err := skill.WengLinBT(matchResult, skills)
+		newSkills, err := skill.WengLinBT(&params, matchResult, skills)
 		if err != nil {
 			log.Printf("Problem calculating Weng-Lin for game %d", game.GameID)
 		}

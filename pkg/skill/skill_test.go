@@ -4,6 +4,13 @@ import (
 	"testing"
 )
 
+// The values here are from other implementations. We use them here for cross-verification.
+var params = Params{
+	DefaultMu: 25.0,
+	DefaultSigma: 25.0/ 3,
+	DefaultBeta: (25.0/3.0)/2.0,
+}
+
 func TestMissingData(t *testing.T) {
 	result := MatchResult{
 		MatchID: 1,
@@ -23,12 +30,12 @@ func TestMissingData(t *testing.T) {
 
 	skills := []Rating{
 		{
-			Mu:    MU,
-			Sigma: SIGMA,
+			Mu:    params.DefaultMu,
+			Sigma: params.DefaultSigma,
 		},
 	}
 
-	_, err := WengLinBT(result, skills)
+	_, err := WengLinBT(&params, result, skills)
 	if err == nil {
 		t.Fatal("Expected mismatch error, got nil!")
 	}
@@ -53,26 +60,26 @@ func TestDefaultSkills(t *testing.T) {
 
 	skills := []Rating{
 		{
-			Mu:    MU,
-			Sigma: SIGMA,
+			Mu:    params.DefaultMu,
+			Sigma: params.DefaultSigma,
 		},
 		{
-			Mu:    MU,
-			Sigma: SIGMA,
+			Mu:    params.DefaultMu,
+			Sigma: params.DefaultSigma,
 		},
 	}
 
-	newSkills, err := WengLinBT(result, skills)
+	newSkills, err := WengLinBT(&params, result, skills)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
 
 	if newSkills[0].Mu != 27.63523138347365 || newSkills[0].Sigma != 8.065506316323548 {
-		t.Fatal("P1 skill calculation is not correct")
+		t.Fatalf("P1 skill calculation is not correct: %+v", newSkills[0])
 	}
 
 	if newSkills[1].Mu != 22.36476861652635 || newSkills[1].Sigma != 8.065506316323548 {
-		t.Fatal("P2 skill calculation is not correct")
+		t.Fatalf("P2 skill calculation is not correct: %+v", newSkills[1])
 	}
 }
 
@@ -97,16 +104,16 @@ func TestDefaultSkillsKFactor(t *testing.T) {
 
 	skills := []Rating{
 		{
-			Mu:    MU,
-			Sigma: SIGMA,
+			Mu:    params.DefaultMu,
+			Sigma: params.DefaultSigma,
 		},
 		{
-			Mu:    MU,
-			Sigma: SIGMA,
+			Mu:    params.DefaultMu,
+			Sigma: params.DefaultSigma,
 		},
 	}
 
-	newSkills, err := WengLinBT(result, skills)
+	newSkills, err := WengLinBT(&params, result, skills)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
@@ -141,16 +148,16 @@ func TestTieDefaultSkills(t *testing.T) {
 
 	skills := []Rating{
 		{
-			Mu:    MU,
-			Sigma: SIGMA,
+			Mu:    params.DefaultMu,
+			Sigma: params.DefaultSigma,
 		},
 		{
-			Mu:    MU,
-			Sigma: SIGMA,
+			Mu:    params.DefaultMu,
+			Sigma: params.DefaultSigma,
 		},
 	}
 
-	newSkills, err := WengLinBT(result, skills)
+	newSkills, err := WengLinBT(&params, result, skills)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
@@ -197,7 +204,7 @@ func TestThreePlayerGame(t *testing.T) {
 		},
 	}
 
-	newSkills, err := WengLinBT(result, skills)
+	newSkills, err := WengLinBT(&params, result, skills)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}

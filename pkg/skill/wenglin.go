@@ -6,14 +6,24 @@ import (
 	"math"
 )
 
-// MU is the mean skill value for a brand new player.
-const MU = 1500.0
+// Params represent the default values used in calculating Weng-Lin. 
+type Params struct {
+    // DefaultMU is the mean skill value for a brand new player.
+	DefaultMu float64
 
-// SIGMA is the standard deviation for skill of a brand new player.
-const SIGMA = 350.0
+	// DefaultSigma is the standard deviation for skill of a brand new player.
+	DefaultSigma float64
 
-// BETA is a component used in calculating Weng-Lin values.
-const BETA = SIGMA / 2
+	// DefaultBeta is a component used in calculating Weng-Lin values.
+	DefaultBeta float64
+}
+
+// DefaultParams are the param values used for Weng-Lin when a player hasn't been seen before.
+var DefaultParams = Params{
+	DefaultMu: 1500.0,
+	DefaultSigma: 350.0,
+	DefaultBeta: 350.0/2.0,
+}
 
 // Rating is the Weng-Lin skill value for a given player. It is basically the two components
 // describing a normal distribution: mu (the mean) and sigma (the standard deviation).
@@ -55,7 +65,12 @@ func minKFactor(a, b float32) float32 {
 // WengLinBT calculates the updates to the player skills using the Weng-Lin
 // Bradley-Terry full pair algorithm.
 // Original code here: http://www.csie.ntu.edu.tw/~cjlin/papers/online_ranking/
-func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
+func WengLinBT(params *Params, result MatchResult, skills []Rating) ([]Rating, error) {
+	// If we're not provided with parameters, we'll use the defaults.
+	if params == nil {
+		params = &DefaultParams
+	}
+
 	// We expect the caller to provide the list of starting skills such that each
 	// player result in the match has a corresponding skill at the same index.
 	if len(result.PlayerResults) != len(skills) {
@@ -81,7 +96,7 @@ func WengLinBT(result MatchResult, skills []Rating) ([]Rating, error) {
 			p1SigmaSquared := math.Pow(skills[p1index].Sigma, 2.0)
 			p2SigmaSquared := math.Pow(skills[p2index].Sigma, 2.0)
 
-			betaSquared := math.Pow(BETA, 2.0)
+			betaSquared := math.Pow(params.DefaultBeta, 2.0)
 			ciq := math.Sqrt(p1SigmaSquared + p2SigmaSquared + (2 * betaSquared))
 
 			p1MuDiff := skills[p2index].Mu - skills[p1index].Mu
