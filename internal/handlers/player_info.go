@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"gitlab.com/xonotic/xonstat/pkg/player"
+	"gitlab.com/xonotic/xonstat/pkg/util"
 )
 
 // playerInfoResponse is the view-specific information about a player.
@@ -145,9 +146,30 @@ func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// The raw results here include K:D for CTS. While we need this for showing an
+	// accurate scoreboard, we do not want it included for other things like the
+	// player's overall KD ratio. We thus need to remove it or subtract it for just
+	// that game type here.
+	ctsSeen := false
+
 	overallStats := make(map[string]*player.OverallStatsBase, len(rawOverallStats))
 	for _, e := range rawOverallStats {
+		if e.GameTypeCd == "cts" {
+			ctsSeen = true
+		}
+
 		overallStats[e.GameTypeCd] = e
+	}
+
+	// This player has CTS information, so here we remove the K:D 
+	// pieces from the overall numbers. This prevents displaying a
+	// super low overall K:D.
+	if ctsSeen {
+		overall := overallStats["overall"]
+		cts := overallStats["cts"]
+		overall.Kills -= cts.Kills
+		overall.Deaths -= cts.Deaths
+		overall.KDRatio = util.Ratio(overall.Kills, overall.Deaths)
 	}
 
 	response := &playerInfoResponse{
