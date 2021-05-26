@@ -39,7 +39,7 @@ func TeamColorFromTeam(team int) string {
 
 // NewTeamGameStatBase creates an instance of this class from the model type
 // returned from the DB.
-func NewTeamGameStatBase(tgs *models.TeamGameStat) *TeamGameStatBase {
+func NewTeamGameStatBase(gameTypeCd string, tgs *models.TeamGameStat) *TeamGameStatBase {
 	score := 0
 	if tgs.Score.Valid {
 		score = int(tgs.Score.Int32)
@@ -53,6 +53,12 @@ func NewTeamGameStatBase(tgs *models.TeamGameStat) *TeamGameStatBase {
 	caps := 0
 	if tgs.Caps.Valid {
 		caps = int(tgs.Caps.Int32)
+	}
+
+	// Fix for Freezetag where the field was moved from "score" to "rounds"
+	// See https://gitlab.com/xonotic/xonstat/-/issues/190
+	if gameTypeCd == "ft" && score == 0 && rounds != 0 {
+		score = rounds
 	}
 
 	color := TeamColorFromTeam(tgs.Team)
@@ -286,7 +292,7 @@ func InfoData(db models.Datastore, gameID int) (*InfoBase, error) {
 
 	teamGameStatsByTeam := make(map[int]*TeamGameStatBase)
 	for _, v := range rawTeamGameStats {
-		teamGameStatsByTeam[v.Team] = NewTeamGameStatBase(v)
+		teamGameStatsByTeam[v.Team] = NewTeamGameStatBase(game.GameTypeCd, v)
 	}
 
 	rawPlayerGameStats, err := db.RPlayerGameStatsByGameID(gameID)
