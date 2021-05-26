@@ -45,6 +45,8 @@ func GameTypeSummaryData(db models.Datastore, playerID int) ([]*GameTypeSummaryB
 
 		switch rs.GameTypeCd {
 		case "dm", "cts", "ka", "keepaway":
+			s.Wins = 0
+			s.Losses = 0
 			s.WinRatio = 0.0
 		default:
 			s.WinRatio = util.Percentage(rs.Wins, rs.Wins+rs.Losses)
