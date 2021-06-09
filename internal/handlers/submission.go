@@ -54,6 +54,15 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sub, err := submission.NewSubmission(rawSubmission)
+
+	// Server IP addresses come from "X-Real-IP" or "X-Forwarded-For" headers.
+	// These are determined/evaluated by the middleware.RealIP in chi.
+	serverIPAddr := r.RemoteAddr
+	if serverIPAddr != "" {
+		sub.Server.IPAddr.String = serverIPAddr
+		sub.Server.IPAddr.Valid = true
+	}
+
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
