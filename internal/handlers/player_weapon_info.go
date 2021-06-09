@@ -178,8 +178,8 @@ func assembleDamage(weaponsUsed []string, gameIDs []int, rawDamage map[string]*p
 // @Router /player/{id}/weapons [get]
 func (ae *AppEnv) PlayerWeaponInfoHandler(w http.ResponseWriter, r *http.Request) {
 	playerID, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		log.Printf("Invalid or missing player ID value: %s", err)
+	if err != nil || playerID <= 2 {
+		log.Printf("Invalid or missing player ID value")
 		ae.NotFoundHandler(w, r)
 		return
 	}

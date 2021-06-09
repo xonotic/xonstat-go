@@ -33,8 +33,8 @@ type playerSkillJSONResponse struct {
 // @Router /player/{id}/skill [get]
 func (ae *AppEnv) PlayerSkillHandler(w http.ResponseWriter, r *http.Request) {
 	playerID, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		log.Printf("Invalid or missing player ID value: %s", err)
+	if err != nil || playerID <= 2 {
+		log.Printf("Invalid or missing player ID value")
 		ae.NotFoundHandler(w, r)
 		return
 	}

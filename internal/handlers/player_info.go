@@ -119,8 +119,8 @@ func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
 
 	playerID, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		log.Printf("Invalid or missing player ID value: %s", err)
+	if err != nil || playerID <= 2 {
+		log.Printf("Invalid or missing player ID value")
 		ae.NotFoundHandler(w, r)
 		return
 	}
