@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
 	"time"
@@ -170,7 +173,32 @@ func web(addr string) {
 
 	// Start the web application server on the specified port.
 	log.Printf("Starting XonStat web application server on %s...", addr)
-	http.ListenAndServe(addr, r)
+
+	// Graceful shutdown courtesy of https://millhouse.dev/posts/graceful-shutdowns-in-golang-with-signal-notify-context.
+	// Create context that listens for the interrupt signal from the OS.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	// Construct our server and start it in the background.
+	server := http.Server{
+		Addr:    addr,
+		Handler: r,
+	}
+	go server.ListenAndServe()
+
+	// Wait for the signal to stop, then do so gracefully. The maximum shutdown time
+	// is 30 seconds, after which all pending requests are cancelled.
+	<-ctx.Done()
+	stop()
+	log.Printf("Received the interrupt signal. Shutting down gracefully. Control+C again to force.")
+
+	// Perform application shutdown with a maximum timeout of 30 seconds.
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(timeoutCtx); err != nil {
+		fmt.Println(err)
+	}
 }
 
 // webCmd starts up the web application server
