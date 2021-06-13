@@ -1,0 +1,8 @@
+[Unit]
+Description=XonStat Application Server (2)
+
+[Service]
+Type=forking
+ExecStart=/home/xonstat/xonstat-go/xonstat-2 -c /home/xonstat/.xonstat.toml web --addr :6544
+Restart=on-failure
+User=xonstat

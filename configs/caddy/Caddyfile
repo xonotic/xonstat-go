@@ -1,0 +1,5 @@
+:8989 {
+    reverse_proxy 127.0.0.1:6543 127.0.0.1:6544 {
+        health_uri /ping
+    }
+}
