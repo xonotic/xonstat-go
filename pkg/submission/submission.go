@@ -401,7 +401,13 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 			pgs.Collects = intFromString(value)
 		case "scoreboard-fastest", "scoreboard-captime":
 			pgs.Fastest = durationFromString(value, 100.0)
-			// TODO: if the game type is ctf, do fastest cap processing
+		case "total-fastest":
+			// We allow CTS to log fastest laps even if they've specced. In these
+			// cases they would only have a "total" entry and not a "scoreboard"
+			// entry since they wouldn't show up on the in-game scoreboard.
+			if pgs.Fastest == nil {
+				pgs.Fastest = durationFromString(value, 100.0)
+			}
 		case "scoreboard-revivals":
 			pgs.Revivals = intFromString(value)
 		case "scoreboard-bctime":
@@ -610,7 +616,7 @@ func NewSubmission(rs *RawSubmission) (*Submission, error) {
 		return nil, err
 	}
 
-	// This helps with debugging requests that error out. 
+	// This helps with debugging requests that error out.
 	log.Printf("Processing match %s", s.Game.MatchID.String)
 
 	err = s.fillServer(rs)
