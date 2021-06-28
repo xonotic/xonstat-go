@@ -161,7 +161,7 @@ func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		overallStats[e.GameTypeCd] = e
 	}
 
-	// This player has CTS information, so here we remove the K:D 
+	// This player has CTS information, so here we remove the K:D
 	// pieces from the overall numbers. This prevents displaying a
 	// super low overall K:D.
 	if ctsSeen {

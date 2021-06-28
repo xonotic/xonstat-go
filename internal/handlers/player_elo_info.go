@@ -16,6 +16,8 @@ func (ae *AppEnv) PlayerEloInfoHandler(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	hashkey := params.Get("hashkey")
 
+	r.Header.Set("Accept", "text/plain")
+
 	eloInfo, err := player.EloInfoData(ae.db, hashkey)
 	if err != nil {
 		log.Printf("Error retrieving Elo information for hashkey %s: %s", hashkey, err)

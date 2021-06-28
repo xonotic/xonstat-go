@@ -9,12 +9,14 @@ import (
 // NotFoundHandler handles route patterns that aren't registered.
 func (ae *AppEnv) NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 
+	w.WriteHeader(http.StatusNotFound)
 	sayingIndex := rand.Intn(8)
 
 	acceptHeader := r.Header.Get("Accept")
 	if acceptHeader == "application/json" {
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
+	} else if acceptHeader == "text/plain" {
+		w.Header().Add("Content-Type", "text/plain")
 	} else {
 		// HTML response
 		type Data struct {
