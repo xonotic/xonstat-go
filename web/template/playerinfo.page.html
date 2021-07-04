@@ -40,18 +40,14 @@
       <div class="cell small-6">
         <p>
           Games Played: <small>{{.Games}} <br /></small>
-        </p>
 
         {{with (index $.OverallStats .GameTypeCd)}}
-        <p>
           Time Played: <small>{{.TimePlayed.Long}} <br /></small>
-        </p>
 
-        <p>
           Last Played: <small><span class="abstime" data-epoch="{{.LastPlayed.Epoch}}"
               title="{{.LastPlayed.UTCStr}}">{{.LastPlayed.Fuzzy}}</span> <br /></small>
-        </p>
         {{end}}
+        </p>
       </div>
 
       <!-- RIGHT PANEL -->
@@ -60,17 +56,15 @@
           {{if eq .GameTypeCd "overall" "as" "ca" "ctf" "dom" "duel" "ft" "freezetag" "kh" "nb" "nexball" "rune" "tdm"}}
           Win Percentage: <small>{{printf "%.2f" .WinRatio}}% ({{.Wins}} wins, {{.Losses}} losses)</small> <br />
           {{end}}
-        </p>
 
         {{with (index $.OverallStats .GameTypeCd)}}
         {{if eq .GameTypeCd "cts" "nb" "nexball"}}
         {{else}}
-        <p>
           K/D Ratio: <small>{{printf "%.2f" .KDRatio}} ({{.Kills}} kills, {{.Deaths}} deaths)<br /></small>
-        </p>
         {{end}}
         {{end}}
 
+        </p>
       </div>
 
     </div>
