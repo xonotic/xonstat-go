@@ -27,7 +27,7 @@ func (ds *PGDatastore) RRecentGames(serverID int, mapID int, playerID int,
 	and g.map_id = m.map_id
 	and g.game_type_cd = cdg.game_type_cd
 	and g.game_id = pgs.game_id 
-	and pgs.scoreboardpos = 1 `)
+	and pgs.scoreboardpos = (select min(scoreboardpos) from player_game_stats where game_id = g.game_id) `)
 
 	if serverID != -1 {
 		sqlBuf.WriteString(fmt.Sprintf("and s.server_id = $%d ", placeholder))
