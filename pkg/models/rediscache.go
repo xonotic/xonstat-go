@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -19,14 +20,14 @@ type RedisCache struct {
 }
 
 // NewRedisCache creates a new Redis cache instance.
-func NewRedisCache(options *redis.Options) *RedisCache {
+func NewRedisCache(options *redis.Options) (*RedisCache, error) {
 	ctx := context.TODO()
 	client := redis.NewClient(options)
 
 	pong := client.Ping(ctx)
 	if pong.Val() != "PONG" {
 		log.Printf("Could not connect to Redis. Cache is disabled.")
-		return nil
+		return nil, fmt.Errorf("Redis is not available")
 	}
 
 	cache := cache.New(&cache.Options{
@@ -36,7 +37,7 @@ func NewRedisCache(options *redis.Options) *RedisCache {
 	return &RedisCache{
 		client: client,
 		cache:  cache,
-	}
+	}, nil
 }
 
 // Get retrieves a key from the cache if it exists.

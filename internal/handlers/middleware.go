@@ -65,6 +65,11 @@ func D0Verify(next http.Handler) http.Handler {
 // Cached is a Redis caching middleware wherein successful requests can get stored for faster retrieval later.
 func (ae *AppEnv) Cached(duration time.Duration, handler func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// If we don't have cache at all, bypass straight to the underlying handler.
+		if !ae.cacheEnabled {
+			handler(w, r)
+			return
+		}
 
 		// Most of the HandlerFuncs do their own content negotiation by checking the
 		// Accept header instead of having a different route/URI. To account for this

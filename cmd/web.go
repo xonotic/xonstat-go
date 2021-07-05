@@ -71,9 +71,14 @@ func web(addr string) {
 	}
 
 	redisAddr := viper.GetString("RedisAddr")
-	cache := models.NewRedisCache(&redis.Options{
+	cache, err := models.NewRedisCache(&redis.Options{
 		Addr: redisAddr,
 	})
+
+	cacheEnabled := true
+	if err != nil {
+		cacheEnabled = false
+	}
 
 	requestLogger := lumberjack.Logger{
 		Filename:   viper.GetString("RequestsLogFile"),
@@ -83,7 +88,7 @@ func web(addr string) {
 		Compress:   true,
 	}
 
-	env := handlers.NewAppEnv(db, cache, &requestLogger)
+	env := handlers.NewAppEnv(db, cacheEnabled, cache, &requestLogger)
 
 	r := chi.NewRouter()
 
