@@ -164,6 +164,8 @@ func web(addr string) {
 		env.PlayerSkillHandler)
 	r.Get("/skill",
 		env.PlayerSkillHashkeyHandler)
+	r.Get(reverse.Add("heatmap", "/heatmap"),
+		env.HeatmapHandler)
 	r.NotFound(env.NotFoundHandler)
 
 	// Static files

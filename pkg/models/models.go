@@ -392,3 +392,10 @@ type PlayerHashkeySkill struct {
 	CreateDt   time.Time
 	UpdateDt   time.Time
 }
+
+// HeatmapEntry captures the number of games in a given hour in the week.
+type HeatmapEntry struct {
+	DayOfWeek int
+	HourOfDay int
+	Count int
+}
