@@ -15,21 +15,32 @@ import (
 // @Success 200 {object} [][]int
 // @Router /heatmap [get]
 func (ae *AppEnv) HeatmapHandler(w http.ResponseWriter, r *http.Request) {
-	heatmap, err := leaderboard.HeatmapData(ae.db)
-	if err != nil {
-		log.Printf("Error: %s", err)
-		ae.FiveHundredHandler(w, r)
-		return
-	}
+	acceptHeader := r.Header.Get("Accept")
+	if acceptHeader == "application/json" {
 
-	bytes, err := json.Marshal(heatmap)
-	if err != nil {
-		log.Printf("Error: %s", err)
-		ae.FiveHundredHandler(w, r)
-		return
-	}
+		heatmap, err := leaderboard.HeatmapData(ae.db)
+		if err != nil {
+			log.Printf("Error: %s", err)
+			ae.FiveHundredHandler(w, r)
+			return
+		}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(bytes)
+		bytes, err := json.Marshal(heatmap)
+		if err != nil {
+			log.Printf("Error: %s", err)
+			ae.FiveHundredHandler(w, r)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(bytes)
+	} else {
+		err := ae.templates["heatmap.page.html"].Execute(w, struct{}{})
+		if err != nil {
+			log.Printf("Error: %s", err)
+			ae.FiveHundredHandler(w, r)
+			return
+		}
+	}
 }

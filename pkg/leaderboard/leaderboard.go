@@ -145,25 +145,16 @@ func ActiveMapsData(limit, start int, db models.Datastore) ([]ActiveMapBase, err
 	return activeMaps, nil
 }
 
-const DAYS = 7
-const HOURS = 24
-
-// HeatmapData retrieves the sparse matrix for games played per hour, per day.
+// HeatmapData retrieves the dense matrix for games played per hour, per day.
 func HeatmapData(db models.Datastore) ([][]int, error) {
-	// Initialize with zero values.
-	heatmap := make([][]int, DAYS)
-	for day := range heatmap {
-		heatmap[day] = make([]int, HOURS)
-	}
-
 	entries, err := db.RHeatmap()
 	if err != nil {
 		return nil, err
 	}
 
-	// Fill in the values
-	for _, entry := range entries {
-		heatmap[entry.DayOfWeek][entry.HourOfDay] = entry.Count
+	heatmap := make([][]int, len(entries))
+	for i, entry := range entries {
+		heatmap[i] = []int{entry.DayOfWeek, entry.HourOfDay, entry.Count}
 	}
 
 	return heatmap, nil
