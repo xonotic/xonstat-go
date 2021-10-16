@@ -1,0 +1,439 @@
+{
+  "Background": "images/broken_noise.png",
+  "BackgroundColor": {
+    "R": 0,
+    "G": 0,
+    "B": 0
+  },
+  "Overlay": "images/overlay_classic.png",
+  "Font": "Xolonium",
+  "Width": 560,
+  "Height": 70,
+  "NumGameTypes": 3,
+  "NickConfig": {
+    "Font": "Xolonium",
+    "FontSize": 22,
+    "Pos": {
+      "X": 53,
+      "Y": 20
+    },
+    "Color": [
+      {
+        "R": 0.5,
+        "G": 0.5,
+        "B": 0.5
+      }
+    ],
+    "Angle": 0,
+    "Height": 0,
+    "Width": 0,
+    "MaxWidth": 270,
+    "Align": ""
+  },
+  "NoStatsConfig": {
+    "Font": "Xolonium",
+    "FontSize": 12,
+    "Pos": {
+      "X": 101,
+      "Y": 59
+    },
+    "Color": [
+      {
+        "R": 0.8,
+        "G": 0.2,
+        "B": 0.1
+      }
+    ],
+    "Angle": -10,
+    "Height": 0,
+    "Width": 0,
+    "MaxWidth": 0,
+    "Align": ""
+  },
+  "GameTypeConfig": [
+    {
+      "Font": "Xolonium",
+      "FontSize": 10,
+      "Pos": {
+        "X": 100,
+        "Y": 35
+      },
+      "Color": [
+        {
+          "R": 0.9,
+          "G": 0.9,
+          "B": 0.9
+        }
+      ],
+      "Angle": 0,
+      "Height": 0,
+      "Width": 94,
+      "MaxWidth": 0,
+      "Align": "center"
+    },
+    {
+      "Font": "Xolonium",
+      "FontSize": 10,
+      "Pos": {
+        "X": 195,
+        "Y": 35
+      },
+      "Color": [
+        {
+          "R": 0.9,
+          "G": 0.9,
+          "B": 0.9
+        }
+      ],
+      "Angle": 0,
+      "Height": 0,
+      "Width": 94,
+      "MaxWidth": 0,
+      "Align": "center"
+    },
+    {
+      "Font": "Xolonium",
+      "FontSize": 10,
+      "Pos": {
+        "X": 290,
+        "Y": 35
+      },
+      "Color": [
+        {
+          "R": 0.9,
+          "G": 0.9,
+          "B": 0.9
+        }
+      ],
+      "Angle": 0,
+      "Height": 0,
+      "Width": 94,
+      "MaxWidth": 0,
+      "Align": "center"
+    }
+  ],
+  "EloConfig": [
+    {
+      "Font": "Xolonium",
+      "FontSize": 10,
+      "Pos": {
+        "X": 100,
+        "Y": 53 
+      },
+      "Color": [
+        {
+          "R": 1,
+          "G": 1,
+          "B": 0.5
+        }
+      ],
+      "Angle": 0,
+      "Height": 0,
+      "Width": 0,
+      "MaxWidth": 0,
+      "Align": "center"
+    },
+    {
+      "Font": "Xolonium",
+      "FontSize": 10,
+      "Pos": {
+        "X": 195,
+        "Y": 53 
+      },
+      "Color": [
+        {
+          "R": 1,
+          "G": 1,
+          "B": 0.5
+        }
+      ],
+      "Angle": 0,
+      "Height": 0,
+      "Width": 0,
+      "MaxWidth": 0,
+      "Align": "center"
+    },
+    {
+      "Font": "Xolonium",
+      "FontSize": 10,
+      "Pos": {
+        "X": 290,
+        "Y": 53
+      },
+      "Color": [
+        {
+          "R": 1,
+          "G": 1,
+          "B": 0.5
+        }
+      ],
+      "Angle": 0,
+      "Height": 0,
+      "Width": 0,
+      "MaxWidth": 0,
+      "Align": "center"
+    }
+  ],
+  "RankConfig": [
+    {
+      "Font": "Xolonium",
+      "FontSize": 0,
+      "Pos": {
+        "X": 100,
+        "Y": 58
+      },
+      "Color": [
+        {
+          "R": 0.8,
+          "G": 0.8,
+          "B": 1
+        }
+      ],
+      "Angle": 0,
+      "Height": 0,
+      "Width": 0,
+      "MaxWidth": 0,
+      "Align": "center"
+    },
+    {
+      "Font": "Xolonium",
+      "FontSize": 0,
+      "Pos": {
+        "X": 195,
+        "Y": 58
+      },
+      "Color": [
+        {
+          "R": 0.8,
+          "G": 0.8,
+          "B": 1
+        }
+      ],
+      "Angle": 0,
+      "Height": 0,
+      "Width": 0,
+      "MaxWidth": 0,
+      "Align": "center"
+    },
+    {
+      "Font": "Xolonium",
+      "FontSize": 0,
+      "Pos": {
+        "X": 290,
+        "Y": 58
+      },
+      "Color": [
+        {
+          "R": 0.8,
+          "G": 0.8,
+          "B": 1
+        }
+      ],
+      "Angle": 0,
+      "Height": 0,
+      "Width": 0,
+      "MaxWidth": 0,
+      "Align": "center"
+    }
+  ],
+  "WinPctLabelConfig": {
+    "Font": "Xolonium",
+    "FontSize": 10,
+    "Pos": {
+      "X": 508,
+      "Y": 3
+    },
+    "Color": [
+      {
+        "R": 0.8,
+        "G": 0.8,
+        "B": 0.8
+      }
+    ],
+    "Angle": 0,
+    "Height": 0,
+    "Width": 0,
+    "MaxWidth": 0,
+    "Align": "center"
+  },
+  "WinPctConfig": {
+    "Font": "Xolonium",
+    "FontSize": 15,
+    "Pos": {
+      "X": 509,
+      "Y": 21
+    },
+    "Color": [
+      {
+        "R": 0.37361376673040153,
+        "G": 0.8263862332695985,
+        "B": 0.4791586998087954
+      },
+      {
+        "R": 0.4,
+        "G": 0.8,
+        "B": 0.4
+      },
+      {
+        "R": 1,
+        "G": 1,
+        "B": 0.2
+      }
+    ],
+    "Angle": 0,
+    "Height": 0,
+    "Width": 0,
+    "MaxWidth": 0,
+    "Align": "center"
+  },
+  "WinConfig": {
+    "Font": "Xolonium",
+    "FontSize": 9,
+    "Pos": {
+      "X": 508,
+      "Y": 34
+    },
+    "Color": [
+      {
+        "R": 0.8,
+        "G": 0.8,
+        "B": 0.6
+      }
+    ],
+    "Angle": 0,
+    "Height": 0,
+    "Width": 0,
+    "MaxWidth": 0,
+    "Align": "center"
+  },
+  "LossConfig": {
+    "Font": "Xolonium",
+    "FontSize": 9,
+    "Pos": {
+      "X": 508,
+      "Y": 44
+    },
+    "Color": [
+      {
+        "R": 0.8,
+        "G": 0.8,
+        "B": 0.6
+      }
+    ],
+    "Angle": 0,
+    "Height": 0,
+    "Width": 0,
+    "MaxWidth": 0,
+    "Align": "center"
+  },
+  "KDRatioLabelConfig": {
+    "Font": "Xolonium",
+    "FontSize": 10,
+    "Pos": {
+      "X": 390,
+      "Y": 3
+    },
+    "Color": [
+      {
+        "R": 0.8,
+        "G": 0.8,
+        "B": 0.8
+      }
+    ],
+    "Angle": 0,
+    "Height": 0,
+    "Width": 102,
+    "MaxWidth": 0,
+    "Align": "center"
+  },
+  "KDRatio": {
+    "Font": "Xolonium",
+    "FontSize": 15,
+    "Pos": {
+      "X": 392,
+      "Y": 21
+    },
+    "Color": [
+      {
+        "R": 0.5367335458466154,
+        "G": 0.8877554847177949,
+        "B": 0.31224451528220515
+      },
+      {
+        "R": 0.8,
+        "G": 0.8,
+        "B": 0.4
+      },
+      {
+        "R": 1,
+        "G": 0.2,
+        "B": 0.2
+      }
+    ],
+    "Angle": 0,
+    "Height": 0,
+    "Width": 0,
+    "MaxWidth": 0,
+    "Align": "center"
+  },
+  "KillsConfig": {
+    "Font": "Xolonium",
+    "FontSize": 9,
+    "Pos": {
+      "X": 392,
+      "Y": 34
+    },
+    "Color": [
+      {
+        "R": 0.6,
+        "G": 0.8,
+        "B": 0.6
+      }
+    ],
+    "Angle": 0,
+    "Height": 0,
+    "Width": 0,
+    "MaxWidth": 0,
+    "Align": "center"
+  },
+  "DeathsConfig": {
+    "Font": "Xolonium",
+    "FontSize": 9,
+    "Pos": {
+      "X": 392,
+      "Y": 44
+    },
+    "Color": [
+      {
+        "R": 0.8,
+        "G": 0.6,
+        "B": 0.6
+      }
+    ],
+    "Angle": 0,
+    "Height": 0,
+    "Width": 0,
+    "MaxWidth": 0,
+    "Align": "center"
+  },
+  "PlayingTimeConfig": {
+    "Font": "Xolonium",
+    "FontSize": 10,
+    "Pos": {
+      "X": 451,
+      "Y": 59
+    },
+    "Color": [
+      {
+        "R": 0.1,
+        "G": 0.1,
+        "B": 0.1
+      }
+    ],
+    "Angle": 0,
+    "Height": 0,
+    "Width": 0,
+    "MaxWidth": 0,
+    "Align": "center"
+  }
+}
