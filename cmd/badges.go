@@ -6,6 +6,7 @@ import (
 	"image/png"
 	"log"
 	"os"
+	"path"
 	"strings"
 	"sync"
 
@@ -51,19 +52,19 @@ func pngToJpg(pngFilename string, quality int) {
 }
 
 func renderWorker(pids <-chan int, wg *sync.WaitGroup, pp *badges.PlayerDataFetcher, skins map[string]badges.Skin,
-	surfaceCache map[string]*cairo.Surface) {
+	surfaceCache map[string]*cairo.Surface, outputDir string) {
 
 	for pid := range pids {
 		pd, err := pp.GetPlayerData(pid)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 
 		if len(pd.Nick) == 0 {
-			fmt.Printf("No data for player #%d!\n", pid)
+			log.Printf("No data for player #%d!\n", pid)
 		} else {
 			for name, skin := range skins {
-				pngFN := fmt.Sprintf("output/%s/%d.png", name, pid)
+				pngFN := fmt.Sprintf("%s/%s/%d.png", outputDir, name, pid)
 				skin.Render(pd, pngFN, surfaceCache)
 				pngToJpg(pngFN, 90)
 			}
@@ -84,6 +85,7 @@ var badgesCmd = &cobra.Command{
 		pid, _ := flags.GetInt("pid")
 		limit, _ := flags.GetInt("limit")
 		workers, _ := flags.GetInt("workers")
+		outputDir, _ := flags.GetString("out")
 
 		dsn := viper.GetString("ConnStr")
 		pp, err := badges.NewPlayerDataFetcher(dsn)
@@ -105,16 +107,22 @@ var badgesCmd = &cobra.Command{
 			}
 		} else {
 			// Use just the one player ID for fetching
+			log.Printf("Generating a badge for just player #%d.\n", pid)
 			pids = []int{pid}
 		}
 
-		skins := badges.LoadSkins("skins")
+		cwd, _ := os.Getwd()
+		skinDir := path.Join(cwd, "/assets/skins")
+
+		log.Printf("Loading skins from '%s'", skinDir)
+		skins := badges.LoadSkins(skinDir)
 		for name := range skins {
-			err := os.MkdirAll(fmt.Sprintf("output/%s", name), os.FileMode(0755))
+			err := os.MkdirAll(fmt.Sprintf("%s/%s", outputDir, name), os.FileMode(0755))
 			if err != nil {
 				fmt.Println(err)
 			}
 		}
+		log.Printf("Loaded %d skins.", len(skins))
 
 		surfaceCache := badges.LoadSurfaces(skins)
 
@@ -125,7 +133,7 @@ var badgesCmd = &cobra.Command{
 		// start workers
 		for w := 1; w <= workers; w++ {
 			wg.Add(1)
-			go renderWorker(pidsChan, &wg, pp, skins, surfaceCache)
+			go renderWorker(pidsChan, &wg, pp, skins, surfaceCache, outputDir)
 		}
 
 		// send them work
@@ -136,7 +144,6 @@ var badgesCmd = &cobra.Command{
 
 		// wait until they are all done
 		wg.Wait()
-
 	},
 }
 
@@ -147,4 +154,5 @@ func init() {
 	badgesCmd.Flags().IntP("pid", "p", -1, "Generate just for this player ID")
 	badgesCmd.Flags().IntP("limit", "l", -1, "Max number of badges to generate")
 	badgesCmd.Flags().IntP("workers", "w", 5, "Number of worker threads")
+	badgesCmd.Flags().StringP("out", "o", "output", "Output directory")
 }

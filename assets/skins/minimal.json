@@ -5,7 +5,7 @@
     "G": 0.04,
     "B": 0.04
   },
-  "Overlay": "images/overlay_minimal.png",
+  "Overlay": "assets/images/overlay_minimal.png",
   "Font": "Xolonium",
   "Width": 560,
   "Height": 40,

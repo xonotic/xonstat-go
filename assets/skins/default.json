@@ -1,11 +1,11 @@
 {
-  "Background": "images/broken_noise.png",
+  "Background": "assets/images/broken_noise.png",
   "BackgroundColor": {
     "R": 0,
     "G": 0,
     "B": 0
   },
-  "Overlay": "images/overlay_classic.png",
+  "Overlay": "assets/images/overlay_classic.png",
   "Font": "Xolonium",
   "Width": 560,
   "Height": 70,
