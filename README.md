@@ -125,6 +125,32 @@ Global Flags:
   -c, --config string   config file (default is $HOME/.xonstat.toml)
 ```
 
+### Generate Badges from Player Stats
+
+The `badges` subcommand takes player data from the database and generates
+images called "badges". Badges come in three styles and contain summary information
+like K:D ratio, win ratio, time played, and the number of games played for the 
+three most-played game types.
+
+```
+Generate badge images from player stats
+
+Usage:
+  xonstat badges [flags]
+
+Flags:
+  -a, --all           Generate for all players
+  -d, --delta int     Generate for players having activity within this number of hours (default 6)
+  -h, --help          help for badges
+  -l, --limit int     Max number of badges to generate (default -1)
+  -o, --out string    Output directory (default "output")
+  -p, --pid int       Generate just for this player ID (default -1)
+  -w, --workers int   Number of worker threads (default 5)
+
+Global Flags:
+  -c, --config string   config file (default is $HOME/.xonstat.toml)
+```
+
 ## Roadmap and Issues
 Both roadmap items and issues are handled via the [GitLab issue tracker][issues].
 Roadmap items will have the `task` tag applied.
