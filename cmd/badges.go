@@ -65,6 +65,10 @@ func renderWorker(pids <-chan int, wg *sync.WaitGroup, pp *badges.PlayerDataFetc
 		} else {
 			for name, skin := range skins {
 				pngFN := fmt.Sprintf("%s/%s/%d.png", outputDir, name, pid)
+				if name == "default" {
+					// The default skin doesn't go into a subdirectory.
+					pngFN = fmt.Sprintf("%s/%d.png", outputDir, pid)
+				}
 				skin.Render(pd, pngFN, surfaceCache)
 				pngToJpg(pngFN, 90)
 			}
