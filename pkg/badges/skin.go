@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -304,7 +305,7 @@ func LoadSkins(dir string) map[string]Skin {
 }
 
 // LoadSurfaces constructs a map[skin name] -> *cairo.Surface for that name
-func LoadSurfaces(skins map[string]Skin) map[string]*cairo.Surface {
+func LoadSurfaces(assetsDir string, skins map[string]Skin) map[string]*cairo.Surface {
 	surfaceMap := make(map[string]*cairo.Surface)
 
 	for name, skin := range skins {
@@ -313,7 +314,7 @@ func LoadSurfaces(skins map[string]Skin) map[string]*cairo.Surface {
 
 		// load the background
 		if skin.Params.Background != "" {
-			bg, _ := cairo.NewSurfaceFromPNG(skin.Params.Background)
+			bg, _ := cairo.NewSurfaceFromPNG(path.Join(assetsDir, skin.Params.Background))
 
 			bgW := bg.GetWidth()
 			bgH := bg.GetHeight()
@@ -333,7 +334,7 @@ func LoadSurfaces(skins map[string]Skin) map[string]*cairo.Surface {
 
 		// load the overlay
 		if skin.Params.Overlay != "" {
-			overlay, _ := cairo.NewSurfaceFromPNG(skin.Params.Overlay)
+			overlay, _ := cairo.NewSurfaceFromPNG(path.Join(assetsDir, skin.Params.Overlay))
 			surface.SetSourceSurface(overlay, 0.0, 0.0)
 			surface.Paint()
 		}

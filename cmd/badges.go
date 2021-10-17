@@ -90,6 +90,7 @@ var badgesCmd = &cobra.Command{
 		limit, _ := flags.GetInt("limit")
 		workers, _ := flags.GetInt("workers")
 		outputDir, _ := flags.GetString("out")
+		assetsDir, _ := flags.GetString("assets")
 
 		dsn := viper.GetString("ConnStr")
 		pp, err := badges.NewPlayerDataFetcher(dsn)
@@ -115,20 +116,21 @@ var badgesCmd = &cobra.Command{
 			pids = []int{pid}
 		}
 
-		cwd, _ := os.Getwd()
-		skinDir := path.Join(cwd, "/assets/skins")
+		skinsDir := path.Join(assetsDir, "/skins")
+		log.Printf("Loading skins from '%s'", skinsDir)
 
-		log.Printf("Loading skins from '%s'", skinDir)
-		skins := badges.LoadSkins(skinDir)
+		skins := badges.LoadSkins(skinsDir)
 		for name := range skins {
-			err := os.MkdirAll(fmt.Sprintf("%s/%s", outputDir, name), os.FileMode(0755))
-			if err != nil {
-				fmt.Println(err)
+			if name != "default" {
+				err := os.MkdirAll(fmt.Sprintf("%s/%s", outputDir, name), os.FileMode(0755))
+				if err != nil {
+					fmt.Println(err)
+				}
 			}
 		}
 		log.Printf("Loaded %d skins.", len(skins))
 
-		surfaceCache := badges.LoadSurfaces(skins)
+		surfaceCache := badges.LoadSurfaces(assetsDir, skins)
 
 		pidsChan := make(chan int)
 
@@ -159,4 +161,5 @@ func init() {
 	badgesCmd.Flags().IntP("limit", "l", -1, "Max number of badges to generate")
 	badgesCmd.Flags().IntP("workers", "w", 5, "Number of worker threads")
 	badgesCmd.Flags().StringP("out", "o", "output", "Output directory")
+	badgesCmd.Flags().StringP("assets", "s", "./assets", "assets directory")
 }
