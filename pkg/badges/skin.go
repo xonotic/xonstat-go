@@ -235,7 +235,11 @@ func (s *Skin) Render(pd *PlayerData, filename string, surfaceCache map[string]*
 	s.placeQStr(pd.Nick, s.Params.NickConfig, 0.4, 1)
 
 	// Game type labels along with Elos for those game types
-	for i, gc := range pd.GameCounts[:3] {
+	for i, gc := range pd.GameCounts {
+		// Only three columns fit.
+		if i > 2 {
+			break
+		}
 		s.placeText(gc.GameTypeCd, s.Params.GameTypeConfig[i])
 		s.placeText(fmt.Sprintf("%d", gc.GameCount), s.Params.GameCountsConfig[i])
 	}
