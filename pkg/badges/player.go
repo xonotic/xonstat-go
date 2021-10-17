@@ -10,33 +10,22 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const MAX_ELO_RECS = 3
-const MAX_RANK_RECS = 3
-
-// playerElo holds records coming from the player_elos table in stats
-type playerElo struct {
-	GameType string
-	Elo      int64
-}
-
-// playerRank holds records coming from the player_ranks table in stats
-type playerRank struct {
-	GameType string
-	Rank     int64
-	MaxRank  int64
+// GameCount is the number of games played of the given game mode.
+type GameCount struct {
+	GameTypeCd string
+	GameCount  int
 }
 
 // PlayerData holds aggregate statistics for players
 type PlayerData struct {
 	Nick         qstr.QStr
 	StrippedNick string
-	Elos         []playerElo
-	Ranks        []playerRank
 	Kills        int
 	Deaths       int
 	Wins         int
 	Losses       int
 	PlayingTime  time.Duration
+	GameCounts   []GameCount
 }
 
 // KDRatio returns the player'c Kill:Death ratio as a string
@@ -122,9 +111,8 @@ func NewPlayerDataFetcher(connStr string) (*PlayerDataFetcher, error) {
 	// connection pooling
 	db.SetMaxIdleConns(5)
 
-	pp := new(PlayerDataFetcher)
-	pp.db = db
-	return pp, nil
+	pp := PlayerDataFetcher{db: db}
+	return &pp, nil
 }
 
 // FindPlayers finds a list of player_id values according to certain criteria.
@@ -174,8 +162,8 @@ func (pp *PlayerDataFetcher) genPlayerDataStmt(playerID int) string {
 SELECT
     p.nick,
     p.stripped_nick,
-    upper(pe.game_type_cd) game_type_cd,
-    round(pe.elo) elo,
+    upper(pa.game_type_cd) as game_type_cd,
+    pa.games,
     pa.wins,
     pa.losses,
     pa.kills,
@@ -186,15 +174,11 @@ FROM
 JOIN
     players p
         on p.player_id = pa.player_id
-JOIN
-    player_elos pe
-        on pe.player_id = pa.player_id
-        and pe.game_type_cd = pa.game_type_cd
 WHERE
    pa.player_id = %d
 ORDER BY
-   pe.elo desc NULLS LAST
-LIMIT 3;
+   pa.games desc
+;
 `
 
 	return fmt.Sprintf(query, playerID)
@@ -213,19 +197,17 @@ func (pp *PlayerDataFetcher) GetPlayerData(playerID int) (*PlayerData, error) {
 
 	filled := false
 	var nick, strippedNick, gameType string
-	var wins, losses, kills, deaths, alivetime int
-	var elo sql.NullInt64
+	var games, wins, losses, kills, deaths, alivetime int
 	var totalWins, totalLosses, totalKills, totalDeaths, totalAlivetime int
-	elos := make([]playerElo, 0, MAX_ELO_RECS)
-
-	// Note: ranks no longer supported, so leave this empty
-	ranks := make([]playerRank, 0, MAX_RANK_RECS)
+	gameCounts := make([]GameCount, 0)
 
 	for rows.Next() {
-		err := rows.Scan(&nick, &strippedNick, &gameType, &elo, &wins, &losses, &kills, &deaths, &alivetime)
+		err := rows.Scan(&nick, &strippedNick, &gameType, &games, &wins, &losses, &kills, &deaths, &alivetime)
 		if err != nil {
 			panic(err)
 		}
+
+		gameCounts = append(gameCounts, GameCount{gameType, games})
 
 		// did we fill in the player information yet?
 		if !filled {
@@ -240,14 +222,10 @@ func (pp *PlayerDataFetcher) GetPlayerData(playerID int) (*PlayerData, error) {
 			totalWins += wins
 			totalLosses += losses
 		}
+
 		totalKills += kills
 		totalDeaths += deaths
 		totalAlivetime += alivetime
-
-		// elo and rank are outer joins, thus may be NULL
-		if elo.Valid && len(elos) < MAX_ELO_RECS {
-			elos = append(elos, playerElo{GameType: gameType, Elo: elo.Int64})
-		}
 	}
 
 	err = rows.Err()
@@ -255,8 +233,7 @@ func (pp *PlayerDataFetcher) GetPlayerData(playerID int) (*PlayerData, error) {
 		return nil, err
 	}
 
-	pd.Elos = elos
-	pd.Ranks = ranks
+	pd.GameCounts = gameCounts
 	pd.Kills = totalKills
 	pd.Deaths = totalDeaths
 	pd.Wins = totalWins

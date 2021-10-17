@@ -56,8 +56,7 @@ type SkinParams struct {
 	NickConfig         TextConfig
 	NoStatsConfig      TextConfig
 	GameTypeConfig     []TextConfig
-	EloConfig          []TextConfig
-	RankConfig         []TextConfig
+	GameCountsConfig   []TextConfig
 	WinPctLabelConfig  TextConfig
 	WinPctConfig       TextConfig
 	WinConfig          TextConfig
@@ -235,18 +234,9 @@ func (s *Skin) Render(pd *PlayerData, filename string, surfaceCache map[string]*
 	s.placeQStr(pd.Nick, s.Params.NickConfig, 0.4, 1)
 
 	// Game type labels along with Elos for those game types
-	for i, elo := range pd.Elos {
-		s.placeText(elo.GameType, s.Params.GameTypeConfig[i])
-		s.placeText(fmt.Sprintf("Elo %d", elo.Elo), s.Params.EloConfig[i])
-	}
-
-	// Ranks for those game types
-	for i, textConfig := range s.Params.RankConfig {
-		if i < len(pd.Ranks) {
-			s.placeText(fmt.Sprintf("Rank %d of %d", pd.Ranks[i].Rank, pd.Ranks[i].MaxRank), textConfig)
-		} else {
-			s.placeText("(preliminary)", textConfig)
-		}
+	for i, gc := range pd.GameCounts[:3] {
+		s.placeText(gc.GameTypeCd, s.Params.GameTypeConfig[i])
+		s.placeText(fmt.Sprintf("%d", gc.GameCount), s.Params.GameCountsConfig[i])
 	}
 
 	// Kill Ratio and its details

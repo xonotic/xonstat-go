@@ -112,7 +112,7 @@
       "Align": "center"
     }
   ],
-  "EloConfig": [
+  "GameCountsConfig": [
     {
       "Font": "Xolonium",
       "FontSize": 10,
