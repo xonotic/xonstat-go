@@ -263,6 +263,39 @@
                 }
             }
         },
+        "/players": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "player index and search results",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "nick",
+                        "name": "nick",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "start",
+                        "name": "start",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.playerIndexJSONResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/server/{id}": {
             "get": {
                 "consumes": [
@@ -991,6 +1024,23 @@
                     "type": "string"
                 },
                 "time_ms": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.playerIndexJSONResponse": {
+            "type": "object",
+            "properties": {
+                "next": {
+                    "type": "integer"
+                },
+                "players": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.playerJSON"
+                    }
+                },
+                "start": {
                     "type": "integer"
                 }
             }

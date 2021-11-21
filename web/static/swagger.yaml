@@ -352,6 +352,17 @@ definitions:
       time_ms:
         type: integer
     type: object
+  handlers.playerIndexJSONResponse:
+    properties:
+      next:
+        type: integer
+      players:
+        items:
+          $ref: '#/definitions/handlers.playerJSON'
+        type: array
+      start:
+        type: integer
+    type: object
   handlers.playerInfoJSONResponse:
     properties:
       games_played:
@@ -694,6 +705,27 @@ paths:
             $ref: '#/definitions/handlers.playerWeaponInfoJSONResponse'
       summary: Player weapon information for a fixed (recent) period of time formatted
         for Chart.js
+  /players:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: nick
+        in: query
+        name: nick
+        type: string
+      - description: start
+        in: query
+        name: start
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.playerIndexJSONResponse'
+      summary: player index and search results
   /server/{id}:
     get:
       consumes:
