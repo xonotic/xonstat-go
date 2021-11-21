@@ -35,7 +35,7 @@
     var nick = "{{.NickFragment}}";
     function loadMore() {
         $.ajax({
-            url: "/players?start=" + nextPage + "&nick=" + nick,
+            url: "/playerIndexFragment?start=" + nextPage + "&nick=" + nick,
             headers: { Accept: "application/json" },
             success: function (response) {
                 $("#player-index-table tr:last").after(response.HTML);

@@ -30,6 +30,19 @@ type playerJSON struct {
 	JoinedFuzzy  string `json:"joined_fuzzy"`
 }
 
+// playerJSONFromInfoBase converts an InfoBase into its JSON response form.
+func playerJSONFromInfoBase(ib *player.InfoBase) playerJSON {
+	return playerJSON{
+		PlayerID:     ib.PlayerID,
+		Nick:         ib.Nick.Nick,
+		StrippedNick: ib.Nick.NickStripped,
+		ActiveInd:    ib.ActiveInd,
+		Joined:       ib.CreateDt.Dt.Format(time.RFC3339),
+		JoinedEpoch:  int(ib.CreateDt.Epoch),
+		JoinedFuzzy:  ib.CreateDt.Fuzzy,
+	}
+}
+
 // gamesPlayedJSON is the JSON-specific representation of the games played by a player.
 type gamesPlayedJSON struct {
 	GameTypeCd string  `json:"game_type_cd"`
@@ -66,15 +79,7 @@ type playerInfoJSONResponse struct {
 func newPlayerInfoJSONResponse(response *playerInfoResponse) playerInfoJSONResponse {
 	var jsonResponse playerInfoJSONResponse
 
-	jsonResponse.Player = playerJSON{
-		PlayerID:     response.Player.PlayerID,
-		Nick:         response.Player.Nick.Nick,
-		StrippedNick: response.Player.Nick.NickStripped,
-		ActiveInd:    response.Player.ActiveInd,
-		Joined:       response.Player.CreateDt.Dt.Format(time.RFC3339),
-		JoinedEpoch:  int(response.Player.CreateDt.Epoch),
-		JoinedFuzzy:  response.Player.CreateDt.Fuzzy,
-	}
+	jsonResponse.Player = playerJSONFromInfoBase(response.Player)
 
 	jsonResponse.GamesPlayed = make(map[string]gamesPlayedJSON, len(response.GameTypeSummaries))
 	for _, summary := range response.GameTypeSummaries {

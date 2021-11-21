@@ -7,17 +7,25 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/player"
 )
 
-// playerIndexJSONResponse is the response type for the player index.
-type playerIndexJSONResponse struct {
+// playerIndexFragmentJSONResponse is the response type for the player index.
+type playerIndexFragmentJSONResponse struct {
 	Start    int           `json:"start"`
 	Next     int           `json:"next"`
 	ShowMore bool          `json:"show_more"`
 	HTML     template.HTML `json:"HTML"`
+}
+
+// playerIndexJSONResponse is the JSON response type for the player index.
+type playerIndexJSONResponse struct {
+	Start    int           `json:"start"`
+	Next     int           `json:"next"`
+	Players  []playerJSON `json:"players"`
 }
 
 // playerIndexResponse is the response type for the player index.
@@ -29,8 +37,18 @@ type playerIndexResponse struct {
 	Players      []*player.InfoBase
 }
 
-// PlayerIndexHandler is the web handler for showing the player index and player search results.
+// PlayerIndexHandler godoc
+// @Summary player index and search results
+// @Accept  json
+// @Produce  json
+// @Param nick query string false "nick"
+// @Param start query string false "start"
+// @Success 200 {object} playerIndexJSONResponse
+// @Router /players [get]
 func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
+	// Determine if this request is for an HTML fragment or not by its path.
+	isFragment := strings.HasPrefix(r.RequestURI, "/playerIndexFragment")
+
 	acceptHeader := r.Header.Get("Accept")
 
 	limit := 20
@@ -72,7 +90,7 @@ func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 		Players:      players,
 	}
 
-	if acceptHeader == "application/json" {
+	if isFragment {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
@@ -84,11 +102,28 @@ func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		jsonResponse := playerIndexJSONResponse{
+		jsonResponse := playerIndexFragmentJSONResponse{
 			Start:    response.Start,
 			Next:     response.Next,
 			ShowMore: response.ShowMore,
 			HTML:     template.HTML(fragment.String()),
+		}
+
+		bytes, _ := json.Marshal(jsonResponse)
+		w.Write(bytes)
+	} else if acceptHeader == "application/json" {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		players := make([]playerJSON, len(response.Players))
+		for i, v := range response.Players {
+			players[i] = playerJSONFromInfoBase(v)
+		}
+
+		jsonResponse := playerIndexJSONResponse {
+			Start: response.Start,
+			Next: response.Next,
+			Players: players,
 		}
 
 		bytes, _ := json.Marshal(jsonResponse)

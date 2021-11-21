@@ -148,6 +148,8 @@ func web(addr string) {
 		env.Cached(5*time.Minute, env.GameInfoHandler))
 	r.Get(reverse.Add("game_weapon_info", "/game/{id:\\d+}/weapons", "{id:\\d+}"),
 		env.Cached(5*time.Minute, env.GameWeaponInfoHandler))
+	r.Get(reverse.Add("player_index_fragment", "/playerIndexFragment"),
+		env.PlayerIndexHandler)
 	r.Get(reverse.Add("player_index", "/players"),
 		env.PlayerIndexHandler)
 	r.Get(reverse.Add("player_info", "/player/{id:\\d+}", "{id:\\d+}"),
