@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"gitlab.com/xonotic/xonstat/pkg/player"
+	"gitlab.com/xonotic/xonstat/pkg/skill"
 	"gitlab.com/xonotic/xonstat/pkg/util"
 )
 
@@ -17,6 +18,7 @@ type playerInfoResponse struct {
 	Player            *player.InfoBase
 	OverallStats      map[string]*player.OverallStatsBase
 	GameTypeSummaries []*player.GameTypeSummaryBase
+	Skills            map[string]*skill.InfoBase
 }
 
 // playerJSON is the JSON-specific representation of a player.
@@ -177,10 +179,28 @@ func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		overall.KDRatio = util.Ratio(overall.Kills, overall.Deaths)
 	}
 
+	rawSkills, err := skill.InfoData(ae.db, playerID, "all")
+	if err != nil {
+		log.Printf("Unable to retrieve the skills values: %s", err)
+	}
+
+	skills := make(map[string]*skill.InfoBase)
+	for _, v := range rawSkills {
+		// For display purposes we'll make sigma encompass the 99.7% range
+		// of the normal distribution
+
+		skills[v.GameTypeCd] = v
+		skills[v.GameTypeCd].Sigma *= 3.0
+
+	}
+
+	log.Println(skills)
+
 	response := &playerInfoResponse{
 		Player:            info,
 		GameTypeSummaries: summaries,
 		OverallStats:      overallStats,
+		Skills:            skills,
 	}
 
 	if acceptHeader == "application/json" {

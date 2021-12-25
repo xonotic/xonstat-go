@@ -64,6 +64,9 @@
         {{end}}
         {{end}}
 
+        {{with (index $.Skills .GameTypeCd)}}
+          Skill: <small>{{printf "%.2f" .Mu}} ± {{printf "%.2f" .Sigma}}</small>
+        {{end}}
         </p>
       </div>
 
