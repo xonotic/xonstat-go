@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/alehano/reverse"
@@ -183,7 +184,7 @@ func web(addr string) {
 
 	// Graceful shutdown courtesy of https://millhouse.dev/posts/graceful-shutdowns-in-golang-with-signal-notify-context.
 	// Create context that listens for the interrupt signal from the OS.
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	// Construct our server and start it in the background.
@@ -197,7 +198,7 @@ func web(addr string) {
 	// is 30 seconds, after which all pending requests are cancelled.
 	<-ctx.Done()
 	stop()
-	log.Printf("Received the interrupt signal. Shutting down gracefully. Control+C again to force.")
+	log.Printf("Received the interrupt/terminate signal. Shutting down gracefully. Control+C again to force.")
 
 	// Perform application shutdown with a maximum timeout of 30 seconds.
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
