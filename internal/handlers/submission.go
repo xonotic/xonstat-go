@@ -83,9 +83,13 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = submission.Submit(sub, ae.db)
-	if err != nil {
+	if err == submission.ErrDuplicateGame {
 		log.Printf("Error: %s", err)
-		ae.FiveHundredHandler(w, r)
+		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
+		return
+	} else if err != nil {
+		log.Printf("Error: %s", err)
+		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
 		return
 	}
 

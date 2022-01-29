@@ -9,6 +9,8 @@ import (
 	"gitlab.com/xonotic/xonstat/pkg/models"
 )
 
+var ErrDuplicateGame = fmt.Errorf("duplicate game")
+
 // ShouldUpdateServer determines if the database server record needs to be updated with
 // new information coming from the submission.
 func ShouldUpdateServer(incoming, existing *models.Server) bool {
@@ -139,7 +141,7 @@ func CreateGame(tx *sql.Tx, db models.Datastore, s *Submission) error {
 		if len(games) > 0 {
 			log.Printf("A game with match_id %s for server %d already exists in the database.",
 				s.Game.MatchID.String, s.Game.ServerID)
-			return fmt.Errorf("duplicate game found via match_id")
+			return ErrDuplicateGame
 		}
 	}
 
