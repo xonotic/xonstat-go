@@ -137,7 +137,8 @@ func CreateGame(tx *sql.Tx, db models.Datastore, s *Submission) error {
 		}
 
 		if len(games) > 0 {
-			log.Printf("A game with match_id %s already exists in the database.", s.Game.MatchID.String)
+			log.Printf("A game with match_id %s for server %d already exists in the database.",
+				s.Game.MatchID.String, s.Game.ServerID)
 			return fmt.Errorf("duplicate game found via match_id")
 		}
 	}
