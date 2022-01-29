@@ -131,7 +131,7 @@ func GetOrCreateMap(tx *sql.Tx, db models.Datastore, rawMap *models.Map) (*model
 // We expect a game to be inserted upon each submission, so this method only returns an error.
 func CreateGame(tx *sql.Tx, db models.Datastore, s *Submission) error {
 	if s.Game.MatchID.Valid {
-		games, err := db.RGamesByMatchID(s.Game.MatchID.String)
+		games, err := db.RGamesByMatchID(s.Game.ServerID, s.Game.MatchID.String)
 		if err != nil {
 			return err
 		}
