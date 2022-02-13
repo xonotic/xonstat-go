@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/alehano/reverse"
 	"gitlab.com/xonotic/xonstat/pkg/models"
@@ -34,6 +35,7 @@ func loadTemplates(templateDir string) map[string]*template.Template {
 		"urlFor":      reverse.Rev,
 		"inc":         func(i int) int { return i + 1 },
 		"intToString": func(i int) string { return fmt.Sprintf("%d", i) },
+		"unixts": func(t time.Time) string { return fmt.Sprintf("%d", t.Unix()) },
 	}
 
 	// First, grab the filenames of all of the templates in the directory.

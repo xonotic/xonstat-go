@@ -94,6 +94,7 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Add("Content-Type", "text/plain")
 
 	err = ae.templates["submission.page.html"].Execute(w, sub)
 	if err != nil {
@@ -101,5 +102,4 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
 		return
 	}
-
 }
