@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -15,10 +16,11 @@ import (
 var submitCmd = &cobra.Command{
 	Use:   "submit",
 	Short: "Submit stats requests from files",
-	Long: `Submit stats requests from files.`,
+	Long:  `Submit stats requests from files.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		file, _ := cmd.Flags().GetString("file")
 		url, _ := cmd.Flags().GetString("url")
+		verbose, _ := cmd.Flags().GetBool("verbose")
 
 		f, err := os.Open(file)
 		if err != nil {
@@ -62,6 +64,10 @@ var submitCmd = &cobra.Command{
 		defer res.Body.Close()
 
 		fmt.Printf("%s: %s\n", file, res.Status)
+		if verbose {
+			output, _ := ioutil.ReadAll(res.Body)
+			fmt.Print(string(output))
+		}
 
 		os.Exit(0)
 	},
@@ -71,4 +77,5 @@ func init() {
 	rootCmd.AddCommand(submitCmd)
 	submitCmd.Flags().StringP("file", "f", "", "submission request file")
 	submitCmd.Flags().StringP("url", "u", "http://localhost:8080/stats/submit", "XonStat server submission URL")
+	submitCmd.Flags().BoolP("verbose", "v", false, "Show response body")
 }
