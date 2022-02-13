@@ -1,0 +1,11 @@
+V 1
+R XonStat/1.0
+T TBD
+S {{ .Server.ServerID }}
+G {{ .Game.GameID }}
+M {{ .Map.MapID }}
+{{ range $hashkey, $player := .PlayersByHashkey -}}
+P {{ $hashkey }}
+i {{ $player.PlayerID}}
+n {{ $player.Nick.String }}
+{{ end }}
