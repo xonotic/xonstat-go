@@ -1,8 +1,15 @@
 [Unit]
 Description=XonStat Application Server (2)
 
+Requires=postgresql.service redis-server.service
+Wants=network-online.target
+After=network-online.target postgresql.service redis-server.service
+
 [Service]
-Type=forking
-ExecStart=/home/xonstat/xonstat-go/xonstat-2 -c /home/xonstat/.xonstat.toml web --addr :6544
+Type=exec
+ExecStart=/home/xonstat/xonstat-go/xonstat-2 -c /home/xonstat/.xonstat.toml web --addr 127.0.0.1:6544
 Restart=on-failure
 User=xonstat
+
+[Install]
+WantedBy=multi-user.target
