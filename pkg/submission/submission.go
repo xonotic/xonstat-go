@@ -380,7 +380,12 @@ func (s *Submission) fillPlayerGameStat(events map[string]string, player *models
 		case "wins":
 			wins = true
 		case "t":
-			pgs.Team = intFromString(value)
+			// We shouldn't be creating game stat rows for spectators (team -1)
+			team := intFromString(value)
+			if team.Int32 == -1 {
+				return fmt.Errorf("attempt to fill a player_game_stat for a spectator")
+			}
+			pgs.Team = team
 		case "scoreboard-drops", "scoreboard-released", "scoreboard-ticks", "scoreboard-losses":
 			pgs.Drops = intFromString(value)
 		case "scoreboard-returns":
@@ -557,8 +562,15 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 		if _, ok := nonParticipants[hashkey]; ok {
 			s.fillNonParticipants(events, &player)
 		} else {
+			// Frag matrix events (e kills-N) can arrive before we know if
+			// it's a "good" game stat record or not. So we'll preallocate a slot 
+			// in the frag matrix, then delete it later if we have to.
 			s.FragMatrixByIndex[playerIndex] = make(map[int]int)
-			s.fillPlayerGameStat(events, &player)
+
+			err := s.fillPlayerGameStat(events, &player)
+			if err != nil {
+				delete(s.FragMatrixByIndex, playerIndex)
+			}
 		}
 	}
 
