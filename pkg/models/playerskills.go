@@ -122,7 +122,7 @@ func (ds *PGDatastore) RPlayerSkillsBatch(hashkeys []string, gameTypeCd string) 
 	var sqlBuf bytes.Buffer
 
 	sqlBuf.WriteString(`select ps.player_id, ps.game_type_cd, ps.mu, ps.sigma, ps.active_ind, ps.create_dt, ps.update_dt
-	from player_skills ps join hashkeys hk using player_id
+	from player_skills ps join hashkeys hk using (player_id)
 	where ps.game_type_cd = $1 
 	and hk.active_ind = true `)
 

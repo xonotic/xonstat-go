@@ -52,9 +52,12 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	hashkeys := make([]string, len(sub.PlayersByHashkey))
 	i := 0
 	for hashkey, _ := range sub.PlayersByHashkey {
-		hashkeys[i] = hashkey
+		hashkeys[i] = fmt.Sprintf("'%s'", hashkey)
 		i++
 	}
+
+	skills, err := ae.db.RPlayerSkillsBatch(hashkeys, sub.Game.GameTypeCd)
+	log.Printf("%+v \n", skills)
 
 	if err != nil {
 		log.Printf("Error: %s", err)
