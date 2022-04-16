@@ -3,6 +3,8 @@ package models
 import (
 	"bytes"
 	"database/sql"
+	"fmt"
+	"strings"
 	"time"
 )
 
@@ -49,7 +51,7 @@ func (ds *PGDatastore) RMatchResultsByGameID(gameID int) ([]*PlayerSkillMatchRes
 	return scanPlayerSkillMatchResults(rows)
 }
 
-// RNPMatchResultsByGameID retrives match results suitable for input to the skill 
+// RNPMatchResultsByGameID retrives match results suitable for input to the skill
 // calculation algorithm. It retrieves forfeits instead of actual game stats.
 func (ds *PGDatastore) RNPMatchResultsByGameID(gameID int) ([]*PlayerSkillMatchResult, error) {
 	sql := `select np.player_id, g.game_id, g.game_type_cd, coalesce(cast(extract(epoch
@@ -110,6 +112,30 @@ func (ds *PGDatastore) RPlayerSkills(playerID int, gameTypeCd string) ([]*Player
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+	return scanPlayerSkills(rows)
+
+}
+
+// RPlayerSkillsBatch reads PlayerSkill values by list of hashkeys and the game type.
+func (ds *PGDatastore) RPlayerSkillsBatch(hashkeys []string, gameTypeCd string) ([]*PlayerSkill, error) {
+	var sqlBuf bytes.Buffer
+
+	sqlBuf.WriteString(`select ps.player_id, ps.game_type_cd, ps.mu, ps.sigma, ps.active_ind, ps.create_dt, ps.update_dt
+	from player_skills ps join hashkeys hk using player_id
+	where ps.game_type_cd = $1 
+	and hk.active_ind = true `)
+
+	inList := strings.Join(hashkeys, ",")
+	sqlBuf.WriteString(fmt.Sprintf("and hk.hashkey in (%s) ", inList))
+
+	sqlBuf.WriteString("order by Mu desc ")
+
+	rows, err := ds.db.Query(sqlBuf.String(), gameTypeCd)
+	if err != nil {
+		return nil, err
+	}
+
 	defer rows.Close()
 	return scanPlayerSkills(rows)
 
