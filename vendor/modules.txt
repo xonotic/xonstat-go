@@ -4,6 +4,10 @@ github.com/KyleBanks/depth
 github.com/PuerkitoBio/purell
 # github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
 github.com/PuerkitoBio/urlesc
+# github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+## explicit
+github.com/alecthomas/template
+github.com/alecthomas/template/parse
 # github.com/alehano/reverse v0.0.0-20170809190552-bf1a1f8f8b82
 ## explicit
 github.com/alehano/reverse
@@ -155,6 +159,7 @@ github.com/swaggo/files
 ## explicit
 github.com/swaggo/http-swagger
 # github.com/swaggo/swag v1.7.0
+## explicit
 github.com/swaggo/swag
 # github.com/tkuchiki/go-timezone v0.2.0
 github.com/tkuchiki/go-timezone
