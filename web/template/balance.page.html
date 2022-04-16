@@ -1,0 +1,8 @@
+V {{ .Version }} 
+R {{ .Release }}
+T {{ .Time }}
+{{ range .Players -}}
+P {{ .Hashkey }}
+i {{ .PlayerID }}
+n {{ .Nick }}
+{{ end }}

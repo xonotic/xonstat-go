@@ -120,6 +120,7 @@ func web(addr string) {
 		r.Post("/stats/submit", env.SubmissionHandler)
 		r.Post("/player/me", env.PlayerHashkeyInfoHandler)
 		r.Get("/elo", env.PlayerEloInfoHandler)
+		r.Post("/balance", env.BalanceHandler)
 	})
 
 	// Register all "regular" routes and handlers.
