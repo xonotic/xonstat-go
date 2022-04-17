@@ -129,7 +129,7 @@ func (ds *PGDatastore) RPlayerSkillsBatch(hashkeys []string, gameTypeCd string) 
 	inList := strings.Join(hashkeys, ",")
 	sqlBuf.WriteString(fmt.Sprintf("and hk.hashkey in (%s) ", inList))
 
-	sqlBuf.WriteString("order by Mu desc ")
+	sqlBuf.WriteString("order by (mu + (3 * sigma)) desc ")
 
 	rows, err := ds.db.Query(sqlBuf.String(), gameTypeCd)
 	if err != nil {

@@ -5,24 +5,41 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
+	"strings"
 
 	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
 
 type balancePlayer struct {
-	Hashkey string
-	PlayerID int
-	Nick string
+	Hashkey        string
+	PlayerID       int
+	Nick           string
+	Skill          float64
+	ScorePerSecond float64
+}
+
+// BySkillandSPS implements sort.Interface for []balancePlayer based on
+// the Skill and then ScorePerSecond fields, greatest the least.
+type BySkillandSPS []balancePlayer
+
+func (a BySkillandSPS) Len() int           { return len(a) }
+func (a BySkillandSPS) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a BySkillandSPS) Less(i, j int) bool { 
+	if a[i].Skill != a[j].Skill {
+		return a[i].Skill > a[j].Skill
+	}
+	return a[i].ScorePerSecond > a[j].ScorePerSecond 
 }
 
 type balanceResponse struct {
 	Version int
 	Release string
-	Time int64
+	Time    int64
 	Players []balancePlayer
 }
 
-// BalanceHandler takes player info from servers and returns back a best-guess 
+// BalanceHandler takes player info from servers and returns back a best-guess
 // ordering of those players according to their skill.
 func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	bodyReader := bufio.NewReader(r.Body)
@@ -41,28 +58,53 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sub, err := submission.NewSubmission(rawSubmission)
-
-	response := balanceResponse {
-		Version: 1,
-		Release: "XonStat/1.0",
-		Time: sub.CreateDt.Unix(),
-		Players: make([]balancePlayer, 0),
-	}
-
-	hashkeys := make([]string, len(sub.PlayersByHashkey))
-	i := 0
-	for hashkey, _ := range sub.PlayersByHashkey {
-		hashkeys[i] = fmt.Sprintf("'%s'", hashkey)
-		i++
-	}
-
-	skills, err := ae.db.RPlayerSkillsBatch(hashkeys, sub.Game.GameTypeCd)
-	log.Printf("%+v \n", skills)
-
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
 		return
+	}
+
+	players := make([]balancePlayer, 0)
+	hashkeysToPlayers := make(map[string]*balancePlayer, 0)
+	for hashkey, player := range sub.PlayersByHashkey {
+		gamestat, hasGameStat := sub.PlayerGameStatsByHashkey[hashkey]
+		if strings.HasPrefix(hashkey, "bot#") || !hasGameStat {
+			// Bots and players that don't have a stat record aren't considered.
+			continue
+		}
+
+		score := gamestat.Score.Int32
+		alivetimesecs := sub.PlayerGameStatsByHashkey[hashkey].AliveTime.Seconds()
+		sps := float64(score) / alivetimesecs
+
+		player := balancePlayer{
+			Hashkey:        hashkey,
+			PlayerID:       player.PlayerID,
+			Nick:           player.Nick.String,
+			ScorePerSecond: sps,
+		}
+
+		players = append(players, player)
+
+		hashkeysToPlayers[hashkey] = &player
+
+		if !strings.HasPrefix(hashkey, "player#") {
+			// This is a tracked player, and might have a skill record.
+			// 1. Save these hashkeys
+			// 2. Query for skills for those hashkeys
+			// 3. Update the corresponding balancePlayer record w/ skill info (if found)
+			// 4. Sort!
+		}
+	}
+
+	// Sort the untracked players by ScorePerSecond
+	sort.Sort(BySkillandSPS(players))
+
+	response := balanceResponse{
+		Version: 1,
+		Release: "XonStat/1.0",
+		Time:    sub.CreateDt.Unix(),
+		Players: players,
 	}
 
 	w.WriteHeader(http.StatusOK)
