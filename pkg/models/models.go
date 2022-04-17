@@ -381,3 +381,14 @@ type PlayerSkill struct {
 	CreateDt   time.Time
 	UpdateDt   time.Time
 }
+
+// PlayerHashkeySkill represents a player's Weng-Lin skill, indexed by hashkey.
+type PlayerHashkeySkill struct {
+	Hashkey    string
+	GameTypeCd string
+	Mu         float64
+	Sigma      float64
+	ActiveInd  bool
+	CreateDt   time.Time
+	UpdateDt   time.Time
+}

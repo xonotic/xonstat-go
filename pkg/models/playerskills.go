@@ -117,19 +117,39 @@ func (ds *PGDatastore) RPlayerSkills(playerID int, gameTypeCd string) ([]*Player
 
 }
 
-// RPlayerSkillsBatch reads PlayerSkill values by list of hashkeys and the game type.
-func (ds *PGDatastore) RPlayerSkillsBatch(hashkeys []string, gameTypeCd string) ([]*PlayerSkill, error) {
+// scanPlayerHashkeySkills scans the rows returned by a query to the player_skills table.
+func scanPlayerHashkeySkills(rows *sql.Rows) ([]*PlayerHashkeySkill, error) {
+	var results []*PlayerHashkeySkill
+	for rows.Next() {
+		var s PlayerHashkeySkill
+
+		err := rows.Scan(&s.Hashkey, &s.GameTypeCd, &s.Mu, &s.Sigma, &s.ActiveInd, &s.CreateDt, &s.UpdateDt)
+		if err != nil {
+			return nil, err
+		}
+
+		results = append(results, &s)
+	}
+
+	return results, nil
+}
+
+// RPlayerSkillsBatch reads PlayerHashkeySkill values by list of hashkeys and the game type.
+func (ds *PGDatastore) RPlayerSkillsBatch(hashkeys []string, gameTypeCd string) ([]*PlayerHashkeySkill, error) {
 	var sqlBuf bytes.Buffer
 
-	sqlBuf.WriteString(`select ps.player_id, ps.game_type_cd, ps.mu, ps.sigma, ps.active_ind, ps.create_dt, ps.update_dt
+	sqlBuf.WriteString(`select hk.hashkey, ps.game_type_cd, ps.mu, ps.sigma, ps.active_ind, ps.create_dt, ps.update_dt
 	from player_skills ps join hashkeys hk using (player_id)
 	where ps.game_type_cd = $1 
 	and hk.active_ind = true `)
 
-	inList := strings.Join(hashkeys, ",")
-	sqlBuf.WriteString(fmt.Sprintf("and hk.hashkey in (%s) ", inList))
+	quotedHashkeys := make([]string, len(hashkeys))
+	for i, v := range hashkeys {
+		quotedHashkeys[i] = fmt.Sprintf("'%s'", v)
+	}
 
-	sqlBuf.WriteString("order by (mu + (3 * sigma)) desc ")
+	hashkeyInList := strings.Join(quotedHashkeys, ",")
+	sqlBuf.WriteString(fmt.Sprintf("and hk.hashkey in (%s) ", hashkeyInList))
 
 	rows, err := ds.db.Query(sqlBuf.String(), gameTypeCd)
 	if err != nil {
@@ -137,8 +157,7 @@ func (ds *PGDatastore) RPlayerSkillsBatch(hashkeys []string, gameTypeCd string) 
 	}
 
 	defer rows.Close()
-	return scanPlayerSkills(rows)
-
+	return scanPlayerHashkeySkills(rows)
 }
 
 // CPlayerSkill inserts a PlayerSkill record into the database.

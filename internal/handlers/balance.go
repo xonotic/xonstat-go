@@ -23,13 +23,13 @@ type balancePlayer struct {
 // the Skill and then ScorePerSecond fields, greatest the least.
 type BySkillandSPS []balancePlayer
 
-func (a BySkillandSPS) Len() int           { return len(a) }
-func (a BySkillandSPS) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a BySkillandSPS) Less(i, j int) bool { 
+func (a BySkillandSPS) Len() int      { return len(a) }
+func (a BySkillandSPS) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a BySkillandSPS) Less(i, j int) bool {
 	if a[i].Skill != a[j].Skill {
 		return a[i].Skill > a[j].Skill
 	}
-	return a[i].ScorePerSecond > a[j].ScorePerSecond 
+	return a[i].ScorePerSecond > a[j].ScorePerSecond
 }
 
 type balanceResponse struct {
@@ -64,7 +64,12 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// The destination for the balanced (sorted) players.
 	players := make([]balancePlayer, 0)
+
+	// Hashkeys for tracked players
+	tracked := make([]string, 0)
+
 	hashkeysToPlayers := make(map[string]*balancePlayer, 0)
 	for hashkey, player := range sub.PlayersByHashkey {
 		gamestat, hasGameStat := sub.PlayerGameStatsByHashkey[hashkey]
@@ -90,14 +95,29 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 
 		if !strings.HasPrefix(hashkey, "player#") {
 			// This is a tracked player, and might have a skill record.
-			// 1. Save these hashkeys
-			// 2. Query for skills for those hashkeys
-			// 3. Update the corresponding balancePlayer record w/ skill info (if found)
-			// 4. Sort!
+			// 1. Save these types of hashkeys
+			tracked = append(tracked, hashkey)
 		}
 	}
 
-	// Sort the untracked players by ScorePerSecond
+	if len(tracked) > 0 {
+		// 2. Query for skills for those hashkeys
+		skills, err := ae.db.RPlayerSkillsBatch(tracked, sub.Game.GameTypeCd)
+		if err != nil {
+			log.Printf("Error: %s", err)
+			http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
+			return
+		}
+
+		// 3. Update the corresponding balancePlayer record w/ skill info (if found)
+		for _, skill := range skills {
+			// Optimistic (right end of the confidence interval): we are ~97% confident that
+			// this player's skill is LESS than this number.
+			hashkeysToPlayers[skill.Hashkey].Skill = skill.Mu + (3 * skill.Sigma)
+		}
+	}
+
+	// 4. Sort the untracked players by skill, falling back to score per second
 	sort.Sort(BySkillandSPS(players))
 
 	response := balanceResponse{

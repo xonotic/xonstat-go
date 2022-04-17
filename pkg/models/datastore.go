@@ -100,6 +100,6 @@ type Datastore interface {
 	RMatchResultsByGameID(gameID int) ([]*PlayerSkillMatchResult, error)
 	RNPMatchResultsByGameID(gameID int) ([]*PlayerSkillMatchResult, error)
 	RPlayerSkills(playerID int, gameTypeCd string) ([]*PlayerSkill, error)
-	RPlayerSkillsBatch(hashkeys []string, gameTypeCd string) ([]*PlayerSkill, error)
+	RPlayerSkillsBatch(hashkeys []string, gameTypeCd string) ([]*PlayerHashkeySkill, error)
 	UPlayerSkill(tx *sql.Tx, ps PlayerSkill) error
 }
