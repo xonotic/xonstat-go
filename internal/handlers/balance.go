@@ -21,7 +21,7 @@ type balancePlayer struct {
 
 // BySkillandSPS implements sort.Interface for []balancePlayer based on
 // the Skill and then ScorePerSecond fields, greatest the least.
-type BySkillandSPS []balancePlayer
+type BySkillandSPS []*balancePlayer
 
 func (a BySkillandSPS) Len() int      { return len(a) }
 func (a BySkillandSPS) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
@@ -36,7 +36,7 @@ type balanceResponse struct {
 	Version int
 	Release string
 	Time    int64
-	Players []balancePlayer
+	Players []*balancePlayer
 }
 
 // BalanceHandler takes player info from servers and returns back a best-guess
@@ -65,12 +65,14 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The destination for the balanced (sorted) players.
-	players := make([]balancePlayer, 0)
+	players := make([]*balancePlayer, 0)
+
+	// Use hashkeys to make updates to entries in the above slice.
+	hashkeysToPlayers := make(map[string]*balancePlayer, 0)
 
 	// Hashkeys for tracked players
 	tracked := make([]string, 0)
 
-	hashkeysToPlayers := make(map[string]*balancePlayer, 0)
 	for hashkey, player := range sub.PlayersByHashkey {
 		gamestat, hasGameStat := sub.PlayerGameStatsByHashkey[hashkey]
 		if strings.HasPrefix(hashkey, "bot#") || !hasGameStat {
@@ -89,7 +91,7 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 			ScorePerSecond: sps,
 		}
 
-		players = append(players, player)
+		players = append(players, &player)
 
 		hashkeysToPlayers[hashkey] = &player
 
@@ -113,11 +115,12 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 		for _, skill := range skills {
 			// Optimistic (right end of the confidence interval): we are ~97% confident that
 			// this player's skill is LESS than this number.
-			hashkeysToPlayers[skill.Hashkey].Skill = skill.Mu + (3 * skill.Sigma)
+			player := hashkeysToPlayers[skill.Hashkey]
+			player.Skill = skill.Mu + (3 * skill.Sigma)
 		}
 	}
 
-	// 4. Sort the untracked players by skill, falling back to score per second
+	// 4. Sort the untracked players by skill (if available), falling back to score per second.
 	sort.Sort(BySkillandSPS(players))
 
 	response := balanceResponse{
