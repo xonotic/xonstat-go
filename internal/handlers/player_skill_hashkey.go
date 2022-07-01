@@ -12,7 +12,7 @@ import (
 // @Accept  json
 // @Produce  json
 // @Param hashkey query string true "hashkey"
-// @Param game_type_cd query string true "hashkey"
+// @Param game_type_cd query string false "game type"
 // @Success 200 {object} []playerSkillJSONResponse
 // @Router /skill [get]
 func (ae *AppEnv) PlayerSkillHashkeyHandler(w http.ResponseWriter, r *http.Request) {

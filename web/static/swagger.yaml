@@ -771,6 +771,10 @@ paths:
         name: hashkey
         required: true
         type: string
+      - description: game type
+        in: query
+        name: game_type_cd
+        type: string
       produces:
       - application/json
       responses:

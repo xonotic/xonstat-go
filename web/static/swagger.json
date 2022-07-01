@@ -367,6 +367,12 @@
                         "name": "hashkey",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "game type",
+                        "name": "game_type_cd",
+                        "in": "query"
                     }
                 ],
                 "responses": {
