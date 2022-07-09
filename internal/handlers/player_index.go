@@ -23,9 +23,9 @@ type playerIndexFragmentJSONResponse struct {
 
 // playerIndexJSONResponse is the JSON response type for the player index.
 type playerIndexJSONResponse struct {
-	Start    int           `json:"start"`
-	Next     int           `json:"next"`
-	Players  []playerJSON `json:"players"`
+	Start   int          `json:"start"`
+	Next    int          `json:"next"`
+	Players []playerJSON `json:"players"`
 }
 
 // playerIndexResponse is the response type for the player index.
@@ -49,7 +49,7 @@ func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 	// Determine if this request is for an HTML fragment or not by its path.
 	isFragment := strings.HasPrefix(r.RequestURI, "/playerIndexFragment")
 
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 
 	limit := 20
 
@@ -120,9 +120,9 @@ func (ae *AppEnv) PlayerIndexHandler(w http.ResponseWriter, r *http.Request) {
 			players[i] = playerJSONFromInfoBase(v)
 		}
 
-		jsonResponse := playerIndexJSONResponse {
-			Start: response.Start,
-			Next: response.Next,
+		jsonResponse := playerIndexJSONResponse{
+			Start:   response.Start,
+			Next:    response.Next,
 			Players: players,
 		}
 

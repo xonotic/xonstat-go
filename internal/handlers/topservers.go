@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 )
@@ -46,7 +47,7 @@ type topServersResponse struct {
 // @Success 200 {object} topServerJSONResponse
 // @Router /topservers [get]
 func (ae *AppEnv) TopServersHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 
 	startStr := r.URL.Query().Get("start")
 	start, err := strconv.Atoi(startStr)

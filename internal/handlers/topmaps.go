@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 )
@@ -40,7 +41,7 @@ type topMapsResponse struct {
 // @Success 200 {object} topMapsJSONResponse
 // @Router /topmaps [get]
 func (ae *AppEnv) TopMapsHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 
 	startStr := r.URL.Query().Get("start")
 	start, err := strconv.Atoi(startStr)

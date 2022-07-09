@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 	"time"
+
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/spf13/viper"
@@ -12,7 +15,6 @@ import (
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 	"gitlab.com/xonotic/xonstat/pkg/mmap"
 	"gitlab.com/xonotic/xonstat/pkg/server"
-	"strconv"
 )
 
 type mapInfoJSONResponse struct {
@@ -46,7 +48,7 @@ type mapInfoResponse struct {
 // @Success 200 {object} mapInfoJSONResponse
 // @Router /map/{id} [get]
 func (ae *AppEnv) MapInfoHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 
 	mapID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {

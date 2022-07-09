@@ -6,10 +6,11 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"gitlab.com/xonotic/xonstat/pkg/mmap"
 	"gitlab.com/xonotic/xonstat/pkg/models"
-	"strconv"
 )
 
 // mapIndexJSONResponse is the JSON response type for the map index.
@@ -31,7 +32,7 @@ type mapIndexResponse struct {
 
 // MapIndexHandler is the web handler for showing the server index and map search results.
 func (ae *AppEnv) MapIndexHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 
 	limit := 20
 

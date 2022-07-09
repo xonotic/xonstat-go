@@ -5,13 +5,14 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 )
 
 // FiveHundredHandler handles app-level errors (HTTP 500s).
 func (ae *AppEnv) FiveHundredHandler(w http.ResponseWriter, r *http.Request) {
 	sayingIndex := rand.Intn(8)
 
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 	if acceptHeader == "application/json" {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)

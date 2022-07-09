@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -123,7 +124,7 @@ func newPlayerInfoJSONResponse(response *playerInfoResponse) playerInfoJSONRespo
 // @Success 200 {object} playerInfoJSONResponse
 // @Router /player/{id} [get]
 func (ae *AppEnv) PlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 
 	playerID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil || playerID <= 2 {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi"
 	"gitlab.com/xonotic/xonstat/pkg/server"
@@ -42,7 +43,7 @@ type serverTopScorersResponse struct {
 // @Success 200 {object} topServerJSONResponse
 // @Router /server/{id}/topscorers [get]
 func (ae *AppEnv) ServerTopScorersHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 
 	// This handler only accepts JSON.
 	if acceptHeader != "application/json" {

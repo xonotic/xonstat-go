@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"gitlab.com/xonotic/xonstat/pkg/game"
@@ -71,7 +72,7 @@ type recentGamesResponse struct {
 // @Success 200 {object} []recentGamesJSONResponse
 // @Router /games [get]
 func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 
 	params := r.URL.Query()
 

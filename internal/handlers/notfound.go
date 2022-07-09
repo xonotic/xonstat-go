@@ -4,6 +4,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 )
 
 // NotFoundHandler handles route patterns that aren't registered.
@@ -12,7 +13,7 @@ func (ae *AppEnv) NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	sayingIndex := rand.Intn(8)
 
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 	if acceptHeader == "application/json" {
 		w.Header().Add("Content-Type", "application/json")
 	} else if acceptHeader == "text/plain" {

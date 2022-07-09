@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -55,7 +56,7 @@ type serverInfoResponse struct {
 // @Success 200 {object} serverInfoJSONResponse
 // @Router /server/{id} [get]
 func (ae *AppEnv) ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 
 	serverID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {

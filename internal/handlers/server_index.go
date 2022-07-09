@@ -3,10 +3,11 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
-	"html/template"
+	"strings"
 
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/server"
@@ -31,7 +32,7 @@ type serverIndexResponse struct {
 
 // ServerIndexHandler is the web handler for showing the server index and player search results.
 func (ae *AppEnv) ServerIndexHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 
 	limit := 20
 

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -208,7 +209,7 @@ func shouldShowWeaponCharts(gameTypeCd string) bool {
 // @Success 200 {object} gameInfoJSONResponse
 // @Router /game/{id} [get]
 func (ae *AppEnv) GameInfoHandler(w http.ResponseWriter, r *http.Request) {
-	acceptHeader := r.Header.Get("Accept")
+	acceptHeader := strings.ToLower(r.Header.Get("Accept"))
 
 	gameID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
