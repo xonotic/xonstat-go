@@ -39,7 +39,7 @@ type serverTopScorersResponse struct {
 // @Accept  json
 // @Produce  json
 // @Param id path int false "server_id"
-// @Success 200 {object} topServerJSONResponse
+// @Success 200 {object} serverTopScorersResponse
 // @Router /server/{id}/topscorers [get]
 func (ae *AppEnv) ServerTopScorersHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")

@@ -345,7 +345,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.topServerJSONResponse"
+                            "$ref": "#/definitions/handlers.serverTopScorersResponse"
                         }
                     }
                 }
@@ -1222,6 +1222,37 @@
                 },
                 "server_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "handlers.serverTopScorerEntry": {
+            "type": "object",
+            "properties": {
+                "nick": {
+                    "type": "string"
+                },
+                "player_id": {
+                    "type": "integer"
+                },
+                "rank": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.serverTopScorersResponse": {
+            "type": "object",
+            "properties": {
+                "server_id": {
+                    "type": "integer"
+                },
+                "top_scorers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.serverTopScorerEntry"
+                    }
                 }
             }
         },
