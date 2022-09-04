@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"math/rand"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
@@ -39,10 +42,29 @@ type balanceResponse struct {
 	Players []*balancePlayer
 }
 
+// randomSwap picks two random positions in the array and swaps them. 
+func randomSwap(players []*balancePlayer) {
+	rand.Seed(time.Now().UnixNano())
+
+	i := rand.Intn(len(players))
+	j := rand.Intn(len(players))
+
+	if i != j {
+		players[i], players[j] = players[j], players[i]
+	}
+}
+
 // BalanceHandler takes player info from servers and returns back a best-guess
 // ordering of those players according to their skill.
 func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	bodyReader := bufio.NewReader(r.Body)
+
+	params := r.URL.Query()
+	jitter, err := strconv.Atoi(params.Get("jitter"))
+	if err != nil || jitter < 1 || jitter > 5 {
+		jitter = 0
+	}
+
 	rawSubmission, err := submission.NewRawSubmission(bodyReader)
 	if err != nil {
 		log.Printf("Error: %s", err)
@@ -122,6 +144,11 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 4. Sort the untracked players by skill (if available), falling back to score per second.
 	sort.Sort(BySkillandSPS(players))
+
+	// 5. Introduce jitter to randomize results, if asked.
+	for i:=0; i < jitter; i++ {
+		randomSwap(players)
+	}
 
 	response := balanceResponse{
 		Version: 1,
