@@ -54,8 +54,13 @@ func randomSwap(players []*balancePlayer) {
 	}
 }
 
-// BalanceHandler takes player info from servers and returns back a best-guess
-// ordering of those players according to their skill.
+// BalanceHandler godoc
+// @Summary Best guess ordering of players according to skill and score data.
+// @Accept  text/plain
+// @Produce  text/plain
+// @Param jitter query int false "random swaps to do after sorting"
+// @Success 200 {object} balanceResponse
+// @Router /balance [post]
 func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	bodyReader := bufio.NewReader(r.Body)
 

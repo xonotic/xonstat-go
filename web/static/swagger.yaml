@@ -84,6 +84,32 @@ definitions:
       weapon_cd_init_caps:
         type: string
     type: object
+  handlers.balancePlayer:
+    properties:
+      hashkey:
+        type: string
+      nick:
+        type: string
+      playerID:
+        type: integer
+      scorePerSecond:
+        type: number
+      skill:
+        type: number
+    type: object
+  handlers.balanceResponse:
+    properties:
+      players:
+        items:
+          $ref: '#/definitions/handlers.balancePlayer'
+        type: array
+      release:
+        type: string
+      time:
+        type: integer
+      version:
+        type: integer
+    type: object
   handlers.gameCountsJSON:
     properties:
       game_type_cd:
@@ -568,6 +594,23 @@ info:
   title: XonStat API
   version: "1.0"
 paths:
+  /balance:
+    post:
+      consumes:
+      - text/plain
+      parameters:
+      - description: random swaps to do after sorting
+        in: query
+        name: jitter
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.balanceResponse'
+      summary: Best guess ordering of players according to skill and score data.
   /game/{id}:
     get:
       consumes:

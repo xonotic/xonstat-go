@@ -21,6 +21,33 @@
     "host": "stats.xonotic.org",
     "basePath": "/",
     "paths": {
+        "/balance": {
+            "post": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Best guess ordering of players according to skill and score data.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "random swaps to do after sorting",
+                        "name": "jitter",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.balanceResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/game/{id}": {
             "get": {
                 "consumes": [
@@ -623,6 +650,46 @@
                 },
                 "weapon_cd_init_caps": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.balancePlayer": {
+            "type": "object",
+            "properties": {
+                "hashkey": {
+                    "type": "string"
+                },
+                "nick": {
+                    "type": "string"
+                },
+                "playerID": {
+                    "type": "integer"
+                },
+                "scorePerSecond": {
+                    "type": "number"
+                },
+                "skill": {
+                    "type": "number"
+                }
+            }
+        },
+        "handlers.balanceResponse": {
+            "type": "object",
+            "properties": {
+                "players": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.balancePlayer"
+                    }
+                },
+                "release": {
+                    "type": "string"
+                },
+                "time": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "integer"
                 }
             }
         },
