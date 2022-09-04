@@ -323,15 +323,16 @@ func InfoData(db models.Datastore, gameID int) (*InfoBase, error) {
 	}
 
 	var teamOrdering []int // so we know which team "won" since maps are not ordered
+	teamsSeen := make(map[int]struct{}, 0)
 	for _, v := range rawPlayerGameStats {
 		pgsb := NewPlayerGameStatBase(v)
 		playerGameStats = append(playerGameStats, pgsb)
 
-		// To determine the order in which teams should be shown, we iterate over the
-		// player game stats (which should be in scoreboardpos order) while keeping track
-		// of the distinct team IDs we see.
-		if len(teamOrdering) == 0 || teamOrdering[len(teamOrdering)-1] != pgsb.Team {
+		// If we haven't seen this team before as we're walking the list,
+		// it goes in the ordering.
+		if _, seenThisTeam := teamsSeen[pgsb.Team]; !seenThisTeam {
 			teamOrdering = append(teamOrdering, pgsb.Team)
+			teamsSeen[pgsb.Team] = struct{}{}
 		}
 
 		playerGameStatsByTeam[pgsb.Team] = append(playerGameStatsByTeam[pgsb.Team], pgsb)

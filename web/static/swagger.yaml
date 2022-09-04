@@ -477,6 +477,26 @@ definitions:
       server_id:
         type: integer
     type: object
+  handlers.serverTopScorerEntry:
+    properties:
+      nick:
+        type: string
+      player_id:
+        type: integer
+      rank:
+        type: integer
+      score:
+        type: integer
+    type: object
+  handlers.serverTopScorersResponse:
+    properties:
+      server_id:
+        type: integer
+      top_scorers:
+        items:
+          $ref: '#/definitions/handlers.serverTopScorerEntry'
+        type: array
+    type: object
   handlers.summaryJSONResponse:
     properties:
       games:
@@ -759,7 +779,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.topServerJSONResponse'
+            $ref: '#/definitions/handlers.serverTopScorersResponse'
       summary: Top scoring players on a particular server over a fixed time period
   /skill:
     get:
@@ -770,6 +790,10 @@ paths:
         in: query
         name: hashkey
         required: true
+        type: string
+      - description: game type
+        in: query
+        name: game_type_cd
         type: string
       produces:
       - application/json
