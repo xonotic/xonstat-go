@@ -5,11 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"math/rand"
-	"sort"
-	"strconv"
 	"strings"
-	"time"
 
 	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
@@ -22,36 +18,11 @@ type balancePlayer struct {
 	ScorePerSecond float64
 }
 
-// BySkillandSPS implements sort.Interface for []balancePlayer based on
-// the Skill and then ScorePerSecond fields, greatest the least.
-type BySkillandSPS []*balancePlayer
-
-func (a BySkillandSPS) Len() int      { return len(a) }
-func (a BySkillandSPS) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a BySkillandSPS) Less(i, j int) bool {
-	if a[i].Skill != a[j].Skill {
-		return a[i].Skill > a[j].Skill
-	}
-	return a[i].ScorePerSecond > a[j].ScorePerSecond
-}
-
 type balanceResponse struct {
 	Version int
 	Release string
 	Time    int64
 	Players []*balancePlayer
-}
-
-// randomSwap picks two random positions in the array and swaps them. 
-func randomSwap(players []*balancePlayer) {
-	rand.Seed(time.Now().UnixNano())
-
-	i := rand.Intn(len(players))
-	j := rand.Intn(len(players))
-
-	if i != j {
-		players[i], players[j] = players[j], players[i]
-	}
 }
 
 // BalanceHandler godoc
@@ -63,12 +34,6 @@ func randomSwap(players []*balancePlayer) {
 // @Router /balance [post]
 func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	bodyReader := bufio.NewReader(r.Body)
-
-	params := r.URL.Query()
-	jitter, err := strconv.Atoi(params.Get("jitter"))
-	if err != nil || jitter < 1 || jitter > 5 {
-		jitter = 0
-	}
 
 	rawSubmission, err := submission.NewRawSubmission(bodyReader)
 	if err != nil {
@@ -145,14 +110,6 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 			player := hashkeysToPlayers[skill.Hashkey]
 			player.Skill = skill.Mu + (3 * skill.Sigma)
 		}
-	}
-
-	// 4. Sort the untracked players by skill (if available), falling back to score per second.
-	sort.Sort(BySkillandSPS(players))
-
-	// 5. Introduce jitter to randomize results, if asked.
-	for i:=0; i < jitter; i++ {
-		randomSwap(players)
 	}
 
 	response := balanceResponse{
