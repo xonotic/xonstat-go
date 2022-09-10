@@ -57,6 +57,15 @@ func preprocess(w http.ResponseWriter, r *http.Request) (*submission.Submission,
 	return sub, nil
 }
 
+// seed creates a per-player, per-match consistent value for seeding the RNG
+func seed(hashkey, matchID string) int64 {
+	// FNV1A64 non-cryptographic hash
+	hash := fnv.New64a()
+	hash.Write([]byte(hashkey + matchID))
+
+	return int64(hash.Sum64())
+}
+
 // BalanceHandler godoc
 // @Summary Best guess ordering of players according to skill and score data.
 // @Accept  text/plain
@@ -99,9 +108,6 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: establish a better value
 	scoreFactor := 0.25
 
-	// FNV1A64
-	hash := fnv.New64a()
-
 	for hashkey, player := range sub.PlayersByHashkey {
 		gamestat, hasGameStat := sub.PlayerGameStatsByHashkey[hashkey]
 		if strings.HasPrefix(hashkey, "bot#") || !hasGameStat {
@@ -110,10 +116,7 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Use a consistent per-match seed
-		hash.Reset()
-		hash.Write([]byte(hashkey + sub.Game.MatchID.String))
-		seed := int64(hash.Sum64())
-		hashkeysToSeeds[hashkey] = seed
+		hashkeysToSeeds[hashkey] = seed(hashkey, sub.Game.MatchID.String)
 
 		score := gamestat.Score.Int32
 		alivetimesecs := sub.PlayerGameStatsByHashkey[hashkey].AliveTime.Seconds()
@@ -177,6 +180,7 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Final pass to factor in the score
 	scorePerSecondScale := maxSkill / float64(maxScorePerSecond)
+
 	for hashkey, player := range hashkeysToPlayers {
 		if _, ok := hashkeysWithSkills[hashkey]; !ok {
 			// This player doesn't yet have a skill. Derive one from the default.
