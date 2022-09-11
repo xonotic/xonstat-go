@@ -163,9 +163,9 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 
 			player := hashkeysToPlayers[skill.Hashkey]
 
-			rand.Seed(hashkeysToSeeds[skill.Hashkey])
+			rng := rand.New(rand.NewSource(hashkeysToSeeds[skill.Hashkey]))
+			player.Skill = math.Exp((rng.NormFloat64()*(skill.Sigma*randomness)+skill.Mu)/wenglin.DefaultParams.DefaultBeta)
 
-			player.Skill = math.Exp((rand.NormFloat64()*(skill.Sigma*randomness)+skill.Mu)/wenglin.DefaultParams.DefaultBeta)
 			if player.Skill > maxSkill {
 				maxSkill = player.Skill
 			}
@@ -185,8 +185,8 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 		if _, ok := hashkeysWithSkills[hashkey]; !ok {
 			// This player doesn't yet have a skill. Derive one from the default.
 			// Use a consistent per-match seed
-			rand.Seed(hashkeysToSeeds[hashkey])
-			player.Skill = math.Exp((rand.NormFloat64()*(avgSigma*randomness)+avgMu)/wenglin.DefaultParams.DefaultBeta)
+			rng := rand.New(rand.NewSource(hashkeysToSeeds[hashkey]))
+			player.Skill = math.Exp((rng.NormFloat64()*(avgSigma*randomness)+avgMu)/wenglin.DefaultParams.DefaultBeta)
 		}
 
 		// Finally, add score to the linearized value
