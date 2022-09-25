@@ -71,6 +71,12 @@ func (ae *AppEnv) ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !s.ActiveInd {
+		log.Printf("Error: server %d is inactive", s.ServerID)
+		ae.NotFoundHandler(w, r)
+		return
+	}
+
 	if acceptHeader == "application/json" {
 		// JSON response
 		s, err := serverInfoBaseToJSON(s)
