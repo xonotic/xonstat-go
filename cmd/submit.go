@@ -32,16 +32,16 @@ var submitCmd = &cobra.Command{
 		r := bufio.NewReader(f)
 
 		var buf bytes.Buffer
-		var idfp string
+		var sig string
 		line, err := r.ReadBytes('\n')
 		for err == nil {
-			// The 'IDFP' line is special. It's written to the POST file but it's used as an HTTP header.
+			// The 'SIG' line is special. It's written to the POST file but it's used as an HTTP header.
 			// For this reason we'll not include it in the body, else the d0 verification will not return
 			// the expected result.
-			if strings.HasPrefix(string(line), "IDFP") {
+			if strings.HasPrefix(string(line), "SIG") {
 				pieces := strings.Split(string(line), " ")
 				if len(pieces[1]) > 0 {
-					idfp = strings.TrimSuffix(pieces[1], "\n")
+					sig = strings.TrimSuffix(pieces[1], "\n")
 				}
 			} else {
 				buf.Write(line)
@@ -51,8 +51,9 @@ var submitCmd = &cobra.Command{
 		}
 
 		req, _ := http.NewRequest("POST", url, &buf)
-		if idfp != "" {
-			req.Header.Add("X-D0-Blind-Id-Detached-Signature", idfp)
+		if sig != "" {
+			fmt.Println("adding d0 header")
+			req.Header.Add("X-D0-Blind-Id-Detached-Signature", sig)
 		}
 		req.ContentLength = int64(buf.Len())
 

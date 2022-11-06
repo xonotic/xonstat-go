@@ -69,7 +69,9 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Pull the D0 verification information out, if it is present.
+	// Pull the D0 verification information out, if it is present. Only the idfp
+	// value needs special handling since we do not store the signature value in the DB.
+	sig := r.Header.Get("X-D0-Blind-Id-Detached-Signature")
 	idfp := r.Header.Get("X-D0-Blind-Id-IDFP")
 	if idfp != "" {
 		sub.Server.HashKey = sql.NullString{Valid: true, String: idfp}
@@ -78,7 +80,7 @@ func (ae *AppEnv) SubmissionHandler(w http.ResponseWriter, r *http.Request) {
 	if !logAllRequests {
 		// If we've gotten here, it's likely that we have a valid submission, so we'll log it.
 		bodyLogMsg := fmt.Sprintf("----- BEGIN REQUEST BODY -----\n%s%s----- END REQUEST BODY -----\n\n",
-			fmt.Sprintf("IDFP %s\n", idfp), string(body))
+			fmt.Sprintf("SIG %s\n", sig), string(body))
 		ae.requestLogger.Write([]byte(bodyLogMsg))
 	}
 
