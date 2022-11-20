@@ -69,7 +69,8 @@ func (ds *PGDatastore) RServersByHashkey(hashkey string) ([]*Server, error) {
 	pure_ind, impure_cvars, elo_ind, active_ind, create_dt
 	from servers
 	where hashkey = $1
-	order by hashkey, create_dt`
+	order by (case when active_ind then 1 else 0 end), hashkey, create_dt
+	`
 
 	rows, err := ds.db.Query(sql, hashkey)
 	if err != nil {
