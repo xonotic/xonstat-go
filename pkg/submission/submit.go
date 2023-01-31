@@ -387,6 +387,22 @@ func CreateFragMatrix(tx *sql.Tx, db models.Datastore, s *Submission) error {
 	return nil
 }
 
+// CreatePlayerGameAnticheats inserts all of the anticheat records to the database.
+func CreatePlayerGameAnticheats(tx *sql.Tx, db models.Datastore, s *Submission) error {
+	for _, ac := range s.PlayerGameAnticheats {
+		ac.GameID = s.Game.GameID
+
+		player := s.PlayersByIndex[ac.PlayerID]
+		ac.PlayerID = player.PlayerID
+
+		err := db.CPlayerGameAnticheat(tx, ac)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Submit takes a fully-formed submission and stores it in the database, filling out all the
 // missing information (like primary key values) along the way.
 func Submit(s *Submission, db models.Datastore) error {
@@ -451,6 +467,12 @@ func Submit(s *Submission, db models.Datastore) error {
 			tx.Rollback()
 			return err
 		}
+	}
+
+	err = CreatePlayerGameAnticheats(tx, db, s)
+	if err != nil {
+		tx.Rollback()
+		return err
 	}
 
 	err = tx.Commit()

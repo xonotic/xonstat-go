@@ -102,4 +102,7 @@ type Datastore interface {
 	RPlayerSkills(playerID int, gameTypeCd string) ([]*PlayerSkill, error)
 	RPlayerSkillsBatch(hashkeys []string, gameTypeCd string) ([]*PlayerHashkeySkill, error)
 	UPlayerSkill(tx *sql.Tx, ps PlayerSkill) error
+
+	// Anticheat entities
+	CPlayerGameAnticheat(tx *sql.Tx, ac PlayerGameAnticheat) error
 }

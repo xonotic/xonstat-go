@@ -552,6 +552,7 @@ func (s *Submission) fillPlayers(rs *RawSubmission) error {
 
 		s.Players = append(s.Players, &player)
 		s.PlayersByHashkey[hashkey] = &player
+		s.PlayersByIndex[playerIndex] = &player
 
 		// Do not fill out the other records for non-participants.
 		if _, ok := nonParticipants[hashkey]; ok {
