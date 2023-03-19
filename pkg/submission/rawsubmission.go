@@ -310,7 +310,7 @@ func IsSupportedGameType(gameTypeCd string) bool {
 	switch gameTypeCd {
 	case "as", "ca", "ctf", "cts", "dm", "dom", "duel", "ft", "freezetag", "ka":
 		return true
-	case "keepaway", "kh", "nb", "nexball", "rune", "tdm":
+	case "keepaway", "kh", "nb", "nexball", "rune", "tdm", "mayhem", "tmayhem":
 		return true
 	default:
 		return false
