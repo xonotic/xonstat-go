@@ -131,7 +131,7 @@ func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(recentGames)
 	} else {
 		// HTML response
-		gameTypeCds := []string{"overall", "duel", "ctf", "dm", "tdm", "ca", "kh", "ft", "as", "dom", "nb", "cts"}
+		gameTypeCds := []string{"overall", "duel", "ctf", "dm", "tdm", "ca", "kh", "ft", "as", "dom", "nb", "cts", "mayhem", "tmayhem"}
 
 		// Set the query string for pagination
 		if len(recentGames) > 0 {
