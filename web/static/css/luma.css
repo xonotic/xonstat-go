@@ -189,3 +189,9 @@
   color: #81f13d;
   content: "\e933";
 }
+.sprite-mayhem:before {
+  content: "\e92d";
+}
+.sprite-tmayhem:before {
+  content: "\e92e";
+}
