@@ -310,7 +310,7 @@ func IsSupportedGameType(gameTypeCd string) bool {
 	switch gameTypeCd {
 	case "as", "ca", "ctf", "cts", "dm", "dom", "duel", "ft", "freezetag", "ka":
 		return true
-	case "keepaway", "kh", "nb", "nexball", "rune", "tdm", "mayhem", "tmayhem":
+	case "keepaway", "kh", "nb", "nexball", "rune", "tdm", "mayhem", "tmayhem", "lms":
 		return true
 	default:
 		return false
@@ -358,7 +358,8 @@ func (s *RawSubmission) isBlankGame() error {
 	} else if (gameType == "nb" || gameType == "nexball") && !s.HumanNonZeroScore {
 		// in Nexball, we need a human to have a non-zero score
 		return ErrBlankGame
-	} else if !(s.HumanNonZeroScore && s.HumanFiredWeapon) {
+	} else if !((gameType == "lms" || s.HumanNonZeroScore) && s.HumanFiredWeapon) {
+		// LMS doesn't have a score field
 		return ErrBlankGame
 	}
 
