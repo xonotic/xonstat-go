@@ -308,7 +308,7 @@ func (s *RawSubmission) hasRequiredMetadata() error {
 // IsSupportedGameType determines if XonStat supports the given game type
 func IsSupportedGameType(gameTypeCd string) bool {
 	switch gameTypeCd {
-	case "as", "ca", "ctf", "cts", "dm", "dom", "duel", "ft", "freezetag", "ka":
+	case "as", "ca", "ctf", "cts", "dm", "dom", "duel", "ft", "freezetag", "ka", "tka":
 		return true
 	case "keepaway", "kh", "nb", "nexball", "rune", "tdm", "mayhem", "tmayhem":
 		return true

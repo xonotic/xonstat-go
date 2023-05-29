@@ -37,6 +37,8 @@
             {{template "scoreboard-nb.partial.html" (index $.PlayerGameStatsByTeam $teamID)}}
         {{else if eq $.GameTypeCd "tdm"}}
             {{template "scoreboard-tdm.partial.html" (index $.PlayerGameStatsByTeam $teamID)}}
+        {{else if eq $.GameTypeCd "tka"}}
+            {{template "scoreboard-tka.partial.html" (index $.PlayerGameStatsByTeam $teamID)}}
         {{else if eq $.GameTypeCd "tmayhem"}}
             {{template "scoreboard-tmayhem.partial.html" (index $.PlayerGameStatsByTeam $teamID)}}
         {{end}}
