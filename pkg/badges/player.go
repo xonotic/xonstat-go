@@ -223,8 +223,12 @@ func (pp *PlayerDataFetcher) GetPlayerData(playerID int) (*PlayerData, error) {
 			totalLosses += losses
 		}
 
-		totalKills += kills
-		totalDeaths += deaths
+		// CTS does not count towards overall K:D
+		if gameType != "CTS" {
+			totalKills += kills
+			totalDeaths += deaths
+		}
+
 		totalAlivetime += alivetime
 	}
 
