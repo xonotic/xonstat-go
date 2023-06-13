@@ -54,5 +54,7 @@
         {{template "scoreboard-ka.partial.html" $.PlayerGameStats}}
     {{else if eq $.GameTypeCd "mayhem"}}
         {{template "scoreboard-mayhem.partial.html" $.PlayerGameStats}}
+    {{else if eq $.GameTypeCd "lms"}}
+        {{template "scoreboard-lms.partial.html" $.PlayerGameStats}}
     {{end}}
 {{end}}
