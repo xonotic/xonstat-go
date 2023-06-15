@@ -1,0 +1,45 @@
+V 9
+R xonotic-v0.8.2-605-gdd5d35f
+G cts
+O XDF
+M r7-alexa
+I 0.613855
+S Xonotic DeFrag - Join/Run now! - balance changes
+C 192
+U 26004
+D 1200.000122
+L 
+P NOT_A_HASHKEY
+i 3
+n ^0ns^1.^1A^0v^1👽^0ll^1👽^0c^1'^0h^7
+e scoreboard-elo -2
+e scoreboard-dmgtaken 300
+e total-dmgtaken 300
+e scoreboard-deaths 91
+e total-deaths 91
+e total-fastest 91
+e anticheat-idle_snapaim_m10 120.587
+e anticheat-idle_snapaim_m7 75.3919
+e anticheat-idle_snapaim_m4 28.9458
+e anticheat-idle_snapaim_m3 15.2107
+e anticheat-idle_snapaim_m2 5.44235
+e anticheat-idle_snapaim_noise 1.72934
+e anticheat-idle_snapaim_signal 44.1546
+e anticheat-idle_snapaim 42.4253
+e anticheat-div0_evade 0.000841
+e anticheat-div0_strafebot_new 0.188322
+e anticheat-speedhack_m5 1.00229
+e anticheat-speedhack_m4 1.00229
+e anticheat-speedhack_m3 1.00228
+e anticheat-speedhack_m2 1.00227
+e anticheat-speedhack_m1 1.0023
+e anticheat-speedhack 0.019932
+e anticheat-_time 589.99
+e rank 1
+e scoreboardpos 1
+e scoreboardvalid 1
+e joins 1
+e matches 1
+e wins 1
+e avglatency 36.3707
+e alivetime 586.76

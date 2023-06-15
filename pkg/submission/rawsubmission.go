@@ -173,7 +173,15 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 	human := isHuman(events)
 	joined := joinedGame(events)
 	playedTillEnd := playedInGame(events)
-	if human {
+
+	// Special case for CTS: we count it if they had a fastest lap,
+	// even if they spectated before endmatch.
+	if s.GameMeta["G"] == "cts" && human && joined && hasFastestLap {
+		s.HumanFastestLap = true
+		s.Humans = append(s.Humans, events)
+		s.NumHumansPlayed++
+	} else if human {
+
 		if !playedTillEnd {
 			if joined {
 				// They forfeited, thus count towards the active count.
@@ -190,10 +198,6 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 
 			if nonZeroScore {
 				s.HumanNonZeroScore = true
-			}
-
-			if hasFastestLap {
-				s.HumanFastestLap = true
 			}
 
 			s.Humans = append(s.Humans, events)
@@ -246,7 +250,7 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 			}
 
 			// did this player have a fastest lap
-			if subkey == "scoreboard-fastest" {
+			if subkey == "scoreboard-fastest" || subkey == "total-fastest" {
 				hasFastestLap = true
 			}
 		case "#", "":
