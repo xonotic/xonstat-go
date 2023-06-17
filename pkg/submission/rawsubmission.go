@@ -164,8 +164,15 @@ func joinedGame(events map[string]string) bool {
 	return joins
 }
 
+// hasFastestLap determines if the set of player events is for a player who completed one lap
+func hasFastestLap(events map[string]string) bool {
+	_, scoreboardFastest := events["scoreboard-fastest"]
+	_, totalFastest := events["total-fastest"]
+	return scoreboardFastest || totalFastest
+}
+
 // addPlayerEvents adds a set of player events to the running list and performs some bookkeeping for the same
-func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string, index int, firedWeapon, nonZeroScore, hasFastestLap bool) {
+func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string, index int, firedWeapon bool, nonZeroScore bool) {
 	if len(events) <= 0 {
 		return
 	}
@@ -173,10 +180,11 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 	human := isHuman(events)
 	joined := joinedGame(events)
 	playedTillEnd := playedInGame(events)
+	hasFastest := hasFastestLap(events)
 
 	// Special case for CTS: we count it if they had a fastest lap,
 	// even if they spectated before endmatch.
-	if s.GameMeta["G"] == "cts" && human && joined && hasFastestLap {
+	if s.GameMeta["G"] == "cts" && human && joined && hasFastest {
 		s.HumanFastestLap = true
 		s.Humans = append(s.Humans, events)
 		s.NumHumansPlayed++
@@ -221,7 +229,6 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 	events[label] = hashkey
 	index := -1
 	firedWeapon := false
-	hasFastestLap := false
 	nonZeroScore := false
 
 	key, value, err := s.nextPair()
@@ -248,17 +255,12 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 					nonZeroScore = true
 				}
 			}
-
-			// did this player have a fastest lap
-			if subkey == "scoreboard-fastest" || subkey == "total-fastest" {
-				hasFastestLap = true
-			}
 		case "#", "":
 			// no-op: comment or blank line
 		default:
 			// hit a non-player key, so return that line
 			s.rr.Return(fmt.Sprintf("%s %s", key, value))
-			s.addPlayerEvents(events, hashkey, index, firedWeapon, nonZeroScore, hasFastestLap)
+			s.addPlayerEvents(events, hashkey, index, firedWeapon, nonZeroScore)
 
 			return
 		}
@@ -269,7 +271,7 @@ func (s *RawSubmission) parsePlayerEvents(label, hashkey string) {
 
 	if err == io.EOF {
 		// special case: the last player in the file
-		s.addPlayerEvents(events, hashkey, index, firedWeapon, nonZeroScore, hasFastestLap)
+		s.addPlayerEvents(events, hashkey, index, firedWeapon, nonZeroScore)
 	}
 
 	return
