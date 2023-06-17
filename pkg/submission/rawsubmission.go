@@ -182,10 +182,14 @@ func (s *RawSubmission) addPlayerEvents(events map[string]string, hashkey string
 	playedTillEnd := playedInGame(events)
 	hasFastest := hasFastestLap(events)
 
-	// Special case for CTS: we count it if they had a fastest lap,
-	// even if they spectated before endmatch.
-	if s.GameMeta["G"] == "cts" && human && joined && hasFastest {
-		s.HumanFastestLap = true
+	// Special case for CTS: we count it if they had a fastest lap, even if they spectated before endmatch.
+	if s.GameMeta["G"] == "cts" && human && joined {
+		if hasFastest {
+			// Additional requirement: at least one human player has to register a lap
+			// for the match to be recorded (blank game check).
+			s.HumanFastestLap = true
+		}
+
 		s.Humans = append(s.Humans, events)
 		s.NumHumansPlayed++
 	} else if human {
