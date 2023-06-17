@@ -3,9 +3,9 @@
         <tr>
             <th class="show-for-medium medium-1">Ping</th>
             <th class="small-5 medium-3">Nick</th>
-            <th>Fastest Time</th>
+            <th>Fastest Lap</th>
             <th class="show-for-medium">Deaths</th>
-            <th class="small-3 medium-1">Score</th>
+            <th class="small-3 medium-1">Play Time</th>
         </tr>
     </thead>
 
@@ -26,9 +26,13 @@
                     {{.Nick.NickHTML}}
                 {{end}}
             </td>
+            {{if eq .Fastest.Seconds 0.0}}
+            <td class="small-3">-</td>
+            {{else}}
             <td class="small-3">{{printf "%.2f" .Fastest.Seconds}}</td>
+            {{end}}
             <td class="show-for-medium">{{.Deaths}}</td>
-            <td class="small-3 player-score">{{.Score}}</td>
+            <td class="small-3">{{.AliveTime.Long}}</td>
         </tr>
         {{end}}
     </tbody>
