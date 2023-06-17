@@ -78,7 +78,7 @@ func scanPlayerGameStats(rows *sql.Rows) ([]*PlayerGameStat, error) {
 }
 
 // RPlayerGameStatsByGameID retrieves player game stat records by their game ID
-func (ds *PGDatastore) RPlayerGameStatsByGameID(gameID int) ([]*PlayerGameStat, error) {
+func (ds *PGDatastore) RPlayerGameStatsByGameID(gameID int, gameTypeCd string) ([]*PlayerGameStat, error) {
 	sql := `select player_id, game_id, nick, stripped_nick, team, rank, 
 		cast(coalesce(extract(epoch from alivetime), 0)*1000 as integer), 
 		kills, deaths, suicides, score, 
@@ -88,8 +88,14 @@ func (ds *PGDatastore) RPlayerGameStatsByGameID(gameID int) ([]*PlayerGameStat, 
 		cast(coalesce(extract(epoch from fastest), 0)*1000 as integer), 
 		avg_latency, scoreboardpos, laps, revivals, lives, create_dt, player_game_stat_id
 		from player_game_stats
-		where game_id = $1
-		order by scoreboardpos`
+		where game_id = $1`
+
+	// CTS needs to be sorted by fastest lap. Scoreboardpos is not reliable.
+	if gameTypeCd == "cts" {
+		sql += " order by fastest"
+	} else {
+		sql += " order by scoreboardpos"
+	}
 
 	rows, err := ds.db.Query(sql, gameID)
 	if err != nil {

@@ -295,7 +295,7 @@ func InfoData(db models.Datastore, gameID int) (*InfoBase, error) {
 		teamGameStatsByTeam[v.Team] = NewTeamGameStatBase(game.GameTypeCd, v)
 	}
 
-	rawPlayerGameStats, err := db.RPlayerGameStatsByGameID(gameID)
+	rawPlayerGameStats, err := db.RPlayerGameStatsByGameID(gameID, game.GameTypeCd)
 	if err != nil {
 		return nil, err
 	}
