@@ -93,7 +93,7 @@
 
 {{define "extra-js"}}
 {{if .ShowWeaponCharts}}
-<script type='text/javascript' src='/static/js/vendor/Chart.min.js'></script>
+<script type='text/javascript' src='/static/js/vendor/chart.umd.min.js'></script>
 <script type='text/javascript' src='/static/js/weaponCharts.js'></script>
 <script type="text/javascript">
   jQuery.getJSON("/game/{{.GameID}}/weapons", function (data) {
