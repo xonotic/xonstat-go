@@ -6,21 +6,17 @@ function drawDamageChart(id, data) {
     var aspectRatio = Math.min(1200 / (data.distinct_players.length * 30), 7);
 
     window.damageChart = new Chart(ctx, {
-        type: 'horizontalBar',
+        type: 'bar',
         data: {
             labels: data.distinct_players,
             datasets: data.damage_data,
         },
         options: {
+            indexAxis: 'y',
             aspectRatio: aspectRatio,
-            elements: {
-                rectangle: {
-                    borderWidth: 2,
-                }
-            },
             responsive: true,
             scales: {
-                xAxes: [{
+                x: {
                     stacked: true,
                     gridLines: {
                         color: 'rgba(255, 255, 255, 0.2)',
@@ -29,8 +25,8 @@ function drawDamageChart(id, data) {
                     ticks: {
                         fontColor: '#ccc'
                     }
-                }],
-                yAxes: [{
+                },
+                y: {
                     stacked: true,
                     gridLines: {
                         color: 'rgba(255, 255, 255, 0.2)',
@@ -39,7 +35,7 @@ function drawDamageChart(id, data) {
                     ticks: {
                         fontColor: '#ccc'
                     }
-                }]
+                }
             },
             legend: {
                 position: 'top',
@@ -70,12 +66,13 @@ function drawAccuracyChart(id, data) {
     var aspectRatio = Math.min(1200 / (data.distinct_players.length * 40), 10);
 
     window.accuracyChart = new Chart(ctx, {
-        type: 'horizontalBar',
+        type: 'bar',
         data: {
             labels: data.distinct_players,
             datasets: data.accuracy_data,
         },
         options: {
+            indexAxis: 'y',
             aspectRatio: aspectRatio,
             elements: {
                 rectangle: {
@@ -84,7 +81,7 @@ function drawAccuracyChart(id, data) {
             },
             responsive: true,
             scales: {
-                xAxes: [{
+                x: {
                     stacked: false,
                     gridLines: {
                         color: 'rgba(255, 255, 255, 0.2)',
@@ -98,8 +95,8 @@ function drawAccuracyChart(id, data) {
                             return value + "%";
                         }
                     }
-                }],
-                yAxes: [{
+                },
+                y: {
                     stacked: false,
                     gridLines: {
                         color: 'rgba(255, 255, 255, 0.2)',
@@ -110,7 +107,7 @@ function drawAccuracyChart(id, data) {
                         suggestedMin: 0,
                         suggestedMax: 100,
                     }
-                }]
+                }
             },
             legend: {
                 position: 'top',
