@@ -121,7 +121,7 @@ function drawPlayerAccuracyChart(id, data) {
             datasets: data.accuracy,
         },
         options: {
-            aspectRatio: 3,
+            aspectRatio: 3.5,
             spanGaps: true,
             scales: {
                 x: {
@@ -141,6 +141,9 @@ function drawPlayerAccuracyChart(id, data) {
                 }
             },
             plugins: {
+                legend: {
+                    position: 'right',
+                },
                 tooltip: {
                     mode: "point",
                     titleColor: '#000',
@@ -169,45 +172,45 @@ function drawPlayerDamageChart(id, data) {
             datasets: data.damage,
         },
         options: {
-            aspectRatio: 3,
-            elements: {
-                rectangle: {
-                    borderWidth: 2,
+            aspectRatio: 3.5,
+            scales: {
+                x: {
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: 'Game #'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)',
+                    }
+                },
+                y: {
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: 'Total Damage'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)',
+                    }
                 }
             },
-            responsive: true,
-            scales: {
-                xAxes: [{
-                    stacked: true,
-                    gridLines: {
-                        color: 'rgba(255, 255, 255, 0.2)',
-                        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
-                    },
-                }],
-                yAxes: [{
-                    stacked: true,
-                    gridLines: {
-                        color: 'rgba(255, 255, 255, 0.2)',
-                        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
-                    },
-                }]
-            },
-            legend: {
-                position: 'right',
-            },
-            tooltips: {
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                titleFontColor: '#000',
-                bodyFontColor: '#000',
-                mode: "point",
-                callbacks: {
-                    label: function (tooltipItem, d) {
-                        var label = d.datasets[tooltipItem.datasetIndex].label;
-                        var totalDamage = data.total_damage_per_game[tooltipItem.index];
-                        var weaponDamage = d.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-                        var pctOfTotal = Math.round(weaponDamage/totalDamage*100);
-
-                        return `${label}: ${weaponDamage} (${pctOfTotal}% of total)`;
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                tooltip: {
+                    mode: "point",
+                    titleColor: '#000',
+                    bodyColor: '#000',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    callbacks: {
+                        label: function (context) {
+                            var totalDamage = data.total_damage_per_game[context.dataIndex];
+                            var weaponDamage = context.dataset.data[context.dataIndex];
+                            var pctOfTotal = Math.round(weaponDamage/totalDamage*100);
+                            return `${context.dataset.label}: ${weaponDamage} (${pctOfTotal}% of total)`;
+                        }
                     }
                 }
             }
