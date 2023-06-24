@@ -123,54 +123,38 @@ function drawPlayerAccuracyChart(id, data) {
         options: {
             aspectRatio: 3,
             spanGaps: true,
-            responsive: true,
             scales: {
-                xAxes: [{
-                    display: true,
-                    scaleLabel: {
+                x: {
+                    title: {
                         display: true,
-                        labelString: 'Game #'
-                    }
-                }],
-                yAxes: [{
-                    display: true,
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Accuracy %'
+                        text: 'Game #'
                     },
-                    gridLines: {
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Accuracy %'
+                    },
+                    grid: {
                         color: 'rgba(255, 255, 255, 0.1)',
-                        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
                     },
-                    ticks: {
-                        suggestedMin: 0,
-                    }
-                }]
+                }
             },
-            legend: {
-                position: 'top',
-            },
-            tooltips: {
-                mode: 'point',
-                intersect: false,
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                titleFontColor: '#000',
-                bodyFontColor: '#000',
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        // Summary contains the aggregate accuracy for the weapon.
-                        var summary = data.datasets[tooltipItem.datasetIndex].summary;
-                        var overallAccuracy = Math.round(summary.pct_accuracy);
-
-                        // The individual data points are the accuracy for that particular game.
-                        var rawAccuracy = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-                        var accuracy = Math.round(rawAccuracy);
-
-                        return `${summary.weapon_cd_init_caps}: ${accuracy}% (${overallAccuracy}% overall)`;
+            plugins: {
+                tooltip: {
+                    mode: "point",
+                    titleColor: '#000',
+                    bodyColor: '#000',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    callbacks: {
+                        label: function (context) {
+                            var accuracy = Math.round(context.dataset.data[context.dataIndex]);
+                            var overallAccuracy = Math.round(context.dataset.summary.pct_accuracy);
+                            return `${context.dataset.summary.weapon_cd_init_caps}: ${accuracy}% (${overallAccuracy}% overall)`;
+                        }
                     }
                 }
-
-            }
+            },
         }
     });
 };
