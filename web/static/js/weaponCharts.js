@@ -3,7 +3,9 @@ function drawDamageChart(id, data) {
 
     // The aspect ratio really depends on how many players are present. This formula 
     // is based on playing around with values and settling on a comfortable maximum.
-    var aspectRatio = Math.min(1200 / (data.distinct_players.length * 30), 7);
+    var barHeight = 30;
+    var barPadding = 5;
+    var aspectRatio = Math.min(1200 / (data.distinct_players.length * (barHeight + barPadding)), 7);
 
     window.damageChart = new Chart(ctx, {
         type: 'bar',
@@ -18,22 +20,14 @@ function drawDamageChart(id, data) {
             scales: {
                 x: {
                     stacked: true,
-                    gridLines: {
-                        color: 'rgba(255, 255, 255, 0.2)',
-                        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
-                    },
-                    ticks: {
-                        fontColor: '#ccc'
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)',
                     }
                 },
                 y: {
                     stacked: true,
-                    gridLines: {
-                        color: 'rgba(255, 255, 255, 0.2)',
-                        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
-                    },
-                    ticks: {
-                        fontColor: '#ccc'
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)',
                     }
                 }
             },
@@ -63,7 +57,9 @@ function drawAccuracyChart(id, data) {
 
     // The aspect ratio really depends on how many players are present. This formula 
     // is based on playing around with values and settling on a comfortable maximum.
-    var aspectRatio = Math.min(1200 / (data.distinct_players.length * 40), 10);
+    var barHeight = 40;
+    var barPadding = 5;
+    var aspectRatio = Math.min(1200 / (data.distinct_players.length * (barHeight + barPadding)), 10);
 
     window.accuracyChart = new Chart(ctx, {
         type: 'bar',
@@ -82,10 +78,8 @@ function drawAccuracyChart(id, data) {
             responsive: true,
             scales: {
                 x: {
-                    stacked: false,
-                    gridLines: {
-                        color: 'rgba(255, 255, 255, 0.2)',
-                        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)',
                     },
                     ticks: {
                         fontColor: '#ccc',
@@ -97,10 +91,8 @@ function drawAccuracyChart(id, data) {
                     }
                 },
                 y: {
-                    stacked: false,
-                    gridLines: {
-                        color: 'rgba(255, 255, 255, 0.2)',
-                        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)',
                     },
                     ticks: {
                         fontColor: '#ccc',
