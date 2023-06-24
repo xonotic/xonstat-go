@@ -16,7 +16,6 @@ function drawDamageChart(id, data) {
         options: {
             indexAxis: 'y',
             aspectRatio: aspectRatio,
-            responsive: true,
             scales: {
                 x: {
                     stacked: true,
@@ -31,20 +30,21 @@ function drawDamageChart(id, data) {
                     }
                 }
             },
-            legend: {
-                position: 'top',
-            },
-            tooltips: {
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                titleFontColor: '#000',
-                bodyFontColor: '#000',
-                mode: "point",
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        var item = data.datasets[tooltipItem.datasetIndex].richData[tooltipItem.index];
-                        var damage = Math.round(item.pct_total_damage);
-                        return `${item.weapon_cd_init_caps}: ${item.frags} frags, ${item.actual} damage (${damage}% of total)`;
+            plugins: {
+                tooltip: {
+                    mode: "point",
+                    titleColor: '#000',
+                    bodyColor: '#000',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    callbacks: {
+                        label: function (context) {
+                            console.log(context);
+                            // var item = data.datasets[tooltipItem.datasetIndex].richData[tooltipItem.index];
+                            var item = context.dataset.richData[context.dataIndex];
+                            var damage = Math.round(item.pct_total_damage);
+                            return `${item.weapon_cd_init_caps}: ${item.frags} frags, ${item.actual} damage (${damage}% of total)`;
 
+                        }
                     }
                 }
             }
@@ -75,16 +75,12 @@ function drawAccuracyChart(id, data) {
                     borderWidth: 2,
                 }
             },
-            responsive: true,
             scales: {
                 x: {
                     grid: {
                         color: 'rgba(255, 255, 255, 0.1)',
                     },
                     ticks: {
-                        fontColor: '#ccc',
-                        suggestedMin: 0,
-                        suggestedMax: 100,
                         callback: function (value, index, values) {
                             return value + "%";
                         }
@@ -94,27 +90,20 @@ function drawAccuracyChart(id, data) {
                     grid: {
                         color: 'rgba(255, 255, 255, 0.1)',
                     },
-                    ticks: {
-                        fontColor: '#ccc',
-                        suggestedMin: 0,
-                        suggestedMax: 100,
-                    }
                 }
             },
-            legend: {
-                position: 'top',
-            },
-            tooltips: {
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                titleFontColor: '#000',
-                bodyFontColor: '#000',
-                mode: "point",
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        var item = data.datasets[tooltipItem.datasetIndex].richData[tooltipItem.index];
-                        var accuracy = Math.round(item.pct_accuracy);
-                        return `${item.weapon_cd_init_caps}: ${item.frags} frags, ${accuracy}% (${item.hit} hit/${item.fired} fired)`;
-
+            plugins: {
+                tooltip: {
+                    mode: "point",
+                    titleColor: '#000',
+                    bodyColor: '#000',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    callbacks: {
+                        label: function (context) {
+                            var item = context.dataset.richData[context.dataIndex];
+                            var accuracy = Math.round(item.pct_accuracy);
+                            return `${item.weapon_cd_init_caps}: ${item.frags} frags, ${accuracy}% (${item.hit} hit/${item.fired} fired)`;
+                        }
                     }
                 }
             }
