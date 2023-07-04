@@ -5,7 +5,6 @@ d3.json("/heatmap", {
 }).then((data) => {
 
     var gameCounts = data.map(d => d[2]);
-    var minGames = Math.min(...gameCounts);
     var maxGames = Math.max(...gameCounts);
 
     function makeSparse(data) {
@@ -55,23 +54,21 @@ d3.json("/heatmap", {
     var x = d3.scaleBand()
         .range([0, width])
         .domain(hourLabels)
-        .padding(0.05);
+        .padding(0);
 
     svg.append("g")
-        .style("font-size", 15)
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x).tickSize(0).ticks(24).tickValues(hourLabels))
+        .call(d3.axisBottom(x).tickSize(0))
         .select(".domain").remove()
 
     // Build Y scales and axis:
     var y = d3.scaleBand()
         .range([height, 0])
         .domain(dayLabels)
-        .padding(0.05);
+        .padding(0);
 
     svg.append("g")
-        .style("font-size", 15)
-        .call(d3.axisLeft(y).ticks(7).tickSize(0).tickValues(dayLabels))
+        .call(d3.axisLeft(y).tickSize(0))
         .select(".domain").remove()
 
     // Build color scale
@@ -96,8 +93,9 @@ d3.json("/heatmap", {
             .style("stroke", "#444")
             .style("opacity", 0.8)
     }
+
     var mousemove = function (event, d) {
-        d3.select("#tooltip").text(`${dayLabels[d[0]-1]} ${hourLabels[d[1]]}: ${d[2]} games`);
+        d3.select("#tooltip").text(`${dayLabels[d[0]-1]} ${hourLabels[d[1]]} UTC: ${d[2]} games`);
     }
 
     var mouseleave = function (event, d) {
@@ -114,10 +112,10 @@ d3.json("/heatmap", {
         .append("rect")
         .attr("x", function (d) { return x(hourLabels[d[1]]) })
         .attr("y", function (d) { return y(dayLabels[d[0]-1]) })
-        .attr("rx", 4)
-        .attr("ry", 4)
-        .attr("width", x.bandwidth())
-        .attr("height", y.bandwidth())
+        .attr("rx", 2)
+        .attr("ry", 2)
+        .attr("width", x.bandwidth() - 2.5)
+        .attr("height", y.bandwidth() - 2.5) 
         .style("fill", function (d) { return colorScale(d[2]) })
         .style("stroke-width", 4)
         .style("stroke", "none")
