@@ -64,7 +64,7 @@ type Datastore interface {
 	RSummaryStats(scope string) ([]*SummaryStat, error)
 
 	// Heatmap
-	RHeatmap() ([]*HeatmapEntry, error)
+	RHeatmap(serverID int) ([]*HeatmapEntry, error)
 
 	// Top Players by time played
 	RActivePlayers(limit, start int) ([]*ActivePlayer, error)

@@ -146,8 +146,8 @@ func ActiveMapsData(limit, start int, db models.Datastore) ([]ActiveMapBase, err
 }
 
 // HeatmapData retrieves the dense matrix for games played per hour, per day.
-func HeatmapData(db models.Datastore) ([][]int, error) {
-	entries, err := db.RHeatmap()
+func HeatmapData(db models.Datastore, serverID int) ([][]int, error) {
+	entries, err := db.RHeatmap(serverID)
 	if err != nil {
 		return nil, err
 	}

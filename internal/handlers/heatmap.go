@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
+	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
 )
 
@@ -16,9 +18,17 @@ import (
 // @Router /heatmap [get]
 func (ae *AppEnv) HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 	acceptHeader := r.Header.Get("Accept")
+
+	params := r.URL.Query()
+
+	serverID, err := strconv.Atoi(params.Get("server_id"))
+	if err != nil {
+		serverID = game.EmptyServerID
+	}
+
 	if acceptHeader == "application/json" {
 
-		heatmap, err := leaderboard.HeatmapData(ae.db)
+		heatmap, err := leaderboard.HeatmapData(ae.db, serverID)
 		if err != nil {
 			log.Printf("Error: %s", err)
 			ae.FiveHundredHandler(w, r)
@@ -36,7 +46,7 @@ func (ae *AppEnv) HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write(bytes)
 	} else {
-		err := ae.templates["heatmap.page.html"].Execute(w, struct{}{})
+		err := ae.templates["heatmap.page.html"].Execute(w, serverID)
 		if err != nil {
 			log.Printf("Error: %s", err)
 			ae.FiveHundredHandler(w, r)

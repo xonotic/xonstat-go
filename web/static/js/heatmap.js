@@ -1,4 +1,9 @@
-d3.json("/heatmap", {
+var url = "/heatmap";
+if (server_id != -1) {
+    url = url + "?server_id=" + server_id;
+}
+
+d3.json(url, {
     headers: new Headers({
         "Accept": "application/json"
     }),
@@ -15,19 +20,18 @@ d3.json("/heatmap", {
             }
         }
 
-        data.forEach(element => {
-            dayOfWeek = element[0];
-            hourOfDay = element[1];
-            gameCount = element[2];
+        for(i = 0; i < data.length; i++) {
+            day = data[i][0] - 1;
+            hour = data[i][1];
+            gameCount = data[i][2];
 
-            i = (dayOfWeek * 24) + hourOfDay;
-            sparse[i] = [dayOfWeek, hourOfDay, gameCount];
-        });
+            sparse[(day * 24) + hour][2] = gameCount;
+        }
 
         return sparse;
     }
 
-    data = makeSparse(data);
+    sparseData = makeSparse(data);
 
     // set the dimensions and margins of the graph
     var margin = { top: 40, right: 25, bottom: 30, left: 80 },
@@ -107,7 +111,7 @@ d3.json("/heatmap", {
 
     // add the squares
     svg.selectAll()
-        .data(data, function (d) { return d[2]; })
+        .data(sparseData, function (d) { return d[2]; })
         .enter()
         .append("rect")
         .attr("x", function (d) { return x(hourLabels[d[1]]) })
@@ -123,5 +127,4 @@ d3.json("/heatmap", {
         .on("mouseover", mouseover)
         .on("mousemove", mousemove)
         .on("mouseleave", mouseleave)
-
 })
