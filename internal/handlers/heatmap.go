@@ -8,7 +8,12 @@ import (
 
 	"gitlab.com/xonotic/xonstat/pkg/game"
 	"gitlab.com/xonotic/xonstat/pkg/leaderboard"
+	"gitlab.com/xonotic/xonstat/pkg/server"
 )
+
+type heatmapResponse struct {
+	Server   *server.InfoBase
+}
 
 // HeatmapHandler godoc
 // @summary Data around the games played in hourly intervals along the week as a matrix.
@@ -46,7 +51,19 @@ func (ae *AppEnv) HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write(bytes)
 	} else {
-		err := ae.templates["heatmap.page.html"].Execute(w, serverID)
+		var response heatmapResponse
+
+		if serverID != game.EmptyServerID {
+			s, err := server.InfoData(ae.db, serverID)
+			if err != nil {
+				log.Printf("Error: %s", err)
+				ae.NotFoundHandler(w, r)
+				return
+			}
+			response.Server = s
+		}
+
+		err = ae.templates["heatmap.page.html"].Execute(w, response)
 		if err != nil {
 			log.Printf("Error: %s", err)
 			ae.FiveHundredHandler(w, r)

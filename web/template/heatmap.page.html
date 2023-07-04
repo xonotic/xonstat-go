@@ -6,6 +6,14 @@
 
 {{define "body"}}
 
+<p class="text-center">
+{{if .Server}}
+Showing game counts from <a href="{{urlFor "server_info" (intToString .Server.ServerID)}}" name="Server info page for {{.Server.Name}}">{{.Server.Name}}</a>
+{{else}}
+Showing game counts from all servers 
+{{end}}
+</p>
+
 <div id="heatmapPanel" class="grid-x grid-padding-x">
   <div class="cell small-12">
     <div id="heatmap" class="text-center"></div>
@@ -15,7 +23,12 @@
 {{end}}
 
 {{define "extra-js"}}
-<script>var server_id={{.}};</script>
+{{if .Server}}
+<script>var server_id={{.Server.ServerID}};</script>
+{{else}}
+<script>var server_id=-1;</script>
+{{end}}
+
 <script type='text/javascript' src='/static/js/vendor/d3.js'></script>
 <script type='text/javascript' src='/static/js/vendor/d3-scale-chromatic.v1.min.js'></script>
 <script type='text/javascript' src='/static/js/heatmap.js'></script>
