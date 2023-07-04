@@ -44,13 +44,7 @@ d3.json("/heatmap", {
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // Labels of row and columns
-    var days = [6, 5, 4, 3, 2, 1, 0];
-    var dayLabels = ["Sun", "Sat", "Fri", "Thu", "Wed", "Tue", "Mon"];
-
-    var hours = [
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-        13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23
-    ];
+    var dayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
     var hourLabels = [
         "12AM", "1AM", "2AM", "3AM", "4AM", "5AM", "6AM", "7AM", "8AM", "9AM", "10AM", "11AM",
@@ -61,11 +55,6 @@ d3.json("/heatmap", {
     var x = d3.scaleBand()
         .range([0, width])
         .domain(hourLabels)
-        .padding(0.05);
-
-    var xScale = d3.scaleBand()
-        .range([0, width])
-        .domain(hours)
         .padding(0.05);
 
     svg.append("g")
@@ -80,11 +69,6 @@ d3.json("/heatmap", {
         .domain(dayLabels)
         .padding(0.05);
 
-    var yScale = d3.scaleBand()
-        .range([height, 0])
-        .domain(days)
-        .padding(0.05);
-
     svg.append("g")
         .style("font-size", 15)
         .call(d3.axisLeft(y).ticks(7).tickSize(0).tickValues(dayLabels))
@@ -92,8 +76,8 @@ d3.json("/heatmap", {
 
     // Build color scale
     var colorScale = d3.scaleSequential()
-        .interpolator(d3.interpolateGreys)
-        .domain([maxGames, 0])
+        .interpolator(d3.interpolateOranges)
+        .domain([0, maxGames])
 
     // Tooltip
     svg.append("text")
@@ -113,7 +97,7 @@ d3.json("/heatmap", {
             .style("opacity", 0.8)
     }
     var mousemove = function (event, d) {
-        d3.select("#tooltip").text(`${dayLabels[d[0]]} ${hourLabels[d[1]]}: ${d[2]} games`);
+        d3.select("#tooltip").text(`${dayLabels[d[0]-1]} ${hourLabels[d[1]]}: ${d[2]} games`);
     }
 
     var mouseleave = function (event, d) {
@@ -128,8 +112,8 @@ d3.json("/heatmap", {
         .data(data, function (d) { return d[2]; })
         .enter()
         .append("rect")
-        .attr("x", function (d) { return xScale(d[1]) })
-        .attr("y", function (d) { return yScale(d[0]) })
+        .attr("x", function (d) { return x(hourLabels[d[1]]) })
+        .attr("y", function (d) { return y(dayLabels[d[0]-1]) })
         .attr("rx", 4)
         .attr("ry", 4)
         .attr("width", x.bandwidth())
