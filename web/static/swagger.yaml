@@ -84,24 +84,11 @@ definitions:
       weapon_cd_init_caps:
         type: string
     type: object
-  handlers.balancePlayer:
-    properties:
-      hashkey:
-        type: string
-      nick:
-        type: string
-      playerID:
-        type: integer
-      scorePerSecond:
-        type: number
-      skill:
-        type: number
-    type: object
   handlers.balanceResponse:
     properties:
       players:
         items:
-          $ref: '#/definitions/handlers.balancePlayer'
+          $ref: '#/definitions/skill.BalancePlayer'
         type: array
       release:
         type: string
@@ -580,6 +567,19 @@ definitions:
       server_name:
         type: string
     type: object
+  skill.BalancePlayer:
+    properties:
+      hashkey:
+        type: string
+      nick:
+        type: string
+      playerID:
+        type: integer
+      scorePerSecond:
+        type: number
+      skill:
+        type: number
+    type: object
 host: stats.xonotic.org
 info:
   contact:
@@ -598,11 +598,6 @@ paths:
     post:
       consumes:
       - text/plain
-      parameters:
-      - description: random swaps to do after sorting
-        in: query
-        name: jitter
-        type: integer
       produces:
       - text/plain
       responses:
@@ -685,6 +680,28 @@ paths:
               $ref: '#/definitions/handlers.recentGamesJSONResponse'
             type: array
       summary: Games played by various filter criteria
+  /heatmap:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: server_id filter
+        in: query
+        name: server_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                type: integer
+              type: array
+            type: array
+      summary: Data around the games played in hourly intervals along the week as
+        a matrix.
   /map/{id}:
     get:
       consumes:

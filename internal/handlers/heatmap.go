@@ -19,6 +19,7 @@ type heatmapResponse struct {
 // @summary Data around the games played in hourly intervals along the week as a matrix.
 // @Accept  json
 // @Produce  json
+// @Param server_id query int false "server_id filter"
 // @Success 200 {object} [][]int
 // @Router /heatmap [get]
 func (ae *AppEnv) HeatmapHandler(w http.ResponseWriter, r *http.Request) {

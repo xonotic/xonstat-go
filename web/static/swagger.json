@@ -30,14 +30,6 @@
                     "text/plain"
                 ],
                 "summary": "Best guess ordering of players according to skill and score data.",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "random swaps to do after sorting",
-                        "name": "jitter",
-                        "in": "query"
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -157,6 +149,39 @@
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/handlers.recentGamesJSONResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/heatmap": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Data around the games played in hourly intervals along the week as a matrix.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "server_id filter",
+                        "name": "server_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "integer"
+                                }
                             }
                         }
                     }
@@ -653,33 +678,13 @@
                 }
             }
         },
-        "handlers.balancePlayer": {
-            "type": "object",
-            "properties": {
-                "hashkey": {
-                    "type": "string"
-                },
-                "nick": {
-                    "type": "string"
-                },
-                "playerID": {
-                    "type": "integer"
-                },
-                "scorePerSecond": {
-                    "type": "number"
-                },
-                "skill": {
-                    "type": "number"
-                }
-            }
-        },
         "handlers.balanceResponse": {
             "type": "object",
             "properties": {
                 "players": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/handlers.balancePlayer"
+                        "$ref": "#/definitions/skill.BalancePlayer"
                     }
                 },
                 "release": {
@@ -1408,6 +1413,26 @@
                 },
                 "server_name": {
                     "type": "string"
+                }
+            }
+        },
+        "skill.BalancePlayer": {
+            "type": "object",
+            "properties": {
+                "hashkey": {
+                    "type": "string"
+                },
+                "nick": {
+                    "type": "string"
+                },
+                "playerID": {
+                    "type": "integer"
+                },
+                "scorePerSecond": {
+                    "type": "number"
+                },
+                "skill": {
+                    "type": "number"
                 }
             }
         }
