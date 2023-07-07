@@ -12,6 +12,18 @@ d3.json(url, {
     var gameCounts = data.map(d => d[2]);
     var maxGames = Math.max(...gameCounts);
 
+    // Localize a UTC day-of-week and hour, leaving gameCount the same.
+    function localize(dayUTC, hourUTC, gameCount) {
+        // May 2023 is used because the days of its first week happen to match 
+        // PostgreSQL's isodow() day index. Mon is 1, Tues is 2, and so on.
+        d = new Date(Date.UTC(2023, 4, dayUTC, hourUTC));
+
+        // PG's isodow() returns 1-7 for Mon-Sun. JS's getDay() returns 0-6 for Sun-Sat.
+        // The difference is only Sun (0 -> 7).
+        dayLocal = d.getDay();
+        return [dayLocal == 0 ? 7 : dayLocal, d.getHours(), gameCount];
+    }
+
     function makeSparse(data) {
         var sparse = [];
         for (day = 0; day < 7; day++) {
@@ -21,11 +33,8 @@ d3.json(url, {
         }
 
         for(i = 0; i < data.length; i++) {
-            day = data[i][0] - 1;
-            hour = data[i][1];
-            gameCount = data[i][2];
-
-            sparse[(day * 24) + hour][2] = gameCount;
+            var [day, hour, gameCount] = localize(data[i][0], data[i][1], data[i][2]);
+            sparse[((day-1) * 24) + hour][2] = gameCount;
         }
 
         return sparse;
@@ -99,7 +108,7 @@ d3.json(url, {
     }
 
     var mousemove = function (event, d) {
-        d3.select("#tooltip").text(`${dayLabels[d[0]-1]} ${hourLabels[d[1]]} UTC: ${d[2]} games`);
+        d3.select("#tooltip").text(`${dayLabels[d[0]]} @ ${hourLabels[d[1]]}: ${d[2]} games`);
     }
 
     var mouseleave = function (event, d) {
@@ -115,7 +124,7 @@ d3.json(url, {
         .enter()
         .append("rect")
         .attr("x", function (d) { return x(hourLabels[d[1]]) })
-        .attr("y", function (d) { return y(dayLabels[d[0]-1]) })
+        .attr("y", function (d) { return y(dayLabels[d[0]]) })
         .attr("rx", 2)
         .attr("ry", 2)
         .attr("width", x.bandwidth() - 2.5)
