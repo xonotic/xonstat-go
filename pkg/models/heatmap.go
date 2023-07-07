@@ -24,7 +24,7 @@ func (ds *PGDatastore) RHeatmap(serverID int) ([]*HeatmapEntry, error) {
 		params = append(params, serverID)
 	}
 
-	sqlBuf.WriteString(`group by 1, 2;`)
+	sqlBuf.WriteString(`group by 1, 2 order by 1, 2;`)
 
 	rows, err := ds.db.Query(sqlBuf.String(), params...)
 	if err != nil {
