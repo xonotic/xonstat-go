@@ -1,6 +1,12 @@
 build:
 	go build -trimpath
 
+docker-build:
+	docker build -t xonstat-build .
+	docker container create --name xonstat-build xonstat-build
+	docker container cp xonstat-build:/home/xonstat/xonstat .
+	docker container rm xonstat-build
+
 .PHONY: test
 test:
 	go test -cover -coverprofile=coverage.out ./...
