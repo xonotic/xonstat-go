@@ -45,13 +45,12 @@ d3.json(url, {
     // set the dimensions and margins of the graph
     var margin = { top: 40, right: 25, bottom: 30, left: 80 },
         width = 900 - margin.left - margin.right,
-        height = 450 - margin.top - margin.bottom;
+        height = 300 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
     var svg = d3.select("#heatmap")
         .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
