@@ -68,7 +68,7 @@ func web(addr string) {
 	dsn := viper.GetString("ConnStr")
 	db, err := models.NewPGDatastore(dsn)
 	if err != nil {
-		log.Fatal("Unable to initialize database connection.")
+		log.Fatalf("Unable to initialize database connection: %v.", err)
 	}
 
 	redisAddr := viper.GetString("RedisAddr")

@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
-
-	"github.com/lib/pq"
 )
 
 // BlankEndingGameID is a blank ending game ID.
@@ -37,7 +35,7 @@ func (ds *PGDatastore) CGame(tx *sql.Tx, game Game) (int64, error) {
 		values ($1, $2, $3, $4, $5, $6, $7, $8, %s, $9)`
 
 	_, err = tx.Exec(fmt.Sprintf(sql, durationLiteral), seqVal, game.GameTypeCd, game.ServerID,
-		game.MapID, game.Winner, game.MatchID, game.Mod, game.StartDt, pq.Array(game.Players))
+		game.MapID, game.Winner, game.MatchID, game.Mod, game.StartDt, game.Players)
 
 	if err != nil {
 		return gameID, err

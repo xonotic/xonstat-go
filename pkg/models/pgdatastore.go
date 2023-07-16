@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/lib/pq" // PostgreSQL-specific datastore implementation
+	_ "github.com/jackc/pgx/v5/stdlib" // PostgreSQL-specific datastore implementation
 )
 
 // IdleConnections is the maximum number of idle connections we should maintain for the database.
@@ -21,7 +21,7 @@ type PGDatastore struct {
 // NewPGDatastore creates a new concrete implementation of a Datastore.
 func NewPGDatastore(dsn string) (*PGDatastore, error) {
 	// establish a database connection
-	db, err := sql.Open("postgres", dsn)
+	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, err
 	}

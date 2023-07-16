@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/antzucaro/qstr"
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx"
 )
 
 // GameCount is the number of games played of the given game mode.
