@@ -151,6 +151,23 @@ Global Flags:
   -c, --config string   config file (default is $HOME/.xonstat.toml)
 ```
 
+### Version Information
+The `version` subcommand prints out the application's build information. It's 
+usage is as follows:
+
+```
+Show the build version in the form of the git commit hash from which the binary was built
+
+Usage:
+  xonstat version [flags]
+
+Flags:
+  -h, --help   help for version
+
+Global Flags:
+  -c, --config string   config file (default is $HOME/.xonstat.toml)
+```
+
 ## Roadmap and Issues
 Both roadmap items and issues are handled via the [GitLab issue tracker][issues].
 Roadmap items will have the `task` tag applied.

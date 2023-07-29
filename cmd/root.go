@@ -8,6 +8,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Build information provided by build flags, shown via the `version` subcommand only. 
+var Commit string
+var BuildDt string
+
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands

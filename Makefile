@@ -1,5 +1,8 @@
+COMMIT=$(shell git rev-parse HEAD)
+BUILD_DT=$(shell date +%FT%T%z)
+
 build:
-	go build -trimpath
+	go build -trimpath -ldflags="-X gitlab.com/xonotic/xonstat/cmd.Commit=${COMMIT} -X gitlab.com/xonotic/xonstat/cmd.BuildDt=${BUILD_DT}"
 
 docker-build:
 	docker build -t xonstat-build .
