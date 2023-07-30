@@ -27,6 +27,7 @@ type playerJSON struct {
 	Nick         string `json:"nick"`
 	StrippedNick string `json:"stripped_nick"`
 	ActiveInd    bool   `json:"active_ind"`
+	CakeDayInd   bool   `json:"cake_day_ind"`
 	Joined       string `json:"joined"`
 	JoinedEpoch  int    `json:"joined_epoch"`
 	JoinedFuzzy  string `json:"joined_fuzzy"`
@@ -39,6 +40,7 @@ func playerJSONFromInfoBase(ib *player.InfoBase) playerJSON {
 		Nick:         ib.Nick.Nick,
 		StrippedNick: ib.Nick.NickStripped,
 		ActiveInd:    ib.ActiveInd,
+		CakeDayInd:   ib.CakeDayInd,
 		Joined:       ib.CreateDt.Dt.Format(time.RFC3339),
 		JoinedEpoch:  int(ib.CreateDt.Epoch),
 		JoinedFuzzy:  ib.CreateDt.Fuzzy,

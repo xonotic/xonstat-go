@@ -2,6 +2,7 @@ package player
 
 import (
 	"sort"
+	"time"
 
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/util"
@@ -126,10 +127,10 @@ type InfoBase struct {
 	PlayerID  int
 	Nick      *models.MultiNick
 	ActiveInd bool
+	CakeDayInd bool
 	CreateDt  *models.MultiDt
 }
 
-// InfoData retrieves information about a given server.
 func InfoData(db models.Datastore, playerID int) (*InfoBase, error) {
 	rawPlayer, err := db.RPlayerByID(playerID)
 	if err != nil {
@@ -142,10 +143,16 @@ func InfoData(db models.Datastore, playerID int) (*InfoBase, error) {
 		return nil, err
 	}
 
+	cakeDay := false
+	if util.IsAnniversary(dt.Dt, time.Now()) {
+		cakeDay = true
+	}
+
 	return &InfoBase{
 		PlayerID:  rawPlayer.PlayerID,
 		Nick:      nick,
 		ActiveInd: rawPlayer.ActiveInd,
+		CakeDayInd: cakeDay,
 		CreateDt:  dt,
 	}, nil
 }
