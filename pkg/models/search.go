@@ -17,7 +17,7 @@ func (ds *PGDatastore) RPlayerIndex(start, limit int, nickFragment string) ([]*P
 	from players p 
 	where p.nick not like 'Anonymous Player%'
 	and p.active_ind = true 
-	and p.player_id > 2`)
+	and p.player_id > 2 `)
 
 	// We might not have a start value, so we have to keep track of the bind params
 	// and their placeholder numbers.
