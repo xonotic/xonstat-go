@@ -102,7 +102,7 @@ func (ds *PGDatastore) RPlayerSkills(playerID int, gameTypeCd string) ([]*Player
 	params = append(params, playerID)
 
 	if !(gameTypeCd == "" || gameTypeCd == "overall" || gameTypeCd == "all") {
-		sqlBuf.WriteString("and game_type_cd = $2")
+		sqlBuf.WriteString("and game_type_cd = $2 ")
 		params = append(params, gameTypeCd)
 	}
 
