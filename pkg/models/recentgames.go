@@ -72,6 +72,11 @@ func (ds *PGDatastore) RRecentGames(serverID int, mapID int, playerID int,
 			fmt.Sprintf("and g.create_dt between $%d and $%d ", placeholder, placeholder+1),
 		)
 
+		// Note that these are the same placeholder values for cutoff used on a different table
+		sqlBuf.WriteString(
+			fmt.Sprintf("and pgs.create_dt between $%d and $%d ", placeholder, placeholder+1),
+		)
+
 		placeholder += 2
 		params = append(params, cutoff)
 		params = append(params, time.Now().UTC())
