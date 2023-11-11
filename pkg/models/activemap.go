@@ -42,19 +42,23 @@ func (ds *PGDatastore) RActiveMapsByServer(serverID int, limit int) ([]*ActiveMa
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	sql := `SELECT 
-	row_number() OVER (ORDER BY count(*) DESC) AS rank, 
-	rgs.map_id, m.name, count(*) AS times_played,
-	now() at time zone 'UTC' AS create_dt
-
-	FROM recent_game_stats_mv rgs
-	INNER JOIN maps m USING (map_id)
-
-	WHERE rgs.server_id = $1 
-
-	GROUP BY rgs.map_id, m.name 
-	ORDER BY times_played DESC
-	LIMIT $2`
+	sql := `
+	WITH rgs AS (
+		SELECT 
+		    map_id, count(*) AS times_played
+		FROM 
+		    recent_game_stats_mv
+		WHERE 
+		    server_id = $1
+		GROUP BY map_id
+		ORDER BY 2 desc
+		LIMIT $2
+	)
+	SELECT 
+	    row_number() OVER (ORDER BY times_played DESC) AS rank, 
+		rgs.map_id, m.name, rgs.times_played, now() at time zone 'UTC' AS create_dt
+	FROM 
+	    rgs INNER JOIN maps m USING (map_id) `
 
 	rows, err := ds.db.QueryContext(ctx, sql, serverID, limit)
 	if err != nil {

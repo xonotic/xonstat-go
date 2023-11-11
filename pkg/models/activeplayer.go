@@ -46,18 +46,23 @@ func (ds *PGDatastore) RActivePlayersByServer(serverID int, limit int) ([]*Activ
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	sql := `SELECT 
-	row_number() OVER (ORDER BY sum(rgs.alivetime) DESC) AS rank, 
-	p.player_id, p.nick, 
-	cast(extract(epoch from sum(rgs.alivetime)) AS INTEGER) AS total_alivetime,
-	now() at time zone 'UTC' AS create_dt
-
-	FROM recent_game_stats_mv rgs
-	INNER JOIN players p USING (player_id)
-
-	WHERE rgs.server_id = $1
-
-	GROUP BY p.nick, p.player_id 
+	sql := `
+	WITH rgs AS (
+	    SELECT 
+		    player_id, cast(extract(epoch from sum(alivetime)) AS INTEGER) AS total_alivetime
+		FROM 
+		    recent_game_stats_mv 
+		WHERE 
+		    server_id = $1 
+		GROUP BY 1 
+		ORDER BY 2 desc 
+		LIMIT $2
+	)
+	SELECT 
+	    row_number() OVER (ORDER BY rgs.total_alivetime DESC) AS rank, 
+		p.player_id, p.nick, rgs.total_alivetime, now() at time zone 'UTC' AS create_dt
+	FROM 
+	    rgs INNER JOIN players p USING (player_id)
 	ORDER BY total_alivetime DESC
 	LIMIT $2`
 
