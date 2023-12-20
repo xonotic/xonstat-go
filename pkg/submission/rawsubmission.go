@@ -286,7 +286,7 @@ func (s *RawSubmission) parse() error {
 	key, value, err := s.nextPair()
 	for err == nil {
 		switch key {
-		case "V", "R", "G", "O", "M", "I", "S", "C", "U", "D", "L":
+		case "V", "R", "G", "O", "M", "I", "S", "C", "U", "D", "L", "RP":
 			// metadata about the game
 			s.GameMeta[key] = value
 		case "Q":

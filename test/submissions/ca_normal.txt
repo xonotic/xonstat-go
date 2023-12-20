@@ -8,7 +8,7 @@ S [WTWRP] Votable (2)
 C 0
 U 30142
 D 1073.002197
-L 
+RP 10
 Q team#14
 e scoreboard-rounds 6
 e scoreboard-score 104.38
