@@ -55,7 +55,7 @@ func (ds *PGDatastore) RRecentGamesCutoff(serverID int, mapID int, playerID int,
 	)
 	SELECT 
 		pgsw.game_id, pgsw.game_type_cd, pgsw.winner, pgsw.create_dt, cdg.descr, 
-		pgsw.server_id, s.name, pgsw.map_id, m.name, pgsw.player_id, pgsw.nick, pgsq.match_id
+		pgsw.server_id, s.name, pgsw.map_id, m.name, pgsw.player_id, pgsw.nick, pgsw.match_id
 	FROM 
 		player_game_stats_w pgsw
 		JOIN maps m ON (pgsw.map_id = m.map_id)

@@ -108,9 +108,13 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	now := time.Now().UTC()
 	cutoff := now.AddDate(0, 0, -1*recentGamesDays)
 
-	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, game.EmptyMapID,
+	recentGames, err := game.RecentGamesData(ae.db, game.EmptyServerID, game.EmptyMapID,
 		game.EmptyPlayerID, game.EmptyGameTypeCd, &cutoff, game.EmptyStartGameID,
 		game.EmptyEndGameID, 20, game.EmptyMatchID)
+
+	if err != nil {
+		log.Printf("error finding recent games: %s", err)
+	}
 
 	response := leaderboardResponse{
 		StatLine:      makeStatLine("", allSummaryStats, ""),
