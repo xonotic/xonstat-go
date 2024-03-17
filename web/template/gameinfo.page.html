@@ -9,7 +9,7 @@
 {{define "body"}}
 <div class="grid-x grid-padding-x">
   <div class="cell small-12">
-    <h2>Game #{{.GameID}}</h2>
+    <h2>Game #{{.GameID}} <i class="fa fa-info-circle" title="server match ID {{.MatchID}}"></i></h2>
     <p>
       <span class="sprite sprite-{{.GameTypeCd}}"></span> {{.GameTypeDescr}} <br />
       Played {{.CreateDt.Fuzzy}} <span class="abstime" data-epoch="{{.CreateDt.Epoch}}" title="{{.CreateDt.UTCStr}}"> <i
