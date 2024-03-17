@@ -31,7 +31,7 @@ func scanRecentGames(rows *sql.Rows) ([]*RecentGame, error) {
 // allowing the query to aggressively prune the records it looks at.
 func (ds *PGDatastore) RRecentGamesCutoff(serverID int, mapID int, playerID int,
 	gameTypeCd string, cutoff *time.Time, startGameID int,
-	endGameID int, limit int) (string, []interface{}) {
+	endGameID int, limit int, matchID string) (string, []interface{}) {
 
 	// Build up the SQL that will eventually be executed.
 	// The filter conditions are built up separately.
@@ -121,6 +121,12 @@ func (ds *PGDatastore) RRecentGamesCutoff(serverID int, mapID int, playerID int,
 		params = append(params, endGameID)
 	}
 
+	if matchID != "" {
+		filterBuf.WriteString(fmt.Sprintf("and g.match_id = $%d ", placeholder))
+		placeholder++
+		params = append(params, matchID)
+	}
+
 	// We'll have the SQL with a placeholder for the filters, then a string for the filters 
 	// themselves. Combine them to get the full SQL to be executed.
 	sqlWithoutFilters := sqlBuf.String()
@@ -134,7 +140,7 @@ func (ds *PGDatastore) RRecentGamesCutoff(serverID int, mapID int, playerID int,
 // exclude them from the query.
 func (ds *PGDatastore) RRecentGamesUnbounded(serverID int, mapID int, playerID int,
 	gameTypeCd string, cutoff *time.Time, startGameID int,
-	endGameID int, limit int) (string, []interface{}) {
+	endGameID int, limit int, matchID string) (string, []interface{}) {
 
 	// Build up the SQL that will eventually be executed.
 	var sqlBuf bytes.Buffer
@@ -194,6 +200,12 @@ func (ds *PGDatastore) RRecentGamesUnbounded(serverID int, mapID int, playerID i
 		params = append(params, endGameID)
 	}
 
+	if matchID != "" {
+		sqlBuf.WriteString(fmt.Sprintf("and g.match_id = $%d ", placeholder))
+		placeholder++
+		params = append(params, matchID)
+	}
+
 	sqlBuf.WriteString("order by g.create_dt desc ")
 	sqlBuf.WriteString(fmt.Sprintf("limit $%d ", placeholder))
 	placeholder++
@@ -206,7 +218,7 @@ func (ds *PGDatastore) RRecentGamesUnbounded(serverID int, mapID int, playerID i
 // For the ID values, pass -1 to exclude them from the query.
 func (ds *PGDatastore) RRecentGames(serverID int, mapID int, playerID int,
 	gameTypeCd string, cutoff *time.Time, startGameID int,
-	endGameID int, limit int) ([]*RecentGame, error) {
+	endGameID int, limit int, matchID string) ([]*RecentGame, error) {
 
 	var sql string
 	var params []interface{}
@@ -214,11 +226,11 @@ func (ds *PGDatastore) RRecentGames(serverID int, mapID int, playerID int,
 	if cutoff != nil {
 		// If we have a cutoff value, use the faster version!
 		sql, params = ds.RRecentGamesCutoff(serverID, mapID, playerID, gameTypeCd, 
-			cutoff, startGameID, endGameID, limit)
+			cutoff, startGameID, endGameID, limit, matchID)
 	} else {
 		// Otherwise we'll use the unbounded version as a default.
 		sql, params = ds.RRecentGamesUnbounded(serverID, mapID, playerID, gameTypeCd, 
-			cutoff, startGameID, endGameID, limit)
+			cutoff, startGameID, endGameID, limit, matchID)
 	}
 
 	rows, err := ds.db.Query(sql, params...)

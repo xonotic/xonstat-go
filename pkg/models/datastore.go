@@ -84,7 +84,7 @@ type Datastore interface {
 	RMapActivePlayerScores(mapID int, limit int) ([]*ActivePlayerScore, error)
 
 	// RecentGames by various means
-	RRecentGames(serverID int, mapID int, playerID int, gameTypeCd string, cutoff *time.Time, startGameID int, endGameID int, limit int) ([]*RecentGame, error)
+	RRecentGames(serverID int, mapID int, playerID int, gameTypeCd string, cutoff *time.Time, startGameID int, endGameID int, limit int, matchID string) ([]*RecentGame, error)
 
 	// PlayerGameNonParticipant-oriented methods
 	CPlayerGameNonParticipant(tx *sql.Tx, pgnp PlayerGameNonParticipant) (int64, error)

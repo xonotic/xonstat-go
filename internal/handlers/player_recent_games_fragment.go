@@ -30,7 +30,7 @@ func (ae *AppEnv) PlayerRecentGamesFragmentHandler(w http.ResponseWriter, r *htt
 
 	recentGamesCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
 	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, game.EmptyMapID, playerID,
-		gameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20)
+		gameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20, game.EmptyMatchID)
 
 	err = ae.templates["recentgames.fragment.page.html"].Execute(w, recentGames)
 	if err != nil {

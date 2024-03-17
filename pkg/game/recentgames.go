@@ -26,6 +26,9 @@ const EmptyStartGameID = -1
 // EmptyEndGameID is a blank ending game ID value.
 const EmptyEndGameID = -1
 
+// EmptyEndGameID is a blank ending game ID value.
+const EmptyMatchID = ""
+
 // RecentGameBase is the base type for recent games of any format (HTML, JSON, etc).
 type RecentGameBase struct {
 	GameID              int
@@ -45,14 +48,14 @@ type RecentGameBase struct {
 
 // RecentGamesData retrieves recent games data based on filter criteria
 func RecentGamesData(db models.Datastore, serverID int, mapID int, playerID int, gameTypeCd string,
-	cutoff *time.Time, startGameID int, endGameID int, limit int) ([]RecentGameBase, error) {
+	cutoff *time.Time, startGameID int, endGameID int, limit int, matchID string) ([]RecentGameBase, error) {
 
 	if gameTypeCd != "" && !submission.IsSupportedGameType(gameTypeCd) {
 		return nil, submission.ErrUnsupportedGameType
 	}
 
 	rawRecentGames, err := db.RRecentGames(serverID, mapID, playerID, gameTypeCd, cutoff,
-		startGameID, endGameID, limit)
+		startGameID, endGameID, limit, matchID)
 
 	if err != nil {
 		return nil, err

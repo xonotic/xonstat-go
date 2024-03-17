@@ -110,7 +110,7 @@ func (ae *AppEnv) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 
 	recentGames, _ := game.RecentGamesData(ae.db, game.EmptyServerID, game.EmptyMapID,
 		game.EmptyPlayerID, game.EmptyGameTypeCd, &cutoff, game.EmptyStartGameID,
-		game.EmptyEndGameID, 20)
+		game.EmptyEndGameID, 20, game.EmptyMatchID)
 
 	response := leaderboardResponse{
 		StatLine:      makeStatLine("", allSummaryStats, ""),

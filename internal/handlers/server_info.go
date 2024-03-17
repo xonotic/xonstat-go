@@ -97,7 +97,8 @@ func (ae *AppEnv) ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 		recentGamesCutoff := time.Now().UTC().AddDate(0, 0, -1*viper.GetInt("RecentGamesDays"))
 		recentGames, _ := game.RecentGamesData(ae.db, serverID, game.EmptyMapID, game.EmptyPlayerID,
-			game.EmptyGameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20)
+			game.EmptyGameTypeCd, &recentGamesCutoff, game.EmptyStartGameID, game.EmptyEndGameID, 20, 
+			game.EmptyMatchID)
 
 		response := serverInfoResponse{
 			Server:            *s,

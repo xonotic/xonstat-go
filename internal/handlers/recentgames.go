@@ -68,6 +68,7 @@ type recentGamesResponse struct {
 // @Param game_type_cd query string false "game_type_cd filter"
 // @Param start_game_id query int false "game_id range lower bound"
 // @Param end_game_id query int false "game_id range upper bound"
+// @Param match_id query string false "match_id filter"
 // @Success 200 {object} []recentGamesJSONResponse
 // @Router /games [get]
 func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
@@ -110,7 +111,9 @@ func (ae *AppEnv) RecentGamesHandler(w http.ResponseWriter, r *http.Request) {
 		endGameID = game.EmptyEndGameID
 	}
 
-	recentGames, err := game.RecentGamesData(ae.db, serverID, mapID, playerID, gameTypeCd, nil, startGameID, endGameID, 20)
+	matchID := params.Get("match_id")
+	
+	recentGames, err := game.RecentGamesData(ae.db, serverID, mapID, playerID, gameTypeCd, nil, startGameID, endGameID, 20, matchID)
 	if err != nil {
 		log.Printf("Error: %s", err)
 		ae.FiveHundredHandler(w, r)
