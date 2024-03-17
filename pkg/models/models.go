@@ -294,6 +294,7 @@ type RecentGame struct {
 	WinningPlayerID int
 	WinningNick     string
 	CreateDt        time.Time
+	MatchID         string
 }
 
 // PlayerGameNonParticipant houses people who were around for a match but didn't complete it.

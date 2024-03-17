@@ -13,7 +13,8 @@ func scanRecentGames(rows *sql.Rows) ([]*RecentGame, error) {
 		var rg RecentGame
 
 		err := rows.Scan(&rg.GameID, &rg.GameTypeCd, &rg.WinningTeam, &rg.CreateDt, &rg.GameTypeDescr,
-			&rg.ServerID, &rg.ServerName, &rg.MapID, &rg.MapName, &rg.WinningPlayerID, &rg.WinningNick)
+			&rg.ServerID, &rg.ServerName, &rg.MapID, &rg.MapName, &rg.WinningPlayerID, &rg.WinningNick,
+			&rg.MatchID)
 
 		if err != nil {
 			return nil, err
@@ -46,7 +47,7 @@ func (ds *PGDatastore) RRecentGamesCutoff(serverID int, mapID int, playerID int,
 		SELECT 
 		   g.server_id, pgs.game_id, g.map_id, pgs.player_id, pgs.nick, 
 		   rank() OVER (partition by g.game_id order by pgs.scoreboardpos ASC) AS scoreboardpos, 
-		   g.game_type_cd, g.winner, g.create_dt
+		   g.game_type_cd, g.winner, g.create_dt, g.match_id
 		FROM 
 			player_game_stats pgs join games g using (game_id)
 		WHERE 
@@ -54,7 +55,7 @@ func (ds *PGDatastore) RRecentGamesCutoff(serverID int, mapID int, playerID int,
 	)
 	SELECT 
 		pgsw.game_id, pgsw.game_type_cd, pgsw.winner, pgsw.create_dt, cdg.descr, 
-		pgsw.server_id, s.name, pgsw.map_id, m.name, pgsw.player_id, pgsw.nick
+		pgsw.server_id, s.name, pgsw.map_id, m.name, pgsw.player_id, pgsw.nick, pgsq.match_id
 	FROM 
 		player_game_stats_w pgsw
 		JOIN maps m ON (pgsw.map_id = m.map_id)
@@ -146,7 +147,7 @@ func (ds *PGDatastore) RRecentGamesUnbounded(serverID int, mapID int, playerID i
 	SELECT 
 	    g.game_id, g.game_type_cd, g.winner, 
 	    g.create_dt, cdg.descr, s.server_id, s.name, m.map_id, m.name, 
-	    pgs.player_id, pgs.nick
+	    pgs.player_id, pgs.nick, g.match_id
 	FROM 
 	    games g, servers s, maps m, player_game_stats pgs, cd_game_type cdg
 	WHERE 
