@@ -89,6 +89,13 @@ func (ds *PGDatastore) RPlayerWeaponStatsByGameList(playerID int, gameIDs []int)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	var weaponStats []*PlayerWeaponStat
+
+	// Return early if there are no game IDs to filter by.
+	if len(gameIDs) < 1 {
+		return weaponStats, nil
+	}
+
 	// Convert the game IDs to strings...
 	var strGameIDs []string
 	for _, gameID := range gameIDs {
@@ -112,7 +119,6 @@ func (ds *PGDatastore) RPlayerWeaponStatsByGameList(playerID int, gameIDs []int)
 		return nil, err
 	}
 
-	var weaponStats []*PlayerWeaponStat
 	for rows.Next() {
 		var ws PlayerWeaponStat
 
