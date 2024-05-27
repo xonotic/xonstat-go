@@ -152,6 +152,10 @@ func (s *Submission) fillServer(rs *RawSubmission) error {
 	s.Server.ActiveInd = true
 
 	if serverName, ok := rs.GameMeta["S"]; ok {
+		if len(serverName) > 64 {
+			serverName = serverName[:64]
+		}
+
 		s.Server.Name = sql.NullString{String: serverName, Valid: true}
 	} else {
 		return ErrInvalidGameMeta
