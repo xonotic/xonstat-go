@@ -27,7 +27,7 @@ func scanRecentGames(rows *sql.Rows) ([]*RecentGame, error) {
 }
 
 // RRecentGamesCutoff is an optimization of the RRecentGames query that uses
-// a CTE for a large speedup. The speedup comes from the presence of a cutoff, 
+// a CTE for a large speedup. The speedup comes from the presence of a cutoff,
 // allowing the query to aggressively prune the records it looks at.
 func (ds *PGDatastore) RRecentGamesCutoff(serverID int, mapID int, playerID int,
 	gameTypeCd string, cutoff *time.Time, startGameID int,
@@ -100,7 +100,7 @@ func (ds *PGDatastore) RRecentGamesCutoff(serverID int, mapID int, playerID int,
 		// Constrain the list of games returned to those that contained that player.
 		// Unfortunately this can't be parameterized/bound.
 		filterBuf.WriteString(fmt.Sprintf("and g.players @> ARRAY[%d] ", playerID))
-	} 
+	}
 
 	if gameTypeCd != "" {
 		filterBuf.WriteString(fmt.Sprintf("and g.game_type_cd = $%d ", placeholder))
@@ -127,16 +127,16 @@ func (ds *PGDatastore) RRecentGamesCutoff(serverID int, mapID int, playerID int,
 		params = append(params, matchID)
 	}
 
-	// We'll have the SQL with a placeholder for the filters, then a string for the filters 
+	// We'll have the SQL with a placeholder for the filters, then a string for the filters
 	// themselves. Combine them to get the full SQL to be executed.
 	sqlWithoutFilters := sqlBuf.String()
 	filters := filterBuf.String()
 
-	return  fmt.Sprintf(sqlWithoutFilters, filters), params
+	return fmt.Sprintf(sqlWithoutFilters, filters), params
 }
 
-// RRecentGamesUnbounded constructs SQL and corresponding params for retrieving 
-// recent games according to filter criteria. For the ID values, pass -1 to 
+// RRecentGamesUnbounded constructs SQL and corresponding params for retrieving
+// recent games according to filter criteria. For the ID values, pass -1 to
 // exclude them from the query.
 func (ds *PGDatastore) RRecentGamesUnbounded(serverID int, mapID int, playerID int,
 	gameTypeCd string, cutoff *time.Time, startGameID int,
@@ -161,7 +161,7 @@ func (ds *PGDatastore) RRecentGamesUnbounded(serverID int, mapID int, playerID i
 	    and g.map_id = m.map_id
 	    and g.game_type_cd = cdg.game_type_cd
 	    and g.game_id = pgs.game_id 
-	    and pgs.scoreboardpos = (select min(scoreboardpos) from player_game_stats where game_id = g.game_id) `)
+	    and pgs.scoreboardpos = 1 `)
 
 	if serverID != -1 {
 		sqlBuf.WriteString(fmt.Sprintf("and s.server_id = $%d ", placeholder))
@@ -179,7 +179,7 @@ func (ds *PGDatastore) RRecentGamesUnbounded(serverID int, mapID int, playerID i
 		// Constrain the list of games returned to those that contained that player.
 		// Unfortunately this can't be parameterized/bound.
 		sqlBuf.WriteString(fmt.Sprintf("and g.players @> ARRAY[%d] ", playerID))
-	} 
+	}
 
 	if gameTypeCd != "" {
 		sqlBuf.WriteString(fmt.Sprintf("and g.game_type_cd = $%d ", placeholder))
@@ -225,11 +225,11 @@ func (ds *PGDatastore) RRecentGames(serverID int, mapID int, playerID int,
 
 	if cutoff != nil {
 		// If we have a cutoff value, use the faster version!
-		sql, params = ds.RRecentGamesCutoff(serverID, mapID, playerID, gameTypeCd, 
+		sql, params = ds.RRecentGamesCutoff(serverID, mapID, playerID, gameTypeCd,
 			cutoff, startGameID, endGameID, limit, matchID)
 	} else {
 		// Otherwise we'll use the unbounded version as a default.
-		sql, params = ds.RRecentGamesUnbounded(serverID, mapID, playerID, gameTypeCd, 
+		sql, params = ds.RRecentGamesUnbounded(serverID, mapID, playerID, gameTypeCd,
 			cutoff, startGameID, endGameID, limit, matchID)
 	}
 
