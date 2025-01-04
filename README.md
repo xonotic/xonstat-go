@@ -9,6 +9,9 @@ a PostgreSQL database.
 This repository is a port of the [original XonStat][xonstat] application to the Go
 programming language. 
 
+## Prerequisites
+xonstat-go requires the development headers of `libcairo2` to build. Install that with your system's package manager. 
+
 ## Clone
 `git clone git@gitlab.com:xonotic/xonstat-go.git`
 
