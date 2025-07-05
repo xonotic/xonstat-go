@@ -256,19 +256,19 @@ table.matrix {
 }
 
 .game tr.red {
-  background-color: #4d0000;
+  background-color: #390000;
 }
 
 .game tr.blue {
-  background-color: #00004d;
+  background-color: #000039;
 }
 
 .game tr.yellow {
-  background-color: #4d4d00;
+  background-color: #393900;
 }
 
 .game tr.pink {
-  background-color: #4d004d;
+  background-color: #390039;
 }
 
 .teamscore {
@@ -277,19 +277,19 @@ table.matrix {
 }
 
 .teamscore .red {
-  color: #ad0000;
+  color: #d03939;
 }
 
 .teamscore .blue {
-  color: #0000ad;
+  color: #3939d0;
 }
 
 .teamscore .yellow {
-  color: #adad00;
+  color: #d0d039;
 }
 
 .teamscore .pink {
-  color: #ad00ad;
+  color: #d039d0;
 }
 
 .player-score {

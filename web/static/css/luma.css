@@ -26,7 +26,7 @@
 }
 
 .sprite-arc:before {
-  color: #7c9ceb;
+  color: #81a4ea;
   content: "\e900";
 }
 .sprite-as:before {
@@ -70,15 +70,15 @@
   content: "\e90c";
 }
 .sprite-grenadelauncher:before, .sprite-mortar:before {
-  color: #fd7865;
+  color: #fc6450;
   content: "\e90d";
 }
 .sprite-hagar:before {
-  color: #e39160;
+  color: #e28b58;
   content: "\e90e";
 }
 .sprite-hlac:before {
-  color: #e5965b;
+  color: #81f13d;
   content: "\e90f";
 }
 .sprite-okhmg:before {
@@ -86,7 +86,7 @@
   content: "\e911";
 }
 .sprite-hook:before {
-  color: #81f13d;
+  color: #78d164;
   content: "\e912";
 }
 .sprite-inf:before {
@@ -112,7 +112,7 @@
   content: "\e919";
 }
 .sprite-minelayer:before {
-  color: #fd7865;
+  color: #fc8364;
   content: "\e91a";
 }
 .sprite-minstanex:before, .sprite-vaporizer:before {
@@ -133,14 +133,14 @@
   content: "\e91f";
 }
 .sprite-porto:before {
-  color: #6899f2;
+  color: #678bef;
   content: "\e920";
 }
 .sprite-rc:before {
   content: "\e921";
 }
 .sprite-rifle:before {
-  color: #e39160;
+  color: #e29e5a;
   content: "\e922";
 }
 .sprite-rocketlauncher:before, .sprite-devastator:before {
@@ -152,7 +152,7 @@
   content: "\e925";
 }
 .sprite-seeker:before {
-  color: #f7717b;
+  color: #f47088;
   content: "\e926";
 }
 .sprite-shockwave:before {
@@ -167,11 +167,11 @@
   content: "\e929";
 }
 .sprite-tuba:before {
-  color: #e9be57;
+  color: #e8d058;
   content: "\e92a";
 }
 .sprite-uzi:before, .sprite-machinegun:before {
-  color: #81f13d;
+  color: #ade244;
   content: "\e92b";
 }
 .sprite-vip:before {
@@ -186,7 +186,7 @@
   content: "\e931";
 }
 .sprite-okmachinegun:before {
-  color: #81f13d;
+  color: #ade244;
   content: "\e933";
 }
 .sprite-mayhem:before {
