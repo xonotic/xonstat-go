@@ -44,8 +44,9 @@ func GameTypeSummaryData(db models.Datastore, playerID int) ([]*GameTypeSummaryB
 			Losses:     rs.Losses,
 		}
 
+		// Exclude FFA gametypes (CTS, DM, KA, MAYHEM, LMS)
 		switch rs.GameTypeCd {
-		case "dm", "cts", "ka", "keepaway":
+		case "dm", "cts", "ka", "keepaway", "mayhem", "lms":
 			s.Wins = 0
 			s.Losses = 0
 			s.WinRatio = 0.0
