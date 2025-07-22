@@ -1,4 +1,5 @@
 COMMIT=$(shell git rev-parse HEAD)
+COMMIT_SHORT=$(shell git rev-parse --short HEAD)
 BUILD_DT=$(shell date +%FT%T%z)
 
 build:
@@ -23,9 +24,11 @@ swagger:
 
 css:
 	cd web/static/css && cat foundation.css font-awesome.css app.css luma.css > combined.css
-	yuicompressor --type css -o web/static/css/xonstat.css web/static/css/combined.css
+	yui-compressor --type css -o "web/static/css/xonstat-${COMMIT_SHORT}.css" web/static/css/combined.css
 	rm web/static/css/combined.css
+	# Don't forget to update the stylesheet link in web/template/base.layout.html
+	# Consider deleting the oldest minified stylesheet -- keep the 3 most recent versions
 
 clean:
-	rm coverage.out
-	rm xonstat
+	rm -f coverage.out
+	rm -f xonstat
