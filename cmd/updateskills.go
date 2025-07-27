@@ -111,10 +111,15 @@ func (r *ResumeFile) Write() error {
 // shouldDoSkill determines if we run the skill algorithm on a game or not.
 func shouldDoSkill(gameTypeCd string) bool {
 	switch gameTypeCd {
-	case "duel", "dm", "ca", "ctf", "tdm", "ka", "ft":
+	case "as", "ca", "ctf", "dom", "duel", "dm", "tdm", "ka", "keepaway", "tka":
+		return true
+	case "ft", "freezetag", "mayhem", "tmayhem", "lms", "kh":
 		return true
 	}
 
+	// Not overall
+	// Not cts, since players often don't submit a time while grinding in CTS, so skill isn't accurate
+	// Not nexball, since it's uncommon: https://gitlab.com/xonotic/xonstat-go/-/merge_requests/16#note_3824905393
 	return false
 }
 
