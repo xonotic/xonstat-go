@@ -111,10 +111,14 @@ func (r *ResumeFile) Write() error {
 // shouldDoSkill determines if we run the skill algorithm on a game or not.
 func shouldDoSkill(gameTypeCd string) bool {
 	switch gameTypeCd {
-	case "duel", "dm", "ca", "ctf", "tdm", "ka", "ft":
+	case "as", "ca", "ctf", "dom", "duel", "dm", "tdm", "ka", "keepaway", "tka":
+		return true
+	case "ft", "freezetag", "mayhem", "tmayhem", "lms", "kh", "nb", "nexball":
 		return true
 	}
 
+	// Not overall
+	// Not cts, since players often don't submit a time while grinding in CTS, so skill isn't accurate
 	return false
 }
 
