@@ -7,19 +7,13 @@ import (
 	_ "github.com/lib/pq" // PostgreSQL-specific datastore implementation
 )
 
-// IdleConnections is the maximum number of idle connections we should maintain for the database.
-const IdleConnections = 2
-
-// OpenConnections is the maximum number of open connections we should maintain for the database.
-const OpenConnections = 5
-
 // PGDatastore is an implementation of the Datastore interface for a Postgresql database.
 type PGDatastore struct {
 	db *sql.DB
 }
 
 // NewPGDatastore creates a new concrete implementation of a Datastore.
-func NewPGDatastore(dsn string) (*PGDatastore, error) {
+func NewPGDatastore(dsn string, maxidle int, maxopen int) (*PGDatastore, error) {
 	// establish a database connection
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -32,8 +26,8 @@ func NewPGDatastore(dsn string) (*PGDatastore, error) {
 	}
 
 	// connection pooling
-	db.SetMaxIdleConns(IdleConnections)
-	db.SetMaxOpenConns(OpenConnections)
+	db.SetMaxIdleConns(maxidle)
+	db.SetMaxOpenConns(maxopen)
 
 	return &PGDatastore{db}, nil
 }
