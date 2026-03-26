@@ -1,7 +1,13 @@
 User-agent: *
-Disallow: /players/
+Allow: /players$
+Disallow: /players?*
 Disallow: /player/
-Disallow: /games/
+Allow: /games$
+Disallow: /games?*
 Disallow: /game/
-Disallow: /servers/
+Allow: /servers$
+Disallow: /servers?*
 Disallow: /server/
+Allow: /maps$
+Disallow: /maps?*
+Disallow: /map/
