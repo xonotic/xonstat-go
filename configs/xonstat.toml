@@ -1,5 +1,8 @@
 # Connection string to use for XonStatDB PostgreSQL database
-ConnStr = "user=xonstat host=localhost dbname=xonstatdb sslmode=disable"
+ConnStr = "host=/run/postgresql dbname=xonstatdb"
+# PostgreSQL connection pool settings
+MaxIdleConns = 2
+MaxOpenConns = 5
 
 # Address for the Redis cache server
 RedisAddr = "127.0.0.1:6379"

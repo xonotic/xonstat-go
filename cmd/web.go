@@ -66,7 +66,9 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 
 func web(addr string) {
 	dsn := viper.GetString("ConnStr")
-	db, err := models.NewPGDatastore(dsn)
+	maxidle := viper.GetInt("MaxIdleConns")
+	maxopen := viper.GetInt("MaxOpenConns")
+	db, err := models.NewPGDatastore(dsn, maxidle, maxopen)
 	if err != nil {
 		log.Fatal("Unable to initialize database connection.")
 	}

@@ -191,7 +191,9 @@ func prepareInput(rawResults []*models.PlayerSkillMatchResult,
 // updateSkills calculates new skill ratings for a range of games.
 func updateSkills(start, end, limit int, resume bool, resumeFile string, simulate bool) {
 	dsn := viper.GetString("ConnStr")
-	db, err := models.NewPGDatastore(dsn)
+	maxidle := viper.GetInt("MaxIdleConns")
+	maxopen := viper.GetInt("MaxOpenConns")
+	db, err := models.NewPGDatastore(dsn, maxidle, maxopen)
 	if err != nil {
 		log.Fatal("Unable to initialize database connection.")
 	}
