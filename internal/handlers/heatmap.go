@@ -20,6 +20,8 @@ type heatmapResponse struct {
 // @Accept  json
 // @Produce  json
 // @Param server_id query int false "server_id filter"
+// @Param server_ip query string false "server IP address (requires server_port)"
+// @Param server_port query int false "server port (required if server_ip is set)"
 // @Success 200 {object} [][]int
 // @Router /heatmap [get]
 func (ae *AppEnv) HeatmapHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,9 +29,37 @@ func (ae *AppEnv) HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 
 	params := r.URL.Query()
 
-	serverID, err := strconv.Atoi(params.Get("server_id"))
-	if err != nil {
-		serverID = game.EmptyServerID
+	var err error
+	serverID := game.EmptyServerID
+
+	if idStr := params.Get("server_id"); idStr != "" {
+		id, err := strconv.Atoi(idStr)
+		if err == nil {
+			serverID = id
+		}
+	} else if ipStr := params.Get("server_ip"); ipStr != "" {
+		portStr := params.Get("server_port")
+		if portStr == "" {
+			http.Error(w, "server_port is required when server_ip is provided", http.StatusBadRequest)
+			return
+		}
+
+		port, err := strconv.Atoi(portStr)
+		if err != nil {
+			http.Error(w, "invalid server_port value", http.StatusBadRequest)
+			return
+		}
+
+		servers, err := ae.db.RServersByIPAndPort(ipStr, port)
+		if err != nil {
+			log.Printf("Error looking up server by IP/port: %s", err)
+			ae.FiveHundredHandler(w, r)
+			return
+		}
+
+		if len(servers) > 0 {
+			serverID = servers[0].ServerID
+		}
 	}
 
 	if acceptHeader == "application/json" {

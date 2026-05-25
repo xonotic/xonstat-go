@@ -97,6 +97,22 @@ func (ds *PGDatastore) RServersByName(name string) ([]*Server, error) {
 	return scanServers(rows)
 }
 
+// RServersByIPAndPort retrieves server records by their IP address and port.
+func (ds *PGDatastore) RServersByIPAndPort(ipAddr string, port int) ([]*Server, error) {
+	sql := `select server_id, name, location, ip_addr, port, hashkey, public_key, revision, 
+	pure_ind, impure_cvars, elo_ind, active_ind, create_dt
+	from servers
+	where ip_addr = $1 and port = $2
+	order by create_dt`
+
+	rows, err := ds.db.Query(sql, ipAddr, port)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanServers(rows)
+}
+
 // UServer updates a Server record in the database.
 func (ds *PGDatastore) UServer(tx *sql.Tx, server Server) error {
 	sql := `update servers set name=$1, location=$2, ip_addr=$3, port=$4, hashkey=$5, 
