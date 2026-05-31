@@ -40,7 +40,7 @@ func (ae *AppEnv) HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 		servers, err := ae.db.RServersByHashkey(hashkey)
 		if err != nil {
 			log.Printf("Error looking up server by hashkey: %s", err)
-			ae.FiveHundredHandler(w, r)
+			ae.NotFoundHandler(w, r)
 			return
 		}
 
