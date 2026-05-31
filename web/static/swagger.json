@@ -140,6 +140,12 @@
                         "description": "game_id range upper bound",
                         "name": "end_game_id",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "match_id filter",
+                        "name": "match_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -169,6 +175,12 @@
                         "type": "integer",
                         "description": "server_id filter",
                         "name": "server_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "server hashkey filter",
+                        "name": "hashkey",
                         "in": "query"
                     }
                 ],
@@ -691,7 +703,8 @@
                     "type": "string"
                 },
                 "time": {
-                    "type": "integer"
+                    "type": "integer",
+                    "format": "int64"
                 },
                 "version": {
                     "type": "integer"
@@ -1149,6 +1162,9 @@
                 "active_ind": {
                     "type": "boolean"
                 },
+                "cake_day_ind": {
+                    "type": "boolean"
+                },
                 "joined": {
                     "type": "string"
                 },
@@ -1429,10 +1445,12 @@
                     "type": "integer"
                 },
                 "scorePerSecond": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "float64"
                 },
                 "skill": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "float64"
                 }
             }
         }

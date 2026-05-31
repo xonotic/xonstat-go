@@ -93,6 +93,7 @@ definitions:
       release:
         type: string
       time:
+        format: int64
         type: integer
       version:
         type: integer
@@ -393,6 +394,8 @@ definitions:
     properties:
       active_ind:
         type: boolean
+      cake_day_ind:
+        type: boolean
       joined:
         type: string
       joined_epoch:
@@ -576,8 +579,10 @@ definitions:
       playerID:
         type: integer
       scorePerSecond:
+        format: float64
         type: number
       skill:
+        format: float64
         type: number
     type: object
 host: stats.xonotic.org
@@ -670,6 +675,10 @@ paths:
         in: query
         name: end_game_id
         type: integer
+      - description: match_id filter
+        in: query
+        name: match_id
+        type: string
       produces:
       - application/json
       responses:
@@ -689,6 +698,10 @@ paths:
         in: query
         name: server_id
         type: integer
+      - description: server hashkey filter
+        in: query
+        name: hashkey
+        type: string
       produces:
       - application/json
       responses:
