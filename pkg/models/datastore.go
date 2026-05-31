@@ -15,7 +15,6 @@ type Datastore interface {
 	RServerByID(ID int) (*Server, error)
 	RServersByHashkey(hashkey string) ([]*Server, error)
 	RServersByName(name string) ([]*Server, error)
-	RServersByIPAndPort(ipAddr string, port int) ([]*Server, error)
 	UServer(tx *sql.Tx, server Server) error
 
 	// Map-oriented methods
