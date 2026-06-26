@@ -194,6 +194,6 @@ within this repository for the full legal text.
 [etiquette]: https://github.com/fizerkhan/irc-etiquette#irc-etiquette-by-christoph-haas
 [issues]: https://gitlab.com/xonotic/xonstat-go/-/issues
 [viper]: https://github.com/spf13/viper
-[xonotic]: https://www.xonotic.org
+[xonotic]: https://xonotic.org/
 [xonstat]: https://gitlab.com/xonotic/xonstat
 [xonstatdb]: https://gitlab.com/xonotic/xonstatdb
