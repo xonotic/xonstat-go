@@ -30,6 +30,13 @@ func preprocess(w http.ResponseWriter, r *http.Request) (*submission.Submission,
 		return nil, err
 	}
 
+	// There's nothing to balance without teams.
+	if !submission.IsTeamGameType(rawSubmission.GameMeta["G"]) {
+		log.Printf("Error: nothing to balance for non-team game type %s", rawSubmission.GameMeta["G"])
+		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
+		return nil, fmt.Errorf("nothing to balance for non-team game type %s", rawSubmission.GameMeta["G"])
+	}
+
 	// It doesn't make sense to balance games with only one or two players.
 	if rawSubmission.NumHumansPlayed < 3 {
 		log.Printf("Error: not enough players to balance")

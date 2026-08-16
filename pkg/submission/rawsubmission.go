@@ -327,6 +327,18 @@ func IsSupportedGameType(gameTypeCd string) bool {
 	}
 }
 
+// IsTeamGameType determines if a game type has teams that players can be
+// distributed between. Non-team game types (deathmatch, duel, last man
+// standing, etc.) have no teams, so there is nothing to balance.
+func IsTeamGameType(gameTypeCd string) bool {
+	switch gameTypeCd {
+	case "as", "ca", "ctf", "dom", "ft", "freezetag", "kh", "nb", "nexball", "tdm", "tka", "tmayhem":
+		return true
+	}
+
+	return false
+}
+
 func (s *RawSubmission) isSupportedGameType() error {
 	if !IsSupportedGameType(s.GameMeta["G"]) {
 		return ErrUnsupportedGameType
