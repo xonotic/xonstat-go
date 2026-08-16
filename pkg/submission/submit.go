@@ -350,18 +350,20 @@ func CreateTeamGameStats(tx *sql.Tx, db models.Datastore, s *Submission) error {
 // ShouldDoFragMatrix determines if we're going to process frag matrix stuff or not.
 func ShouldDoFragMatrix(gameTypeCd string) bool {
 	switch gameTypeCd {
-	case "as", "ca", "ctf", "dm", "dom", "ft", "freezetag", "ka", "kh", "rune", "tdm":
+	case "as", "ca", "ctf", "dom", "duel", "dm", "tdm", "ka", "keepaway":
+		return true
+	case "tka", "ft", "freezetag", "mayhem", "tmayhem", "lms", "kh":
 		return true
 	}
 
+	// Frag matrix can be valid for nexball, but isn't particularly useful info.
+	// cts doesn't involve fragging
 	return false
 }
 
 // CreateFragMatrix inserts all of the frag matrix records to the database.
 func CreateFragMatrix(tx *sql.Tx, db models.Datastore, s *Submission) error {
-	switch s.Game.GameTypeCd {
-	case "as", "ca", "ctf", "dm", "dom", "ft", "freezetag", "ka", "kh", "rune", "tdm":
-	default:
+	if !ShouldDoFragMatrix(s.Game.GameTypeCd) {
 		return nil
 	}
 
