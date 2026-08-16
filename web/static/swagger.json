@@ -1433,6 +1433,9 @@
                 },
                 "skill": {
                     "type": "number"
+                },
+                "team": {
+                    "type": "integer"
                 }
             }
         }

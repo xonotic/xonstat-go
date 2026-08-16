@@ -5,11 +5,18 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"sort"
 	"strings"
 
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
+
+// SkillStore is the subset of the datastore that the balance calculation
+// needs in order to look up player skills.
+type SkillStore interface {
+	RPlayerSkillsBatch(hashkeys []string, gameTypeCd string) ([]*models.PlayerHashkeySkill, error)
+}
 
 type BalanceParams struct {
 	// These are what we'll use as default skill values if we can't calculate 
@@ -22,12 +29,16 @@ type BalanceParams struct {
 	ScoreFactor float64
 }
 
+// BalancePlayer is the output data structure that gets sent to 
+// the template, which is emitted back to the game server so it
+// can reassign the player to the given team.
 type BalancePlayer struct {
 	Hashkey        string
 	PlayerID       int
 	Nick           string
 	Skill          float64
 	ScorePerSecond float64
+	Team int
 }
 
 // seed creates a per-player, per-match consistent value for seeding the RNG
@@ -39,7 +50,7 @@ func seed(hashkey, matchID string) int64 {
 	return int64(hash.Sum64())
 }
 
-func Balance(params BalanceParams, db models.Datastore, sub *submission.Submission) ([]*BalancePlayer, error) {
+func Balance(params BalanceParams, db SkillStore, sub *submission.Submission) ([]*BalancePlayer, error) {
 	// The destination for the balanced (sorted) players.
 	players := make([]*BalancePlayer, 0)
 
@@ -77,11 +88,19 @@ func Balance(params BalanceParams, db models.Datastore, sub *submission.Submissi
 			maxScorePerSecond = sps
 		}
 
+		// The player's current team (the "t" record), or zero if they aren't
+		// on a team (a spectator or otherwise unassigned player).
+		team := 0
+		if gamestat.Team.Valid {
+			team = int(gamestat.Team.Int32)
+		}
+
 		player := BalancePlayer{
 			Hashkey:        hashkey,
 			PlayerID:       player.PlayerID,
 			Nick:           player.Nick.String,
 			ScorePerSecond: sps,
+			Team:           team,
 		}
 
 		players = append(players, &player)
@@ -93,6 +112,10 @@ func Balance(params BalanceParams, db models.Datastore, sub *submission.Submissi
 			tracked = append(tracked, hashkey)
 		}
 	}
+
+	// Use a deterministic order for the rest of the calculation so the team
+	// assignment doesn't depend on map iteration order.
+	sort.Slice(players, func(i, j int) bool { return players[i].PlayerID < players[j].PlayerID })
 
 	// Those that are tracked are the ones that might have skill values in the DB.
 	// We query for them in batch to decrease round-trips. 
@@ -146,6 +169,61 @@ func Balance(params BalanceParams, db models.Datastore, sub *submission.Submissi
 		// Finally, add score to the linearized value
 		scoreComponent := scorePerSecondScale * player.ScorePerSecond * params.ScoreFactor
 		player.Skill += scoreComponent
+	}
+
+	// Determine which teams exist in the match. The teams are the ones declared
+	// in the submission's team records (the "Q" lines); if none were declared,
+	// fall back to the distinct teams the players are assigned to.
+	teamSet := make(map[int]struct{})
+	for _, tgs := range sub.TeamGameStats {
+		teamSet[tgs.Team] = struct{}{}
+	}
+
+	if len(teamSet) == 0 {
+		for _, player := range players {
+			if player.Team > 0 {
+				teamSet[player.Team] = struct{}{}
+			}
+		}
+	}
+
+	// Balancing only for two-team games. Single team games like
+	// DM don't need sorting, and games with more than two teams are rare
+	// enough that we defer them to a later implementation.
+	if len(teamSet) == 2 {
+		teamIDs := make([]int, 0, 2)
+		for teamID := range teamSet {
+			teamIDs = append(teamIDs, teamID)
+		}
+		sort.Ints(teamIDs)
+
+		// Only balance the players who are already on one of the two teams.
+		// Players not on a team (spectators, the unassigned) don't participate
+		// and are reported with a team of zero.
+		eligible := make([]*BalancePlayer, 0, len(players))
+		for _, player := range players {
+			if _, ok := teamSet[player.Team]; ok {
+				eligible = append(eligible, player)
+			} else {
+				player.Team = 0
+			}
+		}
+
+		if len(eligible) > 0 {
+			items := make([]float64, len(eligible))
+			for i, player := range eligible {
+				items[i] = player.Skill
+			}
+
+			inTeamA := Partition(items)
+			for i, player := range eligible {
+				if inTeamA[i] {
+					player.Team = teamIDs[0]
+				} else {
+					player.Team = teamIDs[1]
+				}
+			}
+		}
 	}
 
 	return players, nil
