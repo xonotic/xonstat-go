@@ -3,9 +3,9 @@ package models
 import (
 	"bytes"
 	"database/sql"
-	"fmt"
-	"strings"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 // scanPlayerSkillMatchResults is a helper function to parse rows into the information needed
@@ -136,22 +136,17 @@ func scanPlayerHashkeySkills(rows *sql.Rows) ([]*PlayerHashkeySkill, error) {
 
 // RPlayerSkillsBatch reads PlayerHashkeySkill values by list of hashkeys and the game type.
 func (ds *PGDatastore) RPlayerSkillsBatch(hashkeys []string, gameTypeCd string) ([]*PlayerHashkeySkill, error) {
-	var sqlBuf bytes.Buffer
-
-	sqlBuf.WriteString(`select hk.hashkey, ps.game_type_cd, ps.mu, ps.sigma, ps.active_ind, ps.create_dt, ps.update_dt
-	from player_skills ps join hashkeys hk using (player_id)
-	where ps.game_type_cd = $1 
-	and hk.active_ind = true `)
-
-	quotedHashkeys := make([]string, len(hashkeys))
-	for i, v := range hashkeys {
-		quotedHashkeys[i] = fmt.Sprintf("'%s'", v)
+	if len(hashkeys) == 0 {
+		return nil, nil
 	}
 
-	hashkeyInList := strings.Join(quotedHashkeys, ",")
-	sqlBuf.WriteString(fmt.Sprintf("and hk.hashkey in (%s) ", hashkeyInList))
+	query := `select hk.hashkey, ps.game_type_cd, ps.mu, ps.sigma, ps.active_ind, ps.create_dt, ps.update_dt
+	from player_skills ps join hashkeys hk using (player_id)
+	where ps.game_type_cd = $1
+	and hk.active_ind = true
+	and hk.hashkey = any($2::text[]) `
 
-	rows, err := ds.db.Query(sqlBuf.String(), gameTypeCd)
+	rows, err := ds.db.Query(query, gameTypeCd, pq.Array(hashkeys))
 	if err != nil {
 		return nil, err
 	}
