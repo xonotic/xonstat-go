@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	texttemplate "text/template"
 	"time"
 
 	"github.com/alehano/reverse"
@@ -23,6 +24,7 @@ type AppEnv struct {
 	cache         models.Cache
 	requestLogger io.WriteCloser
 	templates     map[string]*template.Template
+	textTemplates map[string]*texttemplate.Template
 }
 
 func loadTemplates(templateDir string) map[string]*template.Template {
@@ -76,6 +78,31 @@ func loadTemplates(templateDir string) map[string]*template.Template {
 	return templates
 }
 
+// loadTextTemplates compiles the plain-text templates (e.g. protocol responses
+// consumed by game servers) that must NOT be HTML-escaped. They live alongside
+// the html templates and are distinguished by the .txt suffix.
+func loadTextTemplates(templateDir string) map[string]*texttemplate.Template {
+	textTemplates := make(map[string]*texttemplate.Template)
+
+	allFiles, err := filepath.Glob(filepath.Join(templateDir, "*.txt"))
+	if err != nil {
+		log.Print(err)
+		return textTemplates
+	}
+
+	for _, file := range allFiles {
+		t, err := texttemplate.ParseFiles(file)
+		if err != nil {
+			log.Printf("Error loading text template %s: %s", file, err)
+			continue
+		}
+
+		textTemplates[filepath.Base(file)] = t
+	}
+
+	return textTemplates
+}
+
 // NewAppEnv creates a new AppEnv
 func NewAppEnv(db models.Datastore, cacheEnabled bool, cache models.Cache, rl io.WriteCloser) *AppEnv {
 	cwd, _ := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -87,6 +114,7 @@ func NewAppEnv(db models.Datastore, cacheEnabled bool, cache models.Cache, rl io
 		cache:         cache,
 		requestLogger: rl,
 		templates:     loadTemplates(templatePath),
+		textTemplates: loadTextTemplates(templatePath),
 	}
 
 	return &ae

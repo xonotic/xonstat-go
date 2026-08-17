@@ -96,10 +96,17 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 		Players: players,
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Add("Content-Type", "text/plain")
+	t, ok := ae.textTemplates["balance.page.txt"]
+	if !ok {
+		log.Printf("Error: balance template is not loaded")
+		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
+		return
+	}
 
-	err = ae.templates["balance.page.html"].Execute(w, response)
+	w.Header().Add("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+
+	err = t.Execute(w, response)
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("500 %s", http.StatusText(500)), 500)
