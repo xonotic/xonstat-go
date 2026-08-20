@@ -59,9 +59,9 @@
       <!-- RIGHT PANEL -->
       <div class="cell small-6">
         <p>
-          {{if eq .GameTypeCd "overall" "as" "ca" "ctf" "dom" "duel" "ft" "freezetag" "kh" "nb" "nexball" "rune" "tdm"}}
+        {{if eq .GameTypeCd "overall" "as" "ca" "ctf" "dom" "duel" "ft" "freezetag" "kh" "nb" "nexball" "rune" "tdm" "tka" "tmayhem"}}
           Win Percentage: <small>{{printf "%.2f" .WinRatio}}% ({{.Wins}} wins, {{.Losses}} losses)</small> <br />
-          {{end}}
+        {{end}}
 
         {{with (index $.OverallStats .GameTypeCd)}}
         {{if eq .GameTypeCd "cts" "nb" "nexball"}}

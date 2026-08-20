@@ -247,13 +247,14 @@ func IsWeaponInfoGameType(gameTypeCd string) bool {
 	switch gameTypeCd {
 	case "", "overall":
 		return true
-	case "as", "ca", "ctf", "dm", "dom", "duel", "ft", "freezetag", "ka":
+	case "as", "ca", "ctf", "dm", "dom", "duel", "ft", "freezetag":
 		return true
-	case "keepaway", "kh", "rune", "tdm":
+	case "ka", "keepaway", "kh", "rune", "tdm":
 		return true
-	default:
-		return false
 	}
+
+	// not cts, not nb
+	return false
 }
 
 // RGameIDsByPlayerID retrieves the recent N game IDs for further queries.
