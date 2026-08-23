@@ -68,12 +68,38 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 
 	params := r.URL.Query()
 
+	// Each player receives up to configurable fraction of their own skill as
+	// a bonus for in-match performance. This we call the scorefactor.
 	scoreFactorInt, err := strconv.Atoi(params.Get("scorefactor"))
 	if err != nil || scoreFactorInt < 0 || scoreFactorInt > 100{
 		scoreFactorInt = 25
 	}
 
 	scoreFactor := float64(scoreFactorInt)/100.0
+
+	// cardinality controls the maximum allowed difference in the number of
+	// players between any two teams. Default 1, clamped to [0, 4].
+	cardinality, err := strconv.Atoi(params.Get("cardinality"))
+	if err != nil || cardinality < 0 {
+		cardinality = 1
+	}
+
+	if cardinality > 4 {
+		cardinality = 4
+	}
+
+	// Derive the number of teams from the submission itself.
+	// Fall back to looking at the game stat entries to derive teams.
+	numTeams := len(sub.TeamGameStats)
+	if numTeams == 0 {
+		teamSet := make(map[int]struct{})
+		for _, pgs := range sub.PlayerGameStats {
+			if pgs.Team.Valid {
+				teamSet[int(pgs.Team.Int32)] = struct{}{}
+			}
+		}
+		numTeams = len(teamSet)
+	}
 
 	bp := skill.BalanceParams{
 		DefaultMu: wenglin.DefaultParams.DefaultMu,
@@ -82,7 +108,7 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 		ScoreFactor: scoreFactor,
 	}
 
-	players, err := skill.Balance(bp, ae.db, sub)
+	players, err := skill.Balance(bp, ae.db, sub, cardinality, numTeams)
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)

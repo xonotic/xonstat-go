@@ -95,7 +95,23 @@ func makeSubmission(t *testing.T, body string) *submission.Submission {
 func balancePlayers(t *testing.T, body string, store SkillStore) []*BalancePlayer {
 	t.Helper()
 
-	players, err := Balance(testBalanceParams, store, makeSubmission(t, body))
+	sub := makeSubmission(t, body)
+
+	// Derive numTeams from the submission.
+	teamSet := make(map[int]struct{})
+	for _, tgs := range sub.TeamGameStats {
+		teamSet[tgs.Team] = struct{}{}
+	}
+
+	if len(teamSet) == 0 {
+		for _, pgs := range sub.PlayerGameStatsByHashkey {
+			if pgs.Team.Valid {
+				teamSet[int(pgs.Team.Int32)] = struct{}{}
+			}
+		}
+	}
+
+	players, err := Balance(testBalanceParams, store, sub, 1, len(teamSet))
 	if err != nil {
 		t.Fatalf("Balance: %s", err)
 	}
@@ -143,12 +159,13 @@ func TestBalanceTwoTeams(t *testing.T) {
 		}
 	}
 
-	// The returned partition should be optimal, i.e. match what a brute-force
-	// search would find.
+	// The returned partition should be optimal for the size-constrained search,
+	// i.e. match what a brute-force search over teams within the cardinality
+	// limit of each other would find.
 	diff := math.Abs(sum5 - sum14)
-	if math.Abs(diff-bruteBestDiff(skills)) > 1e-9 {
+	if math.Abs(diff-bruteBestDiffWithSize(skills, 1)) > 1e-9 {
 		t.Fatalf("Team skill difference %f is not optimal (best possible is %f)",
-			diff, bruteBestDiff(skills))
+			diff, bruteBestDiffWithSize(skills, 1))
 	}
 }
 
@@ -223,8 +240,8 @@ func TestBalanceNoTeams(t *testing.T) {
 }
 
 func TestBalanceMoreThanTwoTeams(t *testing.T) {
-	// A game with three declared teams must not be partitioned; players keep
-	// their original teams.
+	// A game with three declared teams should now be balanced using recursive
+	// CKK bisection. Players may be reassigned across teams.
 	body := `V 9
 R test
 G tdm
@@ -249,17 +266,21 @@ e scoreboard-score 0
 
 	players := balancePlayers(t, body, mockSkillStore{})
 
-	expected := map[string]int{
-		"A": 5,
-		"B": 5,
-		"C": 14,
-		"D": 13,
-	}
+	// All players should be on one of the three declared teams.
+	expectedTeams := map[int]struct{}{5: {}, 14: {}, 13: {}}
 	for _, player := range players {
-		if player.Team != expected[player.Hashkey] {
-			t.Fatalf("Player %s team was changed to %d in a game with more than two teams (expected %d)",
-				player.Hashkey, player.Team, expected[player.Hashkey])
+		if _, ok := expectedTeams[player.Team]; !ok {
+			t.Fatalf("Player %s was assigned to unexpected team %d", player.Hashkey, player.Team)
 		}
+	}
+
+	// At least two different teams should be represented.
+	teamSet := make(map[int]struct{})
+	for _, player := range players {
+		teamSet[player.Team] = struct{}{}
+	}
+	if len(teamSet) < 2 {
+		t.Fatalf("Expected at least 2 teams to be represented, got %d", len(teamSet))
 	}
 }
 
@@ -314,5 +335,81 @@ func TestBalanceWithKnownSkills(t *testing.T) {
 		if player.Team != 5 && player.Team != 14 {
 			t.Fatalf("Player %s was assigned to unexpected team %d", player.Hashkey, player.Team)
 		}
+	}
+}
+
+func TestBalanceThreeTeams(t *testing.T) {
+	// A game with three declared teams should now be balanced using recursive
+	// CKK bisection. Players get reassigned across all three teams.
+	body := `V 9
+R test
+G tdm
+O Xonotic
+M testmap
+I 0.123456789
+S Test Server
+C 0
+U 26000
+D 100.000000
+Q team#5
+e scoreboard-score 0
+Q team#14
+e scoreboard-score 0
+Q team#13
+e scoreboard-score 0
+` +
+		playerBlock("A", "1", "Alice", "5", "30") +
+		playerBlock("B", "2", "Bob", "5", "20") +
+		playerBlock("C", "3", "Carol", "14", "40") +
+		playerBlock("D", "4", "Dave", "14", "10") +
+		playerBlock("G", "7", "Gina", "13", "25") +
+		playerBlock("H", "8", "Hal", "13", "15") +
+		playerBlock("I", "9", "Iris", "5", "35") +
+		playerBlock("J", "10", "Jack", "14", "5") +
+		playerBlock("K", "11", "Kim", "13", "30")
+
+	players := balancePlayers(t, body, mockSkillStore{})
+
+	// Collect the team IDs that were assigned.
+	teamSet := make(map[int]struct{})
+	for _, player := range players {
+		teamSet[player.Team] = struct{}{}
+	}
+
+	// All players should be on one of the three declared teams.
+	for _, player := range players {
+		if _, ok := teamSet[player.Team]; !ok {
+			t.Fatalf("Player %s was assigned to unexpected team %d", player.Hashkey, player.Team)
+		}
+	}
+
+	// At least two different teams should be represented.
+	if len(teamSet) < 2 {
+		t.Fatalf("Expected at least 2 teams to be represented, got %d", len(teamSet))
+	}
+
+	// The sum difference between the highest and lowest team should be
+	// reasonable (not all players dumped on one team).
+	teamSums := make(map[int]float64)
+	for _, player := range players {
+		teamSums[player.Team] += player.Skill
+	}
+
+	totalSum := 0.0
+	for _, s := range teamSums {
+		totalSum += s
+	}
+
+	var maxSum float64
+	for _, s := range teamSums {
+		if s > maxSum {
+			maxSum = s
+		}
+	}
+
+	// With 9 players across 3 teams, the max team sum should not exceed
+	// 60% of the total (generous bound to account for CKK approximation).
+	if totalSum > 0 && maxSum > totalSum*0.6 {
+		t.Fatalf("Team sums too imbalanced: max team sum %f exceeds 60%% of total %f", maxSum, totalSum)
 	}
 }
