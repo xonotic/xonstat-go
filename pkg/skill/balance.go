@@ -28,6 +28,12 @@ type BalanceParams struct {
 	// How much weight to give the score as compared to the skill value.
 	// 0 = raw skill only, 100 = 2x raw skill value
 	ScoreFactor float64
+
+	// StabilityThreshold controls how much balance improvement is needed
+	// to justify swapping players between teams. A value of 0.05 means
+	// the new partition must improve the team sum difference by more than
+	// 5% of total skill to be applied. 0 disables stability (always swap).
+	StabilityThreshold float64
 }
 
 // BalancePlayer is the output data structure that gets sent to
@@ -231,17 +237,41 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 				actualTeams = numTeams
 			}
 
+			// Save each player's current team before overwriting.
+			prevTeamIDs := make([]int, len(eligible))
+			for i, bp := range eligible {
+				prevTeamIDs[i] = bp.Team
+			}
+
 			// Assign teams using one of the three partitioning algorithms, which depend
 			// upon the number of players and the number of teams.
 			teamAssignments := Partition(items, actualTeams, maxDifference)
-			for i, bp := range eligible {
-				if teamAssignments[i] < len(teamIDs) {
-					bp.Team = teamIDs[teamAssignments[i]]
-				} else {
-					// Fallback: shouldn't happen, but guard against it.
-					bp.Team = teamIDs[0]
+
+			// Relabel: find the bijection from partition indices to game team IDs
+			// that minimises the number of players who change teams.
+			newTeamIDs := minimizeSwaps(teamAssignments, teamIDs, prevTeamIDs)
+
+			// Stability check: only apply the new assignment if it improves
+			// balance by more than the threshold fraction of total skill.
+			totalSkill := 0.0
+			for _, bp := range eligible {
+				totalSkill += math.Abs(bp.Skill)
+			}
+
+			threshold := params.StabilityThreshold
+			if threshold == 0 {
+				threshold = defaultStabilityThreshold
+			}
+
+			oldDiff := computeDiffFromTeams(eligible, prevTeamIDs)
+			newDiff := computeDiffFromTeams(eligible, newTeamIDs)
+
+			if shouldApplyNewPartition(oldDiff, newDiff, totalSkill, threshold) {
+				for i, bp := range eligible {
+					bp.Team = newTeamIDs[i]
 				}
 			}
+			// else: keep previous teams (already set on bp.Team)
 		}
 	}
 

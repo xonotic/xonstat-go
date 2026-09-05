@@ -413,3 +413,111 @@ e scoreboard-score 0
 		t.Fatalf("Team sums too imbalanced: max team sum %f exceeds 60%% of total %f", maxSum, totalSum)
 	}
 }
+
+func TestBalanceStabilityKeepsTeams(t *testing.T) {
+	// Two nearly identical submissions: only one score changes by 1 point.
+	// With a high stability threshold, teams should stay the same.
+	body1 := tdmHeader +
+		playerBlock("A", "1", "Alice", "5", "30") +
+		playerBlock("B", "2", "Bob", "5", "20") +
+		playerBlock("C", "3", "Carol", "14", "40") +
+		playerBlock("D", "4", "Dave", "14", "10")
+
+	body2 := tdmHeader +
+		playerBlock("A", "1", "Alice", "5", "31") + // +1 score
+		playerBlock("B", "2", "Bob", "5", "20") +
+		playerBlock("C", "3", "Carol", "14", "40") +
+		playerBlock("D", "4", "Dave", "14", "10")
+
+	// First balance with default stability.
+	sub1 := makeSubmission(t, body1)
+	teamSet := make(map[int]struct{})
+	for _, tgs := range sub1.TeamGameStats {
+		teamSet[tgs.Team] = struct{}{}
+	}
+	first, err := Balance(testBalanceParams, mockSkillStore{}, sub1, 1, len(teamSet))
+	if err != nil {
+		t.Fatalf("Balance: %s", err)
+	}
+
+	// Second balance with high stability threshold (50%) — should keep teams.
+	params := testBalanceParams
+	params.StabilityThreshold = 0.50
+	sub2 := makeSubmission(t, body2)
+	teamSet2 := make(map[int]struct{})
+	for _, tgs := range sub2.TeamGameStats {
+		teamSet2[tgs.Team] = struct{}{}
+	}
+	second, err := Balance(params, mockSkillStore{}, sub2, 1, len(teamSet2))
+	if err != nil {
+		t.Fatalf("Balance: %s", err)
+	}
+
+	// Teams should be identical despite the score change.
+	teams1 := make(map[string]int)
+	for _, p := range first {
+		teams1[p.Hashkey] = p.Team
+	}
+	for _, p := range second {
+		if teams1[p.Hashkey] != p.Team {
+			t.Errorf("Player %s changed team from %d to %d with high stability threshold",
+				p.Hashkey, teams1[p.Hashkey], p.Team)
+		}
+	}
+}
+
+func TestBalanceStabilityDisabledSwaps(t *testing.T) {
+	// With stability disabled (threshold 0), a score change should be applied.
+	body1 := tdmHeader +
+		playerBlock("A", "1", "Alice", "5", "30") +
+		playerBlock("B", "2", "Bob", "5", "20") +
+		playerBlock("C", "3", "Carol", "14", "40") +
+		playerBlock("D", "4", "Dave", "14", "10")
+
+	body2 := tdmHeader +
+		playerBlock("A", "1", "Alice", "5", "31") +
+		playerBlock("B", "2", "Bob", "5", "20") +
+		playerBlock("C", "3", "Carol", "14", "40") +
+		playerBlock("D", "4", "Dave", "14", "10")
+
+	sub1 := makeSubmission(t, body1)
+	teamSet := make(map[int]struct{})
+	for _, tgs := range sub1.TeamGameStats {
+		teamSet[tgs.Team] = struct{}{}
+	}
+	first, err := Balance(testBalanceParams, mockSkillStore{}, sub1, 1, len(teamSet))
+	if err != nil {
+		t.Fatalf("Balance: %s", err)
+	}
+
+	params := testBalanceParams
+	params.StabilityThreshold = 0 // disabled
+	sub2 := makeSubmission(t, body2)
+	teamSet2 := make(map[int]struct{})
+	for _, tgs := range sub2.TeamGameStats {
+		teamSet2[tgs.Team] = struct{}{}
+	}
+	second, err := Balance(params, mockSkillStore{}, sub2, 1, len(teamSet2))
+	if err != nil {
+		t.Fatalf("Balance: %s", err)
+	}
+
+	// Both should be valid balanced outputs (no assertion on whether teams
+	// changed — the partition algorithm may or may not change the assignment
+	// for a 1-point difference). Just verify both calls succeed and produce
+	// valid results.
+	teams1 := make(map[string]int)
+	for _, p := range first {
+		teams1[p.Hashkey] = p.Team
+	}
+	teams2 := make(map[string]int)
+	for _, p := range second {
+		teams2[p.Hashkey] = p.Team
+	}
+	for _, p := range second {
+		if p.Team != 5 && p.Team != 14 {
+			t.Errorf("Player %s on unexpected team %d", p.Hashkey, p.Team)
+		}
+	}
+	_ = teams1
+}

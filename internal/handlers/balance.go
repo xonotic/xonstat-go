@@ -88,6 +88,20 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 		cardinality = 4
 	}
 
+	// stability controls the threshold for swapping players between teams.
+	// A value of 5 means the new partition must improve balance by more than
+	// 5% of total skill to be applied. Default 5, clamped to [0, 100].
+	stabilityInt, err := strconv.Atoi(params.Get("stability"))
+	if err != nil || stabilityInt < 0 {
+		stabilityInt = 5
+	}
+
+	if stabilityInt > 100 {
+		stabilityInt = 100
+	}
+
+	stabilityFloat := float64(stabilityInt) / 100.0
+
 	// Derive the number of teams from the submission itself.
 	// Fall back to looking at the game stat entries to derive teams.
 	numTeams := len(sub.TeamGameStats)
@@ -102,10 +116,11 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bp := skill.BalanceParams{
-		DefaultMu: wenglin.DefaultParams.DefaultMu,
-		DefaultSigma: wenglin.DefaultParams.DefaultSigma,
-		DefaultBeta: wenglin.DefaultParams.DefaultBeta,
-		ScoreFactor: scoreFactor,
+		DefaultMu:         wenglin.DefaultParams.DefaultMu,
+		DefaultSigma:      wenglin.DefaultParams.DefaultSigma,
+		DefaultBeta:       wenglin.DefaultParams.DefaultBeta,
+		ScoreFactor:       scoreFactor,
+		StabilityThreshold: stabilityFloat,
 	}
 
 	players, err := skill.Balance(bp, ae.db, sub, cardinality, numTeams)
