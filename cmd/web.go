@@ -18,7 +18,7 @@ import (
 	"github.com/go-chi/httprate"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/swaggo/http-swagger"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"gitlab.com/xonotic/xonstat/internal/handlers"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -122,7 +122,6 @@ func web(addr string) {
 		r.Post("/stats/submit", env.SubmissionHandler)
 		r.Post("/player/me", env.PlayerHashkeyInfoHandler)
 		r.Get("/elo", env.PlayerEloInfoHandler)
-		r.Post("/balance", env.BalanceHandler)
 	})
 
 	// Register all "regular" routes and handlers.
@@ -168,6 +167,7 @@ func web(addr string) {
 		env.PlayerSkillHashkeyHandler)
 	r.Get(reverse.Add("heatmap", "/heatmap"),
 		env.HeatmapHandler)
+	r.Post("/balance", env.BalanceHandler)
 	r.NotFound(env.NotFoundHandler)
 
 	// Static files
@@ -181,7 +181,7 @@ func web(addr string) {
 
 	// Swagger documentation via "swag" and "swag-http" libraries.
 	r.Get("/docs/*", httpSwagger.Handler(
-		httpSwagger.URL("/static/swagger.json"), //The url pointing to API definition"
+		httpSwagger.URL("/static/swagger.json"), // The url pointing to API definition"
 	))
 
 	// Start the web application server on the specified port.
