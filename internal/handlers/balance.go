@@ -12,6 +12,11 @@ import (
 	"gitlab.com/xonotic/xonstat/pkg/submission"
 )
 
+// maxTeams is the maximum number of teams the balance handler will process.
+// Games with more teams are rejected to bound processing time (the swap
+// minimization algorithm is O(T!) in the number of teams).
+const maxTeams = 4
+
 type balanceResponse struct {
 	Version int
 	Release string
@@ -113,6 +118,12 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		numTeams = len(teamSet)
+	}
+
+	if numTeams > maxTeams {
+		log.Printf("Error: too many teams to balance (%d > %d)", numTeams, maxTeams)
+		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
+		return
 	}
 
 	bp := skill.BalanceParams{
