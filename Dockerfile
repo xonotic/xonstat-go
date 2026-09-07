@@ -1,4 +1,4 @@
-FROM golang:bullseye
+FROM docker.io/library/golang:trixie
 
 WORKDIR /home/xonstat
 
