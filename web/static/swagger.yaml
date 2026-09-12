@@ -602,6 +602,35 @@ paths:
       - text/plain
       produces:
       - text/plain
+      parameters:
+      - default: 25
+        description: Percentage of the player's own skill added as a bonus for in-match performance (0 = raw skill only).
+        in: query
+        maximum: 100
+        minimum: 0
+        name: scorefactor
+        type: integer
+      - default: 1
+        description: Maximum allowed difference in the number of players between any two teams.
+        in: query
+        maximum: 4
+        minimum: 0
+        name: maxDifference
+        type: integer
+      - default: 5
+        description: Percent improvement required over the current balance before the new partition is applied (0 disables stability).
+        in: query
+        maximum: 100
+        minimum: 0
+        name: stability
+        type: integer
+      - default: 2.0
+        description: Number of standard deviations around Mu to sample skill from (0 = always use Mu, clamped to [0, 3]).
+        in: query
+        maximum: 3.0
+        minimum: 0.0
+        name: sigmaRange
+        type: number
       responses:
         "200":
           description: OK

@@ -30,6 +30,44 @@
                     "text/plain"
                 ],
                 "summary": "Best guess ordering of players according to skill and score data.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Percentage of the player's own skill added as a bonus for in-match performance (0 = raw skill only).",
+                        "name": "scorefactor",
+                        "in": "query",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "default": 25
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Maximum allowed difference in the number of players between any two teams.",
+                        "name": "maxDifference",
+                        "in": "query",
+                        "minimum": 0,
+                        "maximum": 4,
+                        "default": 1
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Percent improvement required over the current balance before the new partition is applied (0 disables stability).",
+                        "name": "stability",
+                        "in": "query",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "default": 5
+                    },
+                    {
+                        "type": "number",
+                        "description": "Number of standard deviations around Mu to sample skill from (0 = always use Mu, clamped to [0, 3]).",
+                        "name": "sigmaRange",
+                        "in": "query",
+                        "minimum": 0.0,
+                        "maximum": 3.0,
+                        "default": 2.0
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

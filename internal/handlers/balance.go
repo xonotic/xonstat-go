@@ -64,6 +64,9 @@ func preprocess(w http.ResponseWriter, r *http.Request) (*submission.Submission,
 // @Summary Best guess ordering of players according to skill and score data.
 // @Accept  text/plain
 // @Produce  text/plain
+// @Param scorefactor query integer false "Percentage of the player's own skill added as a bonus for in-match performance (0 = raw skill only)." default(25) minimum(0) maximum(100)
+// @Param maxDifference query integer false "Maximum allowed difference in the number of players between any two teams." default(1) minimum(0) maximum(4)
+// @Param stability query integer false "Percent improvement required over the current balance before the new partition is applied (0 disables stability)." default(5) minimum(0) maximum(100)
 // @Param sigmaRange query number false "Number of standard deviations around Mu to sample skill from (0 = always use Mu, clamped to [0, 3])." default(2) minimum(0) maximum(3)
 // @Success 200 {object} balanceResponse
 // @Router /balance [post]
