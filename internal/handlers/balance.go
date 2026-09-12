@@ -82,15 +82,15 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 
 	scoreFactor := float64(scoreFactorInt)/100.0
 
-	// cardinality controls the maximum allowed difference in the number of
+	// maxDifference controls the maximum allowed difference in the number of
 	// players between any two teams. Default 1, clamped to [0, 4].
-	cardinality, err := strconv.Atoi(params.Get("cardinality"))
-	if err != nil || cardinality < 0 {
-		cardinality = 1
+	maxDifference, err := strconv.Atoi(params.Get("maxDifference"))
+	if err != nil || maxDifference < 0 {
+		maxDifference = 1
 	}
 
-	if cardinality > 4 {
-		cardinality = 4
+	if maxDifference > 4 {
+		maxDifference = 4
 	}
 
 	// stability controls the threshold for swapping players between teams.
@@ -134,7 +134,7 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 		StabilityThreshold: stabilityFloat,
 	}
 
-	players, err := skill.Balance(bp, ae.db, sub, cardinality, numTeams)
+	players, err := skill.Balance(bp, ae.db, sub, maxDifference, numTeams)
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
