@@ -19,6 +19,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	httpSwagger "github.com/swaggo/http-swagger"
+	_ "gitlab.com/xonotic/xonstat/docs" // registers the generated swagger spec with swag
 	"gitlab.com/xonotic/xonstat/internal/handlers"
 	"gitlab.com/xonotic/xonstat/pkg/models"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -181,7 +182,7 @@ func web(addr string) {
 
 	// Swagger documentation via "swag" and "swag-http" libraries.
 	r.Get("/docs/*", httpSwagger.Handler(
-		httpSwagger.URL("/static/swagger.json"), // The url pointing to API definition"
+		httpSwagger.URL("/docs/doc.json"), // httpSwagger serves this from swag.ReadDoc() in-memory
 	))
 
 	// Start the web application server on the specified port.
