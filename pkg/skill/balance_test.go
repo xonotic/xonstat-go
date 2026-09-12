@@ -33,6 +33,7 @@ var testBalanceParams = BalanceParams{
 	DefaultSigma: 350.0,
 	DefaultBeta:  175.0,
 	ScoreFactor:  0.25,
+	SigmaRange:   2.0,
 }
 
 const tdmHeader = `V 9
@@ -94,6 +95,11 @@ func makeSubmission(t *testing.T, body string) *submission.Submission {
 
 func balancePlayers(t *testing.T, body string, store SkillStore) []*BalancePlayer {
 	t.Helper()
+	return balancePlayersWithParams(t, body, store, testBalanceParams)
+}
+
+func balancePlayersWithParams(t *testing.T, body string, store SkillStore, params BalanceParams) []*BalancePlayer {
+	t.Helper()
 
 	sub := makeSubmission(t, body)
 
@@ -111,7 +117,7 @@ func balancePlayers(t *testing.T, body string, store SkillStore) []*BalancePlaye
 		}
 	}
 
-	players, err := Balance(testBalanceParams, store, sub, 1, len(teamSet))
+	players, err := Balance(params, store, sub, 1, len(teamSet))
 	if err != nil {
 		t.Fatalf("Balance: %s", err)
 	}
@@ -521,3 +527,48 @@ func TestBalanceStabilityDisabledSwaps(t *testing.T) {
 	}
 	_ = teams1
 }
+
+func TestBalanceSigmaRangeZeroUsesMu(t *testing.T) {
+	// With SigmaRange 0, the sampled skill should exactly equal Mu for
+	// every player with a DB record (noise is clamped to 0).
+	store := mockSkillStore{
+		skills: map[string]models.PlayerHashkeySkill{
+			"A": {Hashkey: "A", GameTypeCd: "tdm", Mu: 2000.0, Sigma: 100.0},
+			"B": {Hashkey: "B", GameTypeCd: "tdm", Mu: 1500.0, Sigma: 400.0},
+			"C": {Hashkey: "C", GameTypeCd: "tdm", Mu: 1200.0, Sigma: 250.0},
+		},
+	}
+
+	body := tdmHeader +
+		playerBlock("A", "1", "Alice", "5", "30") +
+		playerBlock("B", "2", "Bob", "5", "20") +
+		playerBlock("C", "3", "Carol", "14", "40") +
+		playerBlock("D", "4", "Dave", "14", "10")
+
+	sub := makeSubmission(t, body)
+	teamSet := make(map[int]struct{})
+	for _, tgs := range sub.TeamGameStats {
+		teamSet[tgs.Team] = struct{}{}
+	}
+
+	params := testBalanceParams
+	params.SigmaRange = 0
+	params.ScoreFactor = 0
+
+	players, err := Balance(params, store, sub, 1, len(teamSet))
+	if err != nil {
+		t.Fatalf("Balance: %s", err)
+	}
+
+	expectedMu := map[string]float64{"A": 2000.0, "B": 1500.0, "C": 1200.0}
+	for _, player := range players {
+		if mu, ok := expectedMu[player.Hashkey]; ok {
+			if math.Abs(player.Skill-mu) > 1e-9 {
+				t.Fatalf("Player %s skill %f does not equal Mu %f with SigmaRange 0",
+					player.Hashkey, player.Skill, mu)
+			}
+		}
+	}
+}
+
+

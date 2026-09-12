@@ -34,6 +34,13 @@ type BalanceParams struct {
 	// the new partition must improve the team sum difference by more than
 	// 5% of total skill to be applied. 0 disables stability (always swap).
 	StabilityThreshold float64
+
+	// SigmaRange controls how many standard deviations around Mu the skill
+	// sample may be drawn from. A value of 0 always samples Mu (the mean),
+	// while larger values sample further into the distribution's tails.
+	// Values are clamped to [0, 3]. The default of 2 preserves the current
+	// behavior of sampling within two standard deviations.
+	SigmaRange float64
 }
 
 // BalancePlayer is the output data structure that gets sent to
@@ -162,9 +169,10 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 			sumSigma += skill.Sigma
 
 			// Take a sample from this player's Gaussian distribution to
-			// get a single "skill" number. Use a consistent seed per match.
+			// get a single "skill" number. Use a consistent seed per match,
+			// clamped to ±SigmaRange standard deviations.
 			rng := rand.New(rand.NewSource(bp.seed))
-			noise := math.Max(-2.0, math.Min(2.0, rng.NormFloat64()))
+			noise := math.Max(-params.SigmaRange, math.Min(params.SigmaRange, rng.NormFloat64()))
 			bp.Skill = noise*skill.Sigma + skill.Mu
 		}
 
@@ -187,7 +195,7 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 			// default parameters, which represent the average Mu and
 			// Sigma values we've seen from the other players in the match.
 			rng := rand.New(rand.NewSource(bp.seed))
-			noise := math.Max(-2.0, math.Min(2.0, rng.NormFloat64()))
+			noise := math.Max(-params.SigmaRange, math.Min(params.SigmaRange, rng.NormFloat64()))
 			bp.Skill = noise*params.DefaultSigma + params.DefaultMu
 		}
 

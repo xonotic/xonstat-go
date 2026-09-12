@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -63,6 +64,7 @@ func preprocess(w http.ResponseWriter, r *http.Request) (*submission.Submission,
 // @Summary Best guess ordering of players according to skill and score data.
 // @Accept  text/plain
 // @Produce  text/plain
+// @Param sigmaRange query number false "Number of standard deviations around Mu to sample skill from (0 = always use Mu, clamped to [0, 3])." default(2) minimum(0) maximum(3)
 // @Success 200 {object} balanceResponse
 // @Router /balance [post]
 func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,11 +78,11 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	// Each player receives up to configurable fraction of their own skill as
 	// a bonus for in-match performance. This we call the scorefactor.
 	scoreFactorInt, err := strconv.Atoi(params.Get("scorefactor"))
-	if err != nil || scoreFactorInt < 0 || scoreFactorInt > 100{
+	if err != nil || scoreFactorInt < 0 || scoreFactorInt > 100 {
 		scoreFactorInt = 25
 	}
 
-	scoreFactor := float64(scoreFactorInt)/100.0
+	scoreFactor := float64(scoreFactorInt) / 100.0
 
 	// maxDifference controls the maximum allowed difference in the number of
 	// players between any two teams. Default 1, clamped to [0, 4].
@@ -107,6 +109,15 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 
 	stabilityFloat := float64(stabilityInt) / 100.0
 
+	// sigmaRange controls how many standard deviations around Mu the skill
+	// sample may be drawn from. Default 2, clamped to [0, 3]. A value of 0
+	// disables sampling and always uses Mu directly. Invalid format falls
+	// back to the default.
+	sigmaRange := 2.0
+	if sigmaRangeFloat, err := strconv.ParseFloat(params.Get("sigmaRange"), 64); err == nil {
+		sigmaRange = math.Max(0.0, math.Min(3.0, sigmaRangeFloat))
+	}
+
 	// Derive the number of teams from the submission itself.
 	// Fall back to looking at the game stat entries to derive teams.
 	numTeams := len(sub.TeamGameStats)
@@ -127,11 +138,12 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bp := skill.BalanceParams{
-		DefaultMu:         wenglin.DefaultParams.DefaultMu,
-		DefaultSigma:      wenglin.DefaultParams.DefaultSigma,
-		DefaultBeta:       wenglin.DefaultParams.DefaultBeta,
-		ScoreFactor:       scoreFactor,
+		DefaultMu:          wenglin.DefaultParams.DefaultMu,
+		DefaultSigma:       wenglin.DefaultParams.DefaultSigma,
+		DefaultBeta:        wenglin.DefaultParams.DefaultBeta,
+		ScoreFactor:        scoreFactor,
 		StabilityThreshold: stabilityFloat,
+		SigmaRange:         sigmaRange,
 	}
 
 	players, err := skill.Balance(bp, ae.db, sub, maxDifference, numTeams)
