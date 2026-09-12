@@ -2,11 +2,6 @@ package skill
 
 import "math"
 
-// defaultStabilityThreshold is the fraction of total skill above which a
-// partition improvement is considered worth applying (i.e. worth swapping
-// players for). A value of 0.05 means 5% of total skill.
-const defaultStabilityThreshold = 0.05
-
 // minimizeSwaps finds the bijection from partition indices to game team IDs
 // that minimises the number of players who change teams. It returns the
 // actual team ID assigned to each player. For T teams it tries all T!

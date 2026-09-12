@@ -258,15 +258,10 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 				totalSkill += math.Abs(bp.Skill)
 			}
 
-			threshold := params.StabilityThreshold
-			if threshold == 0 {
-				threshold = defaultStabilityThreshold
-			}
-
 			oldDiff := computeDiffFromTeams(eligible, prevTeamIDs)
 			newDiff := computeDiffFromTeams(eligible, newTeamIDs)
 
-			if shouldApplyNewPartition(oldDiff, newDiff, totalSkill, threshold) {
+			if shouldApplyNewPartition(oldDiff, newDiff, totalSkill, params.StabilityThreshold) {
 				for i, bp := range eligible {
 					bp.Team = newTeamIDs[i]
 				}
