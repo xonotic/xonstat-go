@@ -29,7 +29,7 @@ I 0.123456789
 S Test Server
 C 0
 U 26000
-D 100.000000
+D 240.000000
 Q team#5
 e scoreboard-score 0
 Q team#14
@@ -40,7 +40,7 @@ n Alice
 t 5
 e scoreboard-score 30
 e acc-blaster-cnt-fired 1
-e alivetime 100
+e alivetime 240
 e matches 1
 e scoreboardvalid 1
 e joins 1
@@ -50,7 +50,7 @@ n Bob
 t 5
 e scoreboard-score 20
 e acc-blaster-cnt-fired 1
-e alivetime 100
+e alivetime 240
 e matches 1
 e scoreboardvalid 1
 e joins 1
@@ -60,7 +60,7 @@ n Carol
 t 14
 e scoreboard-score 40
 e acc-blaster-cnt-fired 1
-e alivetime 100
+e alivetime 240
 e matches 1
 e scoreboardvalid 1
 e joins 1
@@ -77,7 +77,7 @@ I 0.123456789
 S Test Server
 C 0
 U 26000
-D 100.000000
+D 240.000000
 Q team#1
 e scoreboard-score 0
 Q team#2
@@ -94,7 +94,7 @@ n Alice
 t 1
 e scoreboard-score 10
 e acc-blaster-cnt-fired 1
-e alivetime 100
+e alivetime 240
 e matches 1
 e scoreboardvalid 1
 e joins 1
@@ -104,7 +104,7 @@ n Bob
 t 2
 e scoreboard-score 20
 e acc-blaster-cnt-fired 1
-e alivetime 100
+e alivetime 240
 e matches 1
 e scoreboardvalid 1
 e joins 1
@@ -114,7 +114,7 @@ n Carol
 t 3
 e scoreboard-score 30
 e acc-blaster-cnt-fired 1
-e alivetime 100
+e alivetime 240
 e matches 1
 e scoreboardvalid 1
 e joins 1
@@ -124,7 +124,7 @@ n Dave
 t 4
 e scoreboard-score 40
 e acc-blaster-cnt-fired 1
-e alivetime 100
+e alivetime 240
 e matches 1
 e scoreboardvalid 1
 e joins 1
@@ -134,7 +134,7 @@ n Eve
 t 5
 e scoreboard-score 50
 e acc-blaster-cnt-fired 1
-e alivetime 100
+e alivetime 240
 e matches 1
 e scoreboardvalid 1
 e joins 1

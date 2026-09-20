@@ -68,6 +68,8 @@ func preprocess(w http.ResponseWriter, r *http.Request) (*submission.Submission,
 // @Param maxDifference query integer false "Maximum allowed difference in the number of players between any two teams." default(1) minimum(0) maximum(4)
 // @Param stability query integer false "Percent improvement required over the current balance before the new partition is applied (0 disables stability)." default(5) minimum(0) maximum(100)
 // @Param sigmaRange query number false "Number of standard deviations around Mu to sample skill from (0 = always use Mu, clamped to [0, 3])." default(2) minimum(0) maximum(3)
+// @Param scoreConfidenceExponent query number false "Controls how fast SPS-based estimates are trusted (larger = slower). Range [50, 1000]." default(200) minimum(50) maximum(1000)
+// @Param scoreRampSeconds query number false "Seconds of play after which score-per-second is fully trusted." default(120) minimum(1) maximum(600)
 // @Success 200 {object} balanceResponse
 // @Router /balance [post]
 func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
@@ -121,6 +123,21 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 		sigmaRange = math.Max(0.0, math.Min(3.0, sigmaRangeFloat))
 	}
 
+	// scoreConfidenceExponent controls how conservatively an anon's SPS-based
+	// estimate is trusted. Default 200, clamped to [50, 1000]. After clamping
+	// the exponent is divided by 100 to produce a range of [0.5, 10.0].
+	scoreConfidenceExponent := 2.0
+	if sceFloat, err := strconv.ParseFloat(params.Get("scoreConfidenceExponent"), 64); err == nil {
+		scoreConfidenceExponent = math.Max(50.0, math.Min(1000.0, sceFloat)) / 100.0
+	}
+
+	// scoreRampSeconds is the amount of play time after which score-per-second
+	// is considered fully trustworthy. Default 120, clamped to [1, 600].
+	scoreRampSeconds := 120.0
+	if srFloat, err := strconv.ParseFloat(params.Get("scoreRampSeconds"), 64); err == nil {
+		scoreRampSeconds = math.Max(1.0, math.Min(600.0, srFloat))
+	}
+
 	// Derive the number of teams from the submission itself.
 	// Fall back to looking at the game stat entries to derive teams.
 	numTeams := len(sub.TeamGameStats)
@@ -141,12 +158,13 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bp := skill.BalanceParams{
-		DefaultMu:          wenglin.DefaultParams.DefaultMu,
-		DefaultSigma:       wenglin.DefaultParams.DefaultSigma,
-		DefaultBeta:        wenglin.DefaultParams.DefaultBeta,
-		ScoreFactor:        scoreFactor,
-		StabilityThreshold: stabilityFloat,
-		SigmaRange:         sigmaRange,
+		DefaultMu:               wenglin.DefaultParams.DefaultMu,
+		DefaultSigma:            wenglin.DefaultParams.DefaultSigma,
+		ScoreFactor:             scoreFactor,
+		ScoreConfidenceExponent: scoreConfidenceExponent,
+		ScoreRampSeconds:        scoreRampSeconds,
+		StabilityThreshold:      stabilityFloat,
+		SigmaRange:              sigmaRange,
 	}
 
 	players, err := skill.Balance(bp, ae.db, sub, maxDifference, numTeams)

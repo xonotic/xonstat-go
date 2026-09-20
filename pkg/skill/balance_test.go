@@ -29,11 +29,12 @@ func (m mockSkillStore) RPlayerSkillsBatch(hashkeys []string, gameTypeCd string)
 }
 
 var testBalanceParams = BalanceParams{
-	DefaultMu:    models.PlayerSkill{}.Mu,
-	DefaultSigma: 350.0,
-	DefaultBeta:  175.0,
-	ScoreFactor:  0.25,
-	SigmaRange:   2.0,
+	DefaultMu:               models.PlayerSkill{}.Mu,
+	DefaultSigma:            350.0,
+	ScoreFactor:             0.25,
+	ScoreConfidenceExponent: 2.0,
+	ScoreRampSeconds:        120.0,
+	SigmaRange:              2.0,
 }
 
 const tdmHeader = `V 9
@@ -45,7 +46,7 @@ I 0.123456789
 S Test Server
 C 0
 U 26000
-D 100.000000
+D 240.000000
 Q team#5
 e scoreboard-score 0
 Q team#14
@@ -61,7 +62,7 @@ I 0.123456789
 S Test Server
 C 0
 U 26000
-D 100.000000
+D 240.000000
 `
 
 // playerBlock renders the player events for a participant. An empty team
@@ -72,7 +73,7 @@ func playerBlock(hashkey, index, nick, team, score string) string {
 		block += fmt.Sprintf("t %s\n", team)
 	}
 	block += fmt.Sprintf("e scoreboard-score %s\n", score)
-	block += "e acc-blaster-cnt-fired 1\ne alivetime 100\n"
+	block += "e acc-blaster-cnt-fired 1\ne alivetime 240\n"
 	block += "e matches 1\ne scoreboardvalid 1\ne joins 1\n"
 	return block
 }
@@ -257,7 +258,7 @@ I 0.123456789
 S Test Server
 C 0
 U 26000
-D 100.000000
+D 240.000000
 Q team#5
 e scoreboard-score 0
 Q team#14
@@ -356,7 +357,7 @@ I 0.123456789
 S Test Server
 C 0
 U 26000
-D 100.000000
+D 240.000000
 Q team#5
 e scoreboard-score 0
 Q team#14
@@ -568,6 +569,194 @@ func TestBalanceSigmaRangeZeroUsesMu(t *testing.T) {
 					player.Hashkey, player.Skill, mu)
 			}
 		}
+	}
+}
+
+func TestConfidenceFromAlivetime(t *testing.T) {
+	tests := []struct {
+		name       string
+		alivetime  float64
+		elapsed    float64
+		ramp       float64
+		exponent   float64
+		want       float64
+	}{
+		{"zero elapsed", 100, 0, 120, 2.0, 0},
+		{"zero ramp", 100, 100, 0, 2.0, 0},
+		{"negative elapsed", 100, -1, 120, 2.0, 0},
+		{"fully ramped", 120, 120, 120, 2.0, 1.0},
+		{"both at half ramp", 60, 60, 120, 2.0, 0.0625}, // (0.5*0.5)^2 = 0.0625
+		{"match half, player full", 120, 60, 120, 2.0, 0.25}, // (0.5*1.0)^2 = 0.25
+		{"match full, player half", 60, 120, 120, 2.0, 0.25}, // (1.0*0.5)^2 = 0.25
+		{"exponent 1.0", 60, 60, 120, 1.0, 0.25},             // (0.5*0.5)^1 = 0.25
+		{"exponent 0.5", 60, 60, 120, 0.5, 0.5},             // (0.25)^0.5 = 0.5
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := confidenceFromAlivetime(tt.alivetime, tt.elapsed, tt.ramp, tt.exponent)
+			if math.Abs(got-tt.want) > 1e-9 {
+				t.Errorf("confidenceFromAlivetime(%v, %v, %v, %v) = %v, want %v",
+					tt.alivetime, tt.elapsed, tt.ramp, tt.exponent, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTargetNeighborInterp(t *testing.T) {
+	ladder := []skillLadder{
+		{sps: 0, skill: 1500},
+		{sps: 0.2, skill: 1800},
+		{sps: 0.5, skill: 2100},
+	}
+
+	tests := []struct {
+		name string
+		sps  float64
+		want float64
+	}{
+		{"exact bottom", 0, 1500},
+		{"exact middle rung", 0.2, 1800},
+		{"exact top rung", 0.5, 2100},
+		{"between bottom and middle", 0.1, 1650},   // 1500 + (1800-1500)*0.5
+		{"between middle and top", 0.35, 1950},      // 1800 + (2100-1800)*0.5
+		{"below bottom (extrapolate)", -0.1, 1350},  // 1500 + (1800-1500)*(-0.5)
+		{"above top (extrapolate)", 0.6, 2200},      // 1800 + (2100-1800)*(0.4/0.3) — rides top two rungs
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := targetNeighborInterp(ladder, tt.sps)
+			if math.Abs(got-tt.want) > 1e-6 {
+				t.Errorf("targetNeighborInterp(%v) = %v, want %v", tt.sps, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTargetNeighborInterpSingleRung(t *testing.T) {
+	ladder := []skillLadder{{sps: 0, skill: 1500}}
+	got := targetNeighborInterp(ladder, 0.5)
+	if got != 1500 {
+		t.Errorf("single rung: got %v, want 1500", got)
+	}
+}
+
+func TestBalanceScoreFactorZeroNoBonus(t *testing.T) {
+	// With ScoreFactor=0, an anonymous player's skill should come entirely
+	// from the ladder interpolation (no bonus applied).
+	store := mockSkillStore{
+		skills: map[string]models.PlayerHashkeySkill{
+			"A": {Hashkey: "A", GameTypeCd: "tdm", Mu: 2000.0, Sigma: 100.0},
+		},
+	}
+
+	body := tdmHeader +
+		playerBlock("A", "1", "Alice", "5", "30") +
+		playerBlock("B", "2", "Bob", "5", "20") +
+		playerBlock("C", "3", "Carol", "14", "40") +
+		playerBlock("D", "4", "Dave", "14", "10")
+
+	sub := makeSubmission(t, body)
+	teamSet := make(map[int]struct{})
+	for _, tgs := range sub.TeamGameStats {
+		teamSet[tgs.Team] = struct{}{}
+	}
+
+	params := testBalanceParams
+	params.ScoreFactor = 0
+
+	players, err := Balance(params, store, sub, 1, len(teamSet))
+	if err != nil {
+		t.Fatalf("Balance: %s", err)
+	}
+
+	byHashkey := make(map[string]*BalancePlayer)
+	for _, p := range players {
+		byHashkey[p.Hashkey] = p
+	}
+
+	// A is tracked with Mu=2000, SigmaRange=2 so skill ~= 2000.
+	if s := byHashkey["A"].Skill; math.Abs(s-2000) > 200 {
+		t.Errorf("tracked player A skill %v not near Mu 2000", s)
+	}
+
+	// B, C, D are anon — they should have non-zero skill from ladder interp
+	// but no ScoreFactor bonus (which would be zero anyway with factor=0).
+	for _, hk := range []string{"B", "C", "D"} {
+		if byHashkey[hk].Skill <= 0 {
+			t.Errorf("anon player %s has non-positive skill %v", hk, byHashkey[hk].Skill)
+		}
+	}
+}
+
+func TestBalanceReportedScenario(t *testing.T) {
+	// Regression test for the reported bug: two strong tracked players with
+	// similar SPS plus high-performing anons should result in anons getting
+	// high estimates that force a team split. Under the old average-based
+	// logic the two strongs stacked; under the ladder they separate.
+	//
+	// Setup: tracked A (mu=2200, sig=50) score 35, tracked C (mu=2000, sig=50)
+	// score 32, anons B score 40, D score 39. Duration 240s so all fully
+	// ramped. Anon SPS (0.167, 0.163) exceed the top tracked SPS (0.146),
+	// so the ladder extrapolates them above 2200, forcing the solver to
+	// split A and C across teams.
+	store := mockSkillStore{
+		skills: map[string]models.PlayerHashkeySkill{
+			"A": {Hashkey: "A", GameTypeCd: "tdm", Mu: 2200.0, Sigma: 50.0},
+			"C": {Hashkey: "C", GameTypeCd: "tdm", Mu: 2000.0, Sigma: 50.0},
+		},
+	}
+
+	body := tdmHeader +
+		playerBlock("A", "1", "Alice", "5", "35") +
+		playerBlock("B", "2", "Bob", "5", "40") +
+		playerBlock("C", "3", "Carol", "14", "32") +
+		playerBlock("D", "4", "Dave", "14", "39")
+
+	sub := makeSubmission(t, body)
+	teamSet := make(map[int]struct{})
+	for _, tgs := range sub.TeamGameStats {
+		teamSet[tgs.Team] = struct{}{}
+	}
+
+	params := testBalanceParams
+	params.ScoreFactor = 0
+	params.SigmaRange = 0 // exact Mu
+
+	players, err := Balance(params, store, sub, 1, len(teamSet))
+	if err != nil {
+		t.Fatalf("Balance: %s", err)
+	}
+
+	byHashkey := make(map[string]*BalancePlayer)
+	for _, p := range players {
+		byHashkey[p.Hashkey] = p
+	}
+
+	// A should be 2200, C should be 2000 (tracked, SigmaRange=0).
+	if s := byHashkey["A"].Skill; math.Abs(s-2200) > 1e-9 {
+		t.Errorf("tracked A skill %v not equal to Mu 2200", s)
+	}
+	if s := byHashkey["C"].Skill; math.Abs(s-2000) > 1e-9 {
+		t.Errorf("tracked C skill %v not equal to Mu 2000", s)
+	}
+
+	// B and D are anon with SPS above the top tracked rung. The ladder
+	// extrapolates them above 2200, which forces the solver to split A and C.
+	for _, hk := range []string{"B", "D"} {
+		s := byHashkey[hk].Skill
+		if s < 1500 {
+			t.Errorf("anon %s skill %v should be above DefaultMu 1500", hk, s)
+		}
+	}
+
+	// The two strongest (A and C) must NOT end up on the same team,
+	// because B and D are strong enough to force a split.
+	teamA := byHashkey["A"].Team
+	teamC := byHashkey["C"].Team
+	if teamA == teamC {
+		t.Errorf("strong tracked players A and C ended up on same team %d; expected a split", teamA)
 	}
 }
 

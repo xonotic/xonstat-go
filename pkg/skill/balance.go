@@ -19,15 +19,28 @@ type SkillStore interface {
 }
 
 type BalanceParams struct {
-	// These are what we'll use as default skill values if we can't calculate
-	// an average from the players in the match.
+	// DefaultMu is the global new-player skill mean. It is the bottom rung of
+	// the SPS ladder and the fallback for players whose score-per-second is not
+	// yet meaningful. It is never overwritten with a match average.
 	DefaultMu    float64
 	DefaultSigma float64
-	DefaultBeta  float64
 
-	// How much weight to give the score as compared to the skill value.
-	// 0 = raw skill only, 100 = 2x raw skill value
+	// ScoreFactor is how much weight to give the score as compared to the skill
+	// value. 0 = raw skill only, 100 = 2x raw skill value. It applies to tracked
+	// players only: anonymous (untracked) player estimates are driven by
+	// score-per-second via the SPS ladder instead.
 	ScoreFactor float64
+
+	// ScoreConfidenceExponent controls how conservatively an anon's SPS-based
+	// estimate is trusted. Confidence is (matchRampFactor * aliveRampFactor)
+	// raised to this exponent, so larger values trust score-per-second more
+	// slowly.
+	ScoreConfidenceExponent float64
+
+	// ScoreRampSeconds is the amount of play time after which score-per-second
+	// is considered fully trustworthy. Both the match elapsed time and the
+	// player's own alivetime ramp up to this value.
+	ScoreRampSeconds float64
 
 	// StabilityThreshold controls how much balance improvement is needed
 	// to justify swapping players between teams. A value of 0.05 means
@@ -47,14 +60,18 @@ type BalanceParams struct {
 // the template, which is emitted back to the game server so it
 // can reassign the player to the given team.
 type BalancePlayer struct {
-	Hashkey        string
-	PlayerID       int
-	Nick           string
+	Hashkey  string
+	PlayerID int
+	Nick     string
+	// Skill is the effective skill used for balancing: for tracked players it
+	// is a sample from their DB distribution plus any ScoreFactor bonus; for
+	// anonymous players it is the confidence-gated SPS-ladder estimate.
 	Skill          float64
 	ScorePerSecond float64
 	Team           int
 	seed           int64
 	hasDBSkill     bool
+	aliveTime      float64
 }
 
 // seed creates a per-player, per-match consistent value for seeding the RNG
@@ -123,6 +140,7 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 			}
 
 			bp.ScorePerSecond = sps
+			bp.aliveTime = alivetimesecs
 			if sps > maxScorePerSecond {
 				maxScorePerSecond = sps
 			}
@@ -154,8 +172,6 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 			idx[p.Hashkey] = i
 		}
 
-		var sumMu, sumSigma float64
-
 		for _, skill := range skills {
 			i, ok := idx[skill.Hashkey]
 			if !ok {
@@ -165,9 +181,6 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 			bp := players[i]
 			bp.hasDBSkill = true
 
-			sumMu += skill.Mu
-			sumSigma += skill.Sigma
-
 			// Take a sample from this player's Gaussian distribution to
 			// get a single "skill" number. Use a consistent seed per match,
 			// clamped to ±SigmaRange standard deviations.
@@ -175,33 +188,63 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 			noise := math.Max(-params.SigmaRange, math.Min(params.SigmaRange, rng.NormFloat64()))
 			bp.Skill = noise*skill.Sigma + skill.Mu
 		}
-
-		if len(skills) > 1 {
-			// We DO have at least two data points to establish an average skill.
-			// Update our parameters to reflect that.
-			params.DefaultMu = sumMu / float64(len(skills))
-			params.DefaultSigma = sumSigma / float64(len(skills))
-		}
 	}
 
-	// Final pass: assign default skills and factor in the score.
+	// Score-per-second is scaled against this; avoid division by zero.
 	if maxScorePerSecond == 0.0 {
 		maxScorePerSecond = 1.0
 	}
 
+	// Tracked players receive up to ScoreFactor fraction of their own skill as
+	// a bonus for in-match performance. Anonymous players do not: their
+	// skill is derived via the SPS ladder below, and it already has the
+	// scorefactor bits applied.
 	for _, bp := range players {
-		if !bp.hasDBSkill {
-			// Players not having skill values are sampled from the
-			// default parameters, which represent the average Mu and
-			// Sigma values we've seen from the other players in the match.
-			rng := rand.New(rand.NewSource(bp.seed))
-			noise := math.Max(-params.SigmaRange, math.Min(params.SigmaRange, rng.NormFloat64()))
-			bp.Skill = noise*params.DefaultSigma + params.DefaultMu
+		if bp.hasDBSkill {
+			bp.Skill += bp.Skill * bp.ScorePerSecond / maxScorePerSecond * params.ScoreFactor
+		}
+	}
+
+	// Build the SPS→skill ladder from the tracked players' effective skills
+	// (sample + ScoreFactor), plus the unedited new-player default as the
+	// bottom rung. Anonymous players are interpolated against this ladder.
+	ladder := buildLadder(players, params.DefaultMu)
+
+	// The zero-reference fallback (no tracked players) differentiates anons
+	// around the default using a normalised SPS offset.
+	meanNormSPS := meanNormalizedSPS(players, teamSet, maxScorePerSecond)
+
+	elapsed := 0.0
+	if sub.Game.Duration != nil {
+		elapsed = sub.Game.Duration.Seconds()
+	}
+
+	// Final pass: estimate anonymous players' skill from the SPS ladder,
+	// gated by a confidence curve so early-match / freshly-joined players
+	// stay near the default.
+	for _, bp := range players {
+		if bp.hasDBSkill {
+			continue
 		}
 
-		// Each player receives up to ScoreFactor fraction of their own skill as
-		// a bonus for in-match performance.
-		bp.Skill += bp.Skill * bp.ScorePerSecond / maxScorePerSecond * params.ScoreFactor
+		var pairedSkill float64
+		if len(ladder) > 1 {
+			// If we have ladder values, we'll interpolate off of it.
+			pairedSkill = targetNeighborInterp(ladder, bp.ScorePerSecond)
+		} else {
+			// If we do NOT have usable ladder values, we'll use the default Mu
+			// and tweak the Sigma based on score-per-second performance.
+			pairedSkill = zeroRefPairedSkill(
+				bp.ScorePerSecond, maxScorePerSecond, meanNormSPS,
+				params.DefaultMu, params.DefaultSigma,
+			)
+		}
+
+		confidence := confidenceFromAlivetime(
+			bp.aliveTime, elapsed, params.ScoreRampSeconds, params.ScoreConfidenceExponent,
+		)
+
+		bp.Skill = (1-confidence)*params.DefaultMu + confidence*pairedSkill
 	}
 
 	// Fallback team detection: if no Q lines declared teams, derive them
@@ -279,4 +322,170 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 	}
 
 	return players, nil
+}
+
+// skillLadder is a single reference point on the SPS→skill ladder. The skill
+// value is an "effective skill": a tracked player's DB sample (noise*sigma+mu)
+// plus any ScoreFactor bonus, i.e. exactly the weight that player carries into
+// the partition.
+type skillLadder struct {
+	sps   float64
+	skill float64
+}
+
+// buildLadder assembles the SPS→skill ladder: the unedited new-player default
+// at SPS 0, plus one rung per tracked player. Rungs are sorted by SPS and any
+// duplicate-SPS rungs are collapsed by averaging their skill.
+func buildLadder(players []*BalancePlayer, defaultMu float64) []skillLadder {
+	ladder := make([]skillLadder, 0, len(players)+1)
+	ladder = append(ladder, skillLadder{sps: 0, skill: defaultMu})
+
+	for _, bp := range players {
+		if !bp.hasDBSkill {
+			continue
+		}
+		ladder = append(ladder, skillLadder{sps: bp.ScorePerSecond, skill: bp.Skill})
+	}
+
+	sort.SliceStable(ladder, func(i, j int) bool { return ladder[i].sps < ladder[j].sps })
+
+	// Collapse rungs that share an SPS. SPS is more volatile and ultimately
+	// less reliable than the DB skill values, so when one SPS maps to several
+	// DB skills we could bias down (pessimistic), bias up (optimistic), or
+	// average. We average here for simplicity. Collapsing also keeps
+	// targetNeighborInterp's interpolation line non-degenerate.
+	collapsed := make([]skillLadder, 0, len(ladder))
+	counts := make([]int, 0, len(ladder))
+	for _, rung := range ladder {
+		n := len(collapsed)
+		if n > 0 && rung.sps == collapsed[n-1].sps {
+			collapsed[n-1].skill = (collapsed[n-1].skill*float64(counts[n-1]) + rung.skill) / float64(counts[n-1]+1)
+			counts[n-1]++
+			continue
+		}
+		collapsed = append(collapsed, rung)
+		counts = append(counts, 1)
+	}
+
+	return collapsed
+}
+
+// targetNeighborInterp estimates the skill for an SPS value by linearly
+// interpolating between the two ladder rungs nearest to it in SPS. Ties are
+// broken toward the lower-SPS rung.
+func targetNeighborInterp(ladder []skillLadder, sps float64) float64 {
+	if len(ladder) == 0 {
+		return 0
+	}
+	if len(ladder) == 1 {
+		return ladder[0].skill
+	}
+
+	idx := sort.Search(len(ladder), func(i int) bool { return ladder[i].sps >= sps })
+
+	// Nearest rung.
+	nearest := 0
+	switch {
+	case idx == 0:
+		nearest = 0
+	case idx >= len(ladder):
+		nearest = len(ladder) - 1
+	case sps-ladder[idx-1].sps <= ladder[idx].sps-sps:
+		nearest = idx - 1
+	default:
+		nearest = idx
+	}
+
+	// The second-nearest rung is always adjacent to the nearest one.
+	neighbor := 0
+	switch {
+	case nearest == 0:
+		neighbor = 1
+	case nearest == len(ladder)-1:
+		neighbor = len(ladder) - 2
+	case sps-ladder[nearest-1].sps <= ladder[nearest+1].sps-sps:
+		neighbor = nearest - 1
+	default:
+		neighbor = nearest + 1
+	}
+
+	// Note: the ladder is built and collapsed such that each distinct
+	// sps value has its own rung, so this could be "if neighbor == nearest"
+	// but we'll keep this just in case this func ever gets called with
+	// a ladder array that does NOT collapse in that fashion.
+	a, b := ladder[neighbor], ladder[nearest]
+	if a.sps == b.sps {
+		return b.skill
+	}
+
+	result := a.skill + (b.skill-a.skill)*(sps-a.sps)/(b.sps-a.sps)
+
+	// The interpolation intentionally allows an anon who outperforms every
+	// tracked player to ride the line through the top two rungs and exceed the
+	// top rung's skill. That is what lets anons performing near the strongest
+	// tracked players land high enough to force the partition solver to split
+	// the strong players. If estimates above the top rung ever prove
+	// undesirable, enable this upper-bound clamp: it caps the estimate at
+	// the best tracked player's skill, at the cost of that split behaviour.
+	// if sps > ladder[len(ladder)-1].sps { return ladder[len(ladder)-1].skill }
+
+	return result
+}
+
+// confidenceFromAlivetime returns how much an anonymous player's SPS-based
+// estimate should be trusted. It is the product of two ramp factors, each of
+// which reaches 1 once ScoreRampSeconds of the relevant time has elapsed:
+//
+//   - matchRampFactor: how long the match has been running, and
+//   - aliveRampFactor: how much play time the player has personally accrued.
+//
+// The product is raised to the configured exponent. A non-positive elapsed time
+// or ramp yields zero confidence (no SPS trust).
+func confidenceFromAlivetime(alivetime, elapsed, rampSeconds, exponent float64) float64 {
+	if elapsed <= 0 || rampSeconds <= 0 {
+		return 0
+	}
+
+	matchRampFactor := math.Max(0, math.Min(1, elapsed/rampSeconds))
+	aliveRampFactor := math.Max(0, math.Min(1, alivetime/rampSeconds))
+
+	return math.Pow(matchRampFactor*aliveRampFactor, exponent)
+}
+
+// meanNormalizedSPS is the mean of sps/maxSPS across anonymous players that
+// take part in balancing, used by the zero-reference fallback.
+func meanNormalizedSPS(players []*BalancePlayer, teamSet map[int]struct{}, maxSPS float64) float64 {
+	if maxSPS <= 0 {
+		return 0
+	}
+
+	var sum float64
+	var count int
+	for _, bp := range players {
+		if bp.hasDBSkill {
+			continue
+		}
+		if len(teamSet) > 0 {
+			if _, ok := teamSet[bp.Team]; !ok {
+				continue
+			}
+		}
+		sum += bp.ScorePerSecond / maxSPS
+		count++
+	}
+
+	if count == 0 {
+		return 0
+	}
+	return sum / float64(count)
+}
+
+// zeroRefPairedSkill differentiates anonymous players around the default when
+// there are no tracked players to build a ladder from.
+func zeroRefPairedSkill(sps, maxSPS, meanNormSPS, defaultMu, defaultSigma float64) float64 {
+	if maxSPS <= 0 {
+		return defaultMu
+	}
+	normSPS := sps / maxSPS
+	return defaultMu + (normSPS-meanNormSPS)*defaultSigma
 }
