@@ -167,7 +167,7 @@ func (ae *AppEnv) BalanceHandler(w http.ResponseWriter, r *http.Request) {
 		SigmaRange:              sigmaRange,
 	}
 
-	players, err := skill.Balance(bp, ae.db, sub, maxDifference, numTeams)
+	players, err := skill.Balance(bp, ae.db, sub, maxDifference, numTeams, true)
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)

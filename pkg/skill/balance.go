@@ -1,6 +1,7 @@
 package skill
 
 import (
+	"fmt"
 	"hash/fnv"
 	"log"
 	"math"
@@ -71,6 +72,8 @@ type BalancePlayer struct {
 	Team           int
 	seed           int64
 	hasDBSkill     bool
+	dbMu           float64
+	dbSigma        float64
 	aliveTime      float64
 }
 
@@ -84,7 +87,15 @@ func seed(hashkey, matchID string) int64 {
 	return int64(hash.Sum64())
 }
 
-func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, maxDifference int, numTeams int) ([]*BalancePlayer, error) {
+// When debug is true, a summary of the input parameters, the effective skill
+// ladder, and one line per eligible player are written to the standard logger.
+func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, maxDifference int, numTeams int, debug bool) ([]*BalancePlayer, error) {
+	if debug {
+		log.Printf("[balance] params: defaultMu=%g defaultSigma=%g scoreFactor=%g scoreConfidenceExponent=%g scoreRampSeconds=%g stabilityThreshold=%g sigmaRange=%g maxDifference=%d numTeams=%d",
+			params.DefaultMu, params.DefaultSigma, params.ScoreFactor, params.ScoreConfidenceExponent,
+			params.ScoreRampSeconds, params.StabilityThreshold, params.SigmaRange, maxDifference, numTeams)
+	}
+
 	// The destination for the balanced (sorted) players.
 	players := make([]*BalancePlayer, 0)
 
@@ -180,6 +191,8 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 
 			bp := players[i]
 			bp.hasDBSkill = true
+			bp.dbMu = skill.Mu
+			bp.dbSigma = skill.Sigma
 
 			// Take a sample from this player's Gaussian distribution to
 			// get a single "skill" number. Use a consistent seed per match,
@@ -209,6 +222,14 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 	// (sample + ScoreFactor), plus the unedited new-player default as the
 	// bottom rung. Anonymous players are interpolated against this ladder.
 	ladder := buildLadder(players, params.DefaultMu)
+
+	if debug {
+		rungs := make([]string, len(ladder))
+		for i, rung := range ladder {
+			rungs[i] = fmt.Sprintf("%.4f->%.2f", rung.sps, rung.skill)
+		}
+		log.Printf("[balance] ladder: %s", strings.Join(rungs, " "))
+	}
 
 	// The zero-reference fallback (no tracked players) differentiates anons
 	// around the default using a normalised SPS offset.
@@ -274,6 +295,18 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 				eligible = append(eligible, bp)
 			} else {
 				bp.Team = 0
+			}
+		}
+
+		if debug {
+			for _, bp := range eligible {
+				if bp.hasDBSkill {
+					log.Printf("[balance] player: nick=%q team=%d alivetime=%.1f sps=%.4f mu=%g sigma=%g skill=%.2f",
+						bp.Nick, bp.Team, bp.aliveTime, bp.ScorePerSecond, bp.dbMu, bp.dbSigma, bp.Skill)
+				} else {
+					log.Printf("[balance] player: nick=%q team=%d alivetime=%.1f sps=%.4f skill=%.2f",
+						bp.Nick, bp.Team, bp.aliveTime, bp.ScorePerSecond, bp.Skill)
+				}
 			}
 		}
 

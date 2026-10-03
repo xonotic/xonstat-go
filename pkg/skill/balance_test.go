@@ -118,7 +118,7 @@ func balancePlayersWithParams(t *testing.T, body string, store SkillStore, param
 		}
 	}
 
-	players, err := Balance(params, store, sub, 1, len(teamSet))
+	players, err := Balance(params, store, sub, 1, len(teamSet), false)
 	if err != nil {
 		t.Fatalf("Balance: %s", err)
 	}
@@ -442,7 +442,7 @@ func TestBalanceStabilityKeepsTeams(t *testing.T) {
 	for _, tgs := range sub1.TeamGameStats {
 		teamSet[tgs.Team] = struct{}{}
 	}
-	first, err := Balance(testBalanceParams, mockSkillStore{}, sub1, 1, len(teamSet))
+	first, err := Balance(testBalanceParams, mockSkillStore{}, sub1, 1, len(teamSet), false)
 	if err != nil {
 		t.Fatalf("Balance: %s", err)
 	}
@@ -455,7 +455,7 @@ func TestBalanceStabilityKeepsTeams(t *testing.T) {
 	for _, tgs := range sub2.TeamGameStats {
 		teamSet2[tgs.Team] = struct{}{}
 	}
-	second, err := Balance(params, mockSkillStore{}, sub2, 1, len(teamSet2))
+	second, err := Balance(params, mockSkillStore{}, sub2, 1, len(teamSet2), false)
 	if err != nil {
 		t.Fatalf("Balance: %s", err)
 	}
@@ -492,7 +492,7 @@ func TestBalanceStabilityDisabledSwaps(t *testing.T) {
 	for _, tgs := range sub1.TeamGameStats {
 		teamSet[tgs.Team] = struct{}{}
 	}
-	first, err := Balance(testBalanceParams, mockSkillStore{}, sub1, 1, len(teamSet))
+	first, err := Balance(testBalanceParams, mockSkillStore{}, sub1, 1, len(teamSet), false)
 	if err != nil {
 		t.Fatalf("Balance: %s", err)
 	}
@@ -504,7 +504,7 @@ func TestBalanceStabilityDisabledSwaps(t *testing.T) {
 	for _, tgs := range sub2.TeamGameStats {
 		teamSet2[tgs.Team] = struct{}{}
 	}
-	second, err := Balance(params, mockSkillStore{}, sub2, 1, len(teamSet2))
+	second, err := Balance(params, mockSkillStore{}, sub2, 1, len(teamSet2), false)
 	if err != nil {
 		t.Fatalf("Balance: %s", err)
 	}
@@ -556,7 +556,7 @@ func TestBalanceSigmaRangeZeroUsesMu(t *testing.T) {
 	params.SigmaRange = 0
 	params.ScoreFactor = 0
 
-	players, err := Balance(params, store, sub, 1, len(teamSet))
+	players, err := Balance(params, store, sub, 1, len(teamSet), false)
 	if err != nil {
 		t.Fatalf("Balance: %s", err)
 	}
@@ -666,7 +666,7 @@ func TestBalanceScoreFactorZeroNoBonus(t *testing.T) {
 	params := testBalanceParams
 	params.ScoreFactor = 0
 
-	players, err := Balance(params, store, sub, 1, len(teamSet))
+	players, err := Balance(params, store, sub, 1, len(teamSet), false)
 	if err != nil {
 		t.Fatalf("Balance: %s", err)
 	}
@@ -724,7 +724,7 @@ func TestBalanceReportedScenario(t *testing.T) {
 	params.ScoreFactor = 0
 	params.SigmaRange = 0 // exact Mu
 
-	players, err := Balance(params, store, sub, 1, len(teamSet))
+	players, err := Balance(params, store, sub, 1, len(teamSet), false)
 	if err != nil {
 		t.Fatalf("Balance: %s", err)
 	}
