@@ -3,6 +3,7 @@ package submission
 import (
 	"bufio"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -107,6 +108,32 @@ func TestBlankGame(t *testing.T) {
 		if err != ErrBlankGame {
 			t.Errorf("Did not receive ErrBlankGame")
 		}
+	}
+}
+
+// test that the blank game checks are skipped under BalanceMode, while the
+// other validations still apply
+func TestBlankGameBalanceMode(t *testing.T) {
+	f, err := os.Open("../../test/submissions/cts_blank_game.txt")
+	if err != nil {
+		t.Fatalf("Unable to open file for testing: %s", err)
+	}
+	defer f.Close()
+
+	// BalanceMode parses the blank game successfully.
+	rs, err := NewRawSubmission(bufio.NewReader(f), WithValidationMode(BalanceMode))
+	if err != nil {
+		t.Fatalf("BalanceMode should skip blank game checks, got: %s", err)
+	}
+	if rs == nil {
+		t.Fatal("Expected a RawSubmission under BalanceMode")
+	}
+
+	// Required metadata and supported game type are still enforced under
+	// BalanceMode: a submission missing metadata must fail either way.
+	_, err = NewRawSubmission(bufio.NewReader(strings.NewReader("G tdm\n")), WithValidationMode(BalanceMode))
+	if err != ErrInvalidGameMeta {
+		t.Errorf("Expected ErrInvalidGameMeta under BalanceMode, got: %v", err)
 	}
 }
 

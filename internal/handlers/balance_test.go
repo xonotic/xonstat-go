@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -188,5 +189,94 @@ func TestBalanceRejectsTooManyTeams(t *testing.T) {
 
 	if w.Code != http.StatusUnprocessableEntity {
 		t.Fatalf("Expected status %d for too many teams, got %d", http.StatusUnprocessableEntity, w.Code)
+	}
+}
+
+// discardWriteCloser satisfies AppEnv's requestLogger without retaining data.
+type discardWriteCloser struct{ io.Writer }
+
+func (discardWriteCloser) Close() error { return nil }
+
+// blankTdmBody is a team game with three human players, zero scores, and no
+// weapon-fire events: blank by the submission endpoint's rules (no non-zero
+// score, no weapon fired), but still a match the balancer can process.
+const blankTdmBody = `V 9
+R test
+G tdm
+O Xonotic
+M testmap
+I 0.123456789
+S Test Server
+C 0
+U 26000
+D 240.000000
+Q team#5
+e scoreboard-score 0
+Q team#14
+e scoreboard-score 0
+P player#aaaa
+i 1
+n Alice
+t 5
+e scoreboard-score 0
+e alivetime 240
+e matches 1
+e scoreboardvalid 1
+e joins 1
+P player#bbbb
+i 2
+n Bob
+t 5
+e scoreboard-score 0
+e alivetime 240
+e matches 1
+e scoreboardvalid 1
+e joins 1
+P player#cccc
+i 3
+n Carol
+t 14
+e scoreboard-score 0
+e alivetime 240
+e matches 1
+e scoreboardvalid 1
+e joins 1
+`
+
+// TestBalanceAcceptsBlankGame verifies that the balance handler processes a
+// match the submission endpoint considers blank (no non-zero scores, no
+// weapon fired) instead of rejecting it with a 422.
+func TestBalanceAcceptsBlankGame(t *testing.T) {
+	ae := &AppEnv{
+		textTemplates: loadTextTemplates("../../web/template"),
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/balance", strings.NewReader(blankTdmBody))
+	w := httptest.NewRecorder()
+
+	ae.BalanceHandler(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status %d for a blank game, got %d (body: %s)",
+			http.StatusOK, w.Code, w.Body.String())
+	}
+}
+
+// TestSubmissionStillRejectsBlankGame verifies that the blank game checks
+// remain in place for the submission endpoint: the same body that the
+// balance handler accepts is rejected with a 422 here.
+func TestSubmissionStillRejectsBlankGame(t *testing.T) {
+	ae := &AppEnv{
+		requestLogger: discardWriteCloser{io.Discard},
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/submission", strings.NewReader(blankTdmBody))
+	w := httptest.NewRecorder()
+
+	ae.SubmissionHandler(w, req)
+
+	if w.Code != http.StatusUnprocessableEntity {
+		t.Fatalf("Expected status %d for a blank game, got %d (body: %s)",
+			http.StatusUnprocessableEntity, w.Code, w.Body.String())
 	}
 }

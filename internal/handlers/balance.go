@@ -25,11 +25,15 @@ type balanceResponse struct {
 	Players []*skill.BalancePlayer
 }
 
-// preprocess handles assembling the POST body into a type that we can work with
+// preprocess handles assembling the POST body into a type that we can work with.
+// BalanceMode skips the blank game checks that belong to stats submission:
+// they would reject matches the balancer can still process. The guardrails
+// below (team game type, minimum players) are the balance handler's own.
 func preprocess(w http.ResponseWriter, r *http.Request) (*submission.Submission, error) {
 	bodyReader := bufio.NewReader(r.Body)
 
-	rawSubmission, err := submission.NewRawSubmission(bodyReader)
+	rawSubmission, err := submission.NewRawSubmission(bodyReader,
+		submission.WithValidationMode(submission.BalanceMode))
 	if err != nil {
 		log.Printf("Error: %s", err)
 		http.Error(w, fmt.Sprintf("422 %s", http.StatusText(422)), 422)
