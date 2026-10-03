@@ -251,7 +251,7 @@ func Balance(params BalanceParams, db SkillStore, sub *submission.Submission, ma
 		var pairedSkill float64
 		if len(ladder) > 1 {
 			// If we have ladder values, we'll interpolate off of it.
-			pairedSkill = targetNeighborInterp(ladder, bp.ScorePerSecond)
+			pairedSkill = targetNeighborInterp(ladder, bp.ScorePerSecond, params.DefaultSigma)
 		} else {
 			// If we do NOT have usable ladder values, we'll use the default Mu
 			// and tweak the Sigma based on score-per-second performance.
@@ -404,9 +404,15 @@ func buildLadder(players []*BalancePlayer, defaultMu float64) []skillLadder {
 }
 
 // targetNeighborInterp estimates the skill for an SPS value by linearly
-// interpolating between the two ladder rungs nearest to it in SPS. Ties are
-// broken toward the lower-SPS rung.
-func targetNeighborInterp(ladder []skillLadder, sps float64) float64 {
+// interpolating between the two ladder rungs that bracket it in SPS.
+//
+// Extrapolation beyond either end of the ladder is bounded in two stages:
+// the sps input is clamped to at most one rung-segment past the end, and the
+// result is then clamped to within margin of the end rung's skill. This keeps
+// out-of-range estimates ordered and finite while still letting an anon who
+// outperforms every tracked player land above the top rung (which is what
+// forces the partition solver to split strong players apart).
+func targetNeighborInterp(ladder []skillLadder, sps, margin float64) float64 {
 	if len(ladder) == 0 {
 		return 0
 	}
@@ -414,53 +420,58 @@ func targetNeighborInterp(ladder []skillLadder, sps float64) float64 {
 		return ladder[0].skill
 	}
 
+	top := ladder[len(ladder)-1]
+	bottom := ladder[0]
+
+	// Extrapolation region flags and sps-domain clamps. In-range sps values
+	// are left untouched so the interpolation itself never gets clamped.
+	beyondTop := sps > top.sps
+	beyondBottom := sps < bottom.sps
+
+	if beyondTop {
+		if seg := top.sps - ladder[len(ladder)-2].sps; sps > top.sps+seg {
+			sps = top.sps + seg
+		}
+	} else if beyondBottom {
+		if seg := ladder[1].sps - bottom.sps; sps < bottom.sps-seg {
+			sps = bottom.sps - seg
+		}
+	}
+
 	idx := sort.Search(len(ladder), func(i int) bool { return ladder[i].sps >= sps })
 
-	// Nearest rung.
-	nearest := 0
+	// The segment that actually brackets sps: below the bottom rung we
+	// extrapolate along the first segment, above the top rung along the last,
+	// otherwise we interpolate between the two rungs that contain sps. Picking
+	// the two *closest* rungs instead would extrapolate a segment that sps
+	// sits outside of (e.g. a mid-ladder sps closer to the rung below it than
+	// to the rung above it), which can overshoot every rung on the ladder.
+	var a, b skillLadder
 	switch {
 	case idx == 0:
-		nearest = 0
+		a, b = ladder[0], ladder[1]
 	case idx >= len(ladder):
-		nearest = len(ladder) - 1
-	case sps-ladder[idx-1].sps <= ladder[idx].sps-sps:
-		nearest = idx - 1
+		a, b = ladder[len(ladder)-2], ladder[len(ladder)-1]
 	default:
-		nearest = idx
+		a, b = ladder[idx-1], ladder[idx]
 	}
 
-	// The second-nearest rung is always adjacent to the nearest one.
-	neighbor := 0
-	switch {
-	case nearest == 0:
-		neighbor = 1
-	case nearest == len(ladder)-1:
-		neighbor = len(ladder) - 2
-	case sps-ladder[nearest-1].sps <= ladder[nearest+1].sps-sps:
-		neighbor = nearest - 1
-	default:
-		neighbor = nearest + 1
-	}
-
-	// Note: the ladder is built and collapsed such that each distinct
-	// sps value has its own rung, so this could be "if neighbor == nearest"
-	// but we'll keep this just in case this func ever gets called with
-	// a ladder array that does NOT collapse in that fashion.
-	a, b := ladder[neighbor], ladder[nearest]
 	if a.sps == b.sps {
 		return b.skill
 	}
 
 	result := a.skill + (b.skill-a.skill)*(sps-a.sps)/(b.sps-a.sps)
 
-	// The interpolation intentionally allows an anon who outperforms every
-	// tracked player to ride the line through the top two rungs and exceed the
-	// top rung's skill. That is what lets anons performing near the strongest
-	// tracked players land high enough to force the partition solver to split
-	// the strong players. If estimates above the top rung ever prove
-	// undesirable, enable this upper-bound clamp: it caps the estimate at
-	// the best tracked player's skill, at the cost of that split behaviour.
-	// if sps > ladder[len(ladder)-1].sps { return ladder[len(ladder)-1].skill }
+	// Bound the extrapolated result to within margin of the end rung's skill.
+	// Only applies outside the ladder's sps range; in-range interpolation is
+	// already bounded by its two surrounding rungs.
+	if beyondTop && result > top.skill+margin {
+		result = top.skill + margin
+	}
+
+	if beyondBottom && result < bottom.skill-margin {
+		result = bottom.skill - margin
+	}
 
 	return result
 }

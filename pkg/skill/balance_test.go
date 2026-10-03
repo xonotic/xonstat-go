@@ -609,6 +609,7 @@ func TestTargetNeighborInterp(t *testing.T) {
 		{sps: 0.2, skill: 1800},
 		{sps: 0.5, skill: 2100},
 	}
+	const margin = 350.0
 
 	tests := []struct {
 		name string
@@ -618,15 +619,15 @@ func TestTargetNeighborInterp(t *testing.T) {
 		{"exact bottom", 0, 1500},
 		{"exact middle rung", 0.2, 1800},
 		{"exact top rung", 0.5, 2100},
-		{"between bottom and middle", 0.1, 1650},   // 1500 + (1800-1500)*0.5
-		{"between middle and top", 0.35, 1950},      // 1800 + (2100-1800)*0.5
-		{"below bottom (extrapolate)", -0.1, 1350},  // 1500 + (1800-1500)*(-0.5)
-		{"above top (extrapolate)", 0.6, 2200},      // 1800 + (2100-1800)*(0.4/0.3) — rides top two rungs
+		{"between bottom and middle", 0.1, 1650},  // 1500 + (1800-1500)*0.5
+		{"between middle and top", 0.35, 1950},    // 1800 + (2100-1800)*0.5
+		{"below bottom (extrapolate)", -0.1, 1350}, // 1500 + (1800-1500)*(-0.5)
+		{"above top (extrapolate)", 0.6, 2200},     // 1800 + (2100-1800)*(0.4/0.3) — rides top two rungs
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := targetNeighborInterp(ladder, tt.sps)
+			got := targetNeighborInterp(ladder, tt.sps, margin)
 			if math.Abs(got-tt.want) > 1e-6 {
 				t.Errorf("targetNeighborInterp(%v) = %v, want %v", tt.sps, got, tt.want)
 			}
@@ -636,9 +637,95 @@ func TestTargetNeighborInterp(t *testing.T) {
 
 func TestTargetNeighborInterpSingleRung(t *testing.T) {
 	ladder := []skillLadder{{sps: 0, skill: 1500}}
-	got := targetNeighborInterp(ladder, 0.5)
+	got := targetNeighborInterp(ladder, 0.5, 350)
 	if got != 1500 {
 		t.Errorf("single rung: got %v, want 1500", got)
+	}
+}
+
+// TestTargetNeighborInterpClampedOvershoot verifies that sps values far
+// outside the ladder range stay bounded: the sps domain is clamped to one
+// segment past the end, and the result is further capped to end rung ± margin.
+func TestTargetNeighborInterpClampedOvershoot(t *testing.T) {
+	ladder := []skillLadder{
+		{sps: 0, skill: 1500},
+		{sps: 0.2, skill: 1800},
+		{sps: 0.5, skill: 2100},
+	}
+
+	tests := []struct {
+		name   string
+		sps    float64
+		margin float64
+		want   float64
+	}{
+		// sps clamped to 0.5+(0.5-0.2)=0.8: rides the top segment to 2400,
+		// which is under 2100+350, so only the domain clamp binds.
+		{"far above, wide margin", 10.0, 350, 2400},
+		// Same domain clamp (2400) but the margin ceiling binds at 2200.
+		{"far above, tight margin", 10.0, 100, 2200},
+		// sps clamped to 0-(0.2-0)=-0.2: drops the bottom segment to 1200,
+		// above 1500-350=1150, so only the domain clamp binds.
+		{"far below, wide margin", -10.0, 350, 1200},
+		// Same domain clamp (1200) but the margin floor binds at 1350.
+		{"far below, tight margin", -10.0, 150, 1350},
+		// Monotonic: a wider overshoot never returns a smaller skill.
+		{"monotone above", 1.0, 350, 2400},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := targetNeighborInterp(ladder, tt.sps, tt.margin)
+			if math.Abs(got-tt.want) > 1e-6 {
+				t.Errorf("targetNeighborInterp(%v, %v) = %v, want %v", tt.sps, tt.margin, got, tt.want)
+			}
+		})
+	}
+}
+
+// TestTargetNeighborInterpBracketsSegment verifies that a mid-ladder sps is
+// interpolated on the segment that contains it, not on whichever segment has
+// the two closest rungs. A sps just above a low-sps rung is closer (in sps
+// units) to the bottom rung, and extrapolating that bottom segment used to
+// overshoot every rung on the ladder.
+func TestTargetNeighborInterpBracketsSegment(t *testing.T) {
+	ladder := []skillLadder{
+		{sps: 0, skill: 1500},
+		{sps: 0.01, skill: 3000},
+		{sps: 0.5, skill: 3100},
+	}
+
+	// sps 0.05 sits between rung 1 (0.01) and rung 2 (0.5) even though rung 1
+	// is the closest rung and the bottom rung is closer than rung 2. The old
+	// nearest/neighbor selection rode the (0, 0.01) segment and returned 9000;
+	// the bracketing segment gives ~3044.
+	got := targetNeighborInterp(ladder, 0.05, 350)
+	want := 3000.0 + (3100.0-3000.0)*(0.05-0.01)/(0.5-0.01)
+	if math.Abs(got-want) > 1e-6 {
+		t.Errorf("targetNeighborInterp(0.05) = %v, want %v (bracketing segment)", got, want)
+	}
+	if got > 3100 {
+		t.Errorf("mid-ladder estimate %v exceeds the top rung skill 3100", got)
+	}
+}
+
+// TestTargetNeighborInterpNarrowTopSegment verifies the margin ceiling tames a
+// pathological top segment whose two tracked players sit at nearly the same
+// sps but very different skills (an almost-vertical slope).
+func TestTargetNeighborInterpNarrowTopSegment(t *testing.T) {
+	ladder := []skillLadder{
+		{sps: 0, skill: 1500},
+		{sps: 0.1, skill: 1800},
+		{sps: 0.104, skill: 2600},
+	}
+
+	// Unclamped this would be astronomically large (slope of 200,000/unit).
+	// Domain clamp takes sps to 0.108, giving 3400; the margin ceiling then
+	// binds at 2600+350.
+	got := targetNeighborInterp(ladder, 0.5, 350)
+	want := 2600.0 + 350.0
+	if math.Abs(got-want) > 1e-6 {
+		t.Errorf("narrow segment: got %v, want %v", got, want)
 	}
 }
 
