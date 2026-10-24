@@ -19,10 +19,17 @@ function drawDamageChart(id, data) {
             },
             layout: {
                 padding: {
-                    left: isMobile ? 12 : 4,
-                    right: 16,
-                    top: 4,
-                    bottom: 4
+                    left: isMobile ? 14 : 6,
+                    right: 18,
+                    top: 8,
+                    bottom: 8
+                }
+            },
+            datasets: {
+                bar: {
+                    categoryPercentage: 0.85,
+                    barPercentage: 0.9,
+                    maxBarThickness: isMobile ? 32 : 38
                 }
             },
             scales: {
@@ -46,14 +53,15 @@ function drawDamageChart(id, data) {
                     },
                     ticks: {
                         autoSkip: false,
-                        padding: isMobile ? 16 : 6,
+                        padding: isMobile ? 18 : 6,
                         font: {
-                            size: isMobile ? 10 : 12
+                            size: isMobile ? 11 : 12,
+                            lineHeight: isMobile ? 1.4 : 1.2
                         },
                         callback: function (value) {
                             var label = this.getLabelForValue(value);
-                            if (isMobile && label && label.length > 22) {
-                                return label.substring(0, 22) + '…';
+                            if (isMobile && label && label.length > 24) {
+                                return label.substring(0, 24) + '…';
                             }
                             return label;
                         }
@@ -71,7 +79,16 @@ function drawDamageChart(id, data) {
                     intersect: false,
                     titleColor: '#000',
                     bodyColor: '#000',
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleFont: {
+                        size: isMobile ? 11 : 12,
+                        lineHeight: 1.4
+                    },
+                    bodyFont: {
+                        size: isMobile ? 11 : 12,
+                        lineHeight: 1.4
+                    },
+                    padding: isMobile ? 10 : 6,
                     callbacks: {
                         label: function (context) {
                             var item = context.dataset.richData[context.dataIndex];
@@ -108,12 +125,19 @@ function drawAccuracyChart(id, data) {
                 axis: 'y',
                 intersect: true
             },
+            datasets: {
+                bar: {
+                    categoryPercentage: 0.85,
+                    barPercentage: 0.9,
+                    maxBarThickness: isMobile ? 32 : 38
+                }
+            },
             layout: {
                 padding: {
-                    left: isMobile ? 12 : 4,
-                    right: 16,
-                    top: 4,
-                    bottom: 4
+                    left: isMobile ? 14 : 6,
+                    right: 18,
+                    top: 8,
+                    bottom: 8
                 }
             },
             elements: {
@@ -143,14 +167,15 @@ function drawAccuracyChart(id, data) {
                     },
                     ticks: {
                         autoSkip: false,
-                        padding: isMobile ? 16 : 6,
+                        padding: isMobile ? 18 : 6,
                         font: {
-                            size: isMobile ? 10 : 12
+                            size: isMobile ? 11 : 12,
+                            lineHeight: isMobile ? 1.4 : 1.2
                         },
                         callback: function (value) {
                             var label = this.getLabelForValue(value);
-                            if (isMobile && label && label.length > 22) {
-                                return label.substring(0, 22) + '…';
+                            if (isMobile && label && label.length > 24) {
+                                return label.substring(0, 24) + '…';
                             }
                             return label;
                         }
@@ -168,7 +193,16 @@ function drawAccuracyChart(id, data) {
                     intersect: true,
                     titleColor: '#000',
                     bodyColor: '#000',
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleFont: {
+                        size: isMobile ? 11 : 12,
+                        lineHeight: 1.4
+                    },
+                    bodyFont: {
+                        size: isMobile ? 11 : 12,
+                        lineHeight: 1.4
+                    },
+                    padding: isMobile ? 10 : 6,
                     callbacks: {
                         label: function (context) {
                             var item = context.dataset.richData[context.dataIndex];
@@ -241,7 +275,16 @@ function drawPlayerAccuracyChart(id, data) {
                     intersect: true,
                     titleColor: '#000',
                     bodyColor: '#000',
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleFont: {
+                        size: isMobile ? 11 : 12,
+                        lineHeight: 1.4
+                    },
+                    bodyFont: {
+                        size: isMobile ? 11 : 12,
+                        lineHeight: 1.4
+                    },
+                    padding: isMobile ? 10 : 6,
                     callbacks: {
                         label: function (context) {
                             var accuracy = Math.round(context.dataset.data[context.dataIndex]);
@@ -314,7 +357,16 @@ function drawPlayerDamageChart(id, data) {
                     intersect: false,
                     titleColor: '#000',
                     bodyColor: '#000',
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleFont: {
+                        size: isMobile ? 11 : 12,
+                        lineHeight: 1.4
+                    },
+                    bodyFont: {
+                        size: isMobile ? 11 : 12,
+                        lineHeight: 1.4
+                    },
+                    padding: isMobile ? 10 : 6,
                     callbacks: {
                         label: function (context) {
                             var damage = Math.round(context.raw);
