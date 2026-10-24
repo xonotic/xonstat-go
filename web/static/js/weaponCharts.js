@@ -1,11 +1,6 @@
 function drawDamageChart(id, data) {
     var ctx = document.getElementById(id).getContext('2d');
-
-    // The aspect ratio really depends on how many players are present. This formula 
-    // is based on playing around with values and settling on a comfortable maximum.
-    var barHeight = 30;
-    var barPadding = 5;
-    var aspectRatio = Math.min(1200 / (data.distinct_players.length * (barHeight + barPadding)), 7);
+    var isMobile = window.innerWidth < 600;
 
     window.damageChart = new Chart(ctx, {
         type: 'bar',
@@ -15,32 +10,74 @@ function drawDamageChart(id, data) {
         },
         options: {
             indexAxis: 'y',
-            aspectRatio: aspectRatio,
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                axis: 'y',
+                intersect: false
+            },
+            layout: {
+                padding: {
+                    left: isMobile ? 12 : 4,
+                    right: 16,
+                    top: 4,
+                    bottom: 4
+                }
+            },
             scales: {
                 x: {
                     stacked: true,
                     grid: {
                         color: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    ticks: {
+                        maxTicksLimit: isMobile ? 4 : 8,
+                        autoSkip: true,
+                        font: {
+                            size: isMobile ? 10 : 12
+                        }
                     }
                 },
                 y: {
                     stacked: true,
                     grid: {
                         color: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    ticks: {
+                        autoSkip: false,
+                        padding: isMobile ? 16 : 6,
+                        font: {
+                            size: isMobile ? 10 : 12
+                        },
+                        callback: function (value) {
+                            var label = this.getLabelForValue(value);
+                            if (isMobile && label && label.length > 22) {
+                                return label.substring(0, 22) + '…';
+                            }
+                            return label;
+                        }
                     }
                 }
             },
             plugins: {
+                legend: {
+                    display: !isMobile,
+                    position: 'right'
+                },
                 tooltip: {
-                    mode: "point",
+                    mode: "index",
+                    axis: 'y',
+                    intersect: false,
                     titleColor: '#000',
                     bodyColor: '#000',
                     backgroundColor: 'rgba(255, 255, 255, 0.8)',
                     callbacks: {
                         label: function (context) {
-                            console.log(context);
-                            // var item = data.datasets[tooltipItem.datasetIndex].richData[tooltipItem.index];
                             var item = context.dataset.richData[context.dataIndex];
+                            if (!item) {
+                                return context.dataset.label || '';
+                            }
                             var damage = Math.round(item.pct_total_damage);
                             return `${item.weapon_cd_init_caps}: ${item.frags} frags, ${item.actual} damage (${damage}% of total)`;
 
@@ -54,12 +91,7 @@ function drawDamageChart(id, data) {
 
 function drawAccuracyChart(id, data) {
     var ctx = document.getElementById(id).getContext('2d');
-
-    // The aspect ratio really depends on how many players are present. This formula 
-    // is based on playing around with values and settling on a comfortable maximum.
-    var barHeight = 40;
-    var barPadding = 5;
-    var aspectRatio = Math.min(1200 / (data.distinct_players.length * (barHeight + barPadding)), 10);
+    var isMobile = window.innerWidth < 600;
 
     window.accuracyChart = new Chart(ctx, {
         type: 'bar',
@@ -69,10 +101,24 @@ function drawAccuracyChart(id, data) {
         },
         options: {
             indexAxis: 'y',
-            aspectRatio: aspectRatio,
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'point',
+                axis: 'y',
+                intersect: true
+            },
+            layout: {
+                padding: {
+                    left: isMobile ? 12 : 4,
+                    right: 16,
+                    top: 4,
+                    bottom: 4
+                }
+            },
             elements: {
                 rectangle: {
-                    borderWidth: 2,
+                    borderWidth: 1,
                 }
             },
             scales: {
@@ -81,7 +127,12 @@ function drawAccuracyChart(id, data) {
                         color: 'rgba(255, 255, 255, 0.1)',
                     },
                     ticks: {
-                        callback: function (value, index, values) {
+                        maxTicksLimit: isMobile ? 4 : 8,
+                        autoSkip: true,
+                        font: {
+                            size: isMobile ? 10 : 12
+                        },
+                        callback: function (value) {
                             return value + "%";
                         }
                     }
@@ -90,17 +141,40 @@ function drawAccuracyChart(id, data) {
                     grid: {
                         color: 'rgba(255, 255, 255, 0.1)',
                     },
+                    ticks: {
+                        autoSkip: false,
+                        padding: isMobile ? 16 : 6,
+                        font: {
+                            size: isMobile ? 10 : 12
+                        },
+                        callback: function (value) {
+                            var label = this.getLabelForValue(value);
+                            if (isMobile && label && label.length > 22) {
+                                return label.substring(0, 22) + '…';
+                            }
+                            return label;
+                        }
+                    }
                 }
             },
             plugins: {
+                legend: {
+                    display: !isMobile,
+                    position: 'right'
+                },
                 tooltip: {
                     mode: "point",
+                    axis: 'y',
+                    intersect: true,
                     titleColor: '#000',
                     bodyColor: '#000',
                     backgroundColor: 'rgba(255, 255, 255, 0.8)',
                     callbacks: {
                         label: function (context) {
                             var item = context.dataset.richData[context.dataIndex];
+                            if (!item) {
+                                return context.dataset.label || '';
+                            }
                             var accuracy = Math.round(item.pct_accuracy);
                             return `${item.weapon_cd_init_caps}: ${item.frags} frags, ${accuracy}% (${item.hit} hit/${item.fired} fired)`;
                         }
@@ -113,6 +187,7 @@ function drawAccuracyChart(id, data) {
 
 function drawPlayerAccuracyChart(id, data) {
     var ctx = document.getElementById(id).getContext('2d');
+    var isMobile = window.innerWidth < 600;
 
     window.playerAccuracyChart = new Chart(ctx, {
         type: 'line',
@@ -121,19 +196,35 @@ function drawPlayerAccuracyChart(id, data) {
             datasets: data.accuracy,
         },
         options: {
-            aspectRatio: 3.5,
+            responsive: true,
+            maintainAspectRatio: false,
             spanGaps: true,
             scales: {
                 x: {
                     title: {
-                        display: true,
+                        display: !isMobile,
                         text: 'Game #'
                     },
+                    ticks: {
+                        maxTicksLimit: isMobile ? 5 : 10,
+                        font: {
+                            size: isMobile ? 10 : 12
+                        }
+                    }
                 },
                 y: {
                     title: {
-                        display: true,
+                        display: !isMobile,
                         text: 'Accuracy %'
+                    },
+                    ticks: {
+                        maxTicksLimit: isMobile ? 4 : 6,
+                        font: {
+                            size: isMobile ? 10 : 12
+                        },
+                        callback: function (value) {
+                            return value + "%";
+                        }
                     },
                     grid: {
                         color: 'rgba(255, 255, 255, 0.1)',
@@ -142,18 +233,21 @@ function drawPlayerAccuracyChart(id, data) {
             },
             plugins: {
                 legend: {
-                    position: 'right',
+                    display: !isMobile,
+                    position: isMobile ? 'bottom' : 'right',
                 },
                 tooltip: {
-                    mode: "point",
+                    mode: "nearest",
+                    intersect: true,
                     titleColor: '#000',
                     bodyColor: '#000',
                     backgroundColor: 'rgba(255, 255, 255, 0.8)',
                     callbacks: {
                         label: function (context) {
                             var accuracy = Math.round(context.dataset.data[context.dataIndex]);
-                            var overallAccuracy = Math.round(context.dataset.summary.pct_accuracy);
-                            return `${context.dataset.summary.weapon_cd_init_caps}: ${accuracy}% (${overallAccuracy}% overall)`;
+                            var overallAccuracy = context.dataset.summary ? Math.round(context.dataset.summary.pct_accuracy) : accuracy;
+                            var weapon = context.dataset.summary ? context.dataset.summary.weapon_cd_init_caps : context.dataset.label;
+                            return `${weapon}: ${accuracy}% (${overallAccuracy}% overall)`;
                         }
                     }
                 }
@@ -164,6 +258,7 @@ function drawPlayerAccuracyChart(id, data) {
 
 function drawPlayerDamageChart(id, data) {
     var ctx = document.getElementById(id).getContext('2d');
+    var isMobile = window.innerWidth < 600;
 
     window.playerDamageChart = new Chart(ctx, {
         type: 'bar',
@@ -172,13 +267,20 @@ function drawPlayerDamageChart(id, data) {
             datasets: data.damage,
         },
         options: {
-            aspectRatio: 3.5,
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 x: {
                     stacked: true,
                     title: {
-                        display: true,
+                        display: !isMobile,
                         text: 'Game #'
+                    },
+                    ticks: {
+                        maxTicksLimit: isMobile ? 5 : 10,
+                        font: {
+                            size: isMobile ? 10 : 12
+                        }
                     },
                     grid: {
                         color: 'rgba(255, 255, 255, 0.1)',
@@ -187,8 +289,14 @@ function drawPlayerDamageChart(id, data) {
                 y: {
                     stacked: true,
                     title: {
-                        display: true,
+                        display: !isMobile,
                         text: 'Total Damage'
+                    },
+                    ticks: {
+                        maxTicksLimit: isMobile ? 4 : 6,
+                        font: {
+                            size: isMobile ? 10 : 12
+                        }
                     },
                     grid: {
                         color: 'rgba(255, 255, 255, 0.1)',
@@ -197,19 +305,23 @@ function drawPlayerDamageChart(id, data) {
             },
             plugins: {
                 legend: {
-                    position: 'right',
+                    display: !isMobile,
+                    position: isMobile ? 'bottom' : 'right',
                 },
                 tooltip: {
-                    mode: "point",
+                    mode: "index",
+                    axis: 'y',
+                    intersect: false,
                     titleColor: '#000',
                     bodyColor: '#000',
                     backgroundColor: 'rgba(255, 255, 255, 0.8)',
                     callbacks: {
                         label: function (context) {
-                            var totalDamage = data.total_damage_per_game[context.dataIndex];
-                            var weaponDamage = context.dataset.data[context.dataIndex];
-                            var pctOfTotal = Math.round(weaponDamage/totalDamage*100);
-                            return `${context.dataset.label}: ${weaponDamage} (${pctOfTotal}% of total)`;
+                            var damage = Math.round(context.raw);
+                            if (!context.dataset.summary) {
+                                return damage + " damage";
+                            }
+                            return context.dataset.summary.weapon_cd_init_caps + ": " + damage + " damage";
                         }
                     }
                 }

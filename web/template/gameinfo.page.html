@@ -69,14 +69,18 @@
 <div class="grid-x grid-padding-x">
   <div class="cell small-12">
     <h3><a id="damage"></a>Damage</h3>
-    <canvas id="damageChart"></canvas>
+    <div class="chart-container" style="position: relative; width: 100%; height: 40vh; min-height: 260px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+      <canvas id="damageChart" style="min-width: 720px;"></canvas>
+    </div>
   </div>
 </div>
 
 <div class="grid-x grid-padding-x">
   <div class="cell small-12">
     <h3><a id="accuracy"></a>Accuracy</h3>
-    <canvas id="accuracyChart"></canvas>
+    <div class="chart-container" style="position: relative; width: 100%; height: 40vh; min-height: 260px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+      <canvas id="accuracyChart" style="min-width: 720px;"></canvas>
+    </div>
   </div>
 </div>
 {{end}}
