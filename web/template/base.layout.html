@@ -27,6 +27,17 @@
     {{end}}
 
     {{block "extra-css" .}}
+    <style>
+      .title-bar { margin: 0 !important; padding: 0.5rem 0.75rem; }
+      .title-bar + ul#nav,
+      .title-bar + .menu,
+      #nav { margin: 0 !important; padding-top: 0; padding-bottom: 0; }
+      .is-drilldown { min-height: 0 !important; height: auto !important; }
+      .drilldown a { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+      .drilldown .is-drilldown-submenu { margin: 0 !important; }
+      body > .grid-x:first-of-type { margin-top: 0; }
+      #title { margin-top: 0; padding-top: 0.5rem; }
+    </style>
     {{end}}
 
   </head>
