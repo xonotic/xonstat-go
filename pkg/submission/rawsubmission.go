@@ -16,6 +16,37 @@ var ErrUnsupportedGameType = fmt.Errorf("unsupported game type")
 // ErrBlankGame is when a submission is blank
 var ErrBlankGame = fmt.Errorf("blank game")
 
+// ValidationMode selects which context-specific checks NewRawSubmission runs.
+// The same parser serves both the stats submission endpoint (strict) and the
+// balance endpoint (lenient), which has its own guardrails and must be able
+// to process matches the submission endpoint would consider blank.
+type ValidationMode int
+
+const (
+	// SubmissionMode applies all validation, including the blank game checks.
+	// This is the default.
+	SubmissionMode ValidationMode = iota
+
+	// BalanceMode skips the blank game checks. Required metadata and the
+	// supported game type are still enforced; the balance handler applies
+	// its own guardrails (team game type, minimum number of players).
+	BalanceMode
+)
+
+// Option configures how NewRawSubmission parses and validates.
+type Option func(*parseOptions)
+
+type parseOptions struct {
+	mode ValidationMode
+}
+
+// WithValidationMode selects the validation mode for a submission parse.
+func WithValidationMode(mode ValidationMode) Option {
+	return func(o *parseOptions) {
+		o.mode = mode
+	}
+}
+
 // RawSubmission is an untyped game stats submission
 type RawSubmission struct {
 	// game metadata
@@ -62,8 +93,15 @@ type RawSubmission struct {
 	rr *ReadReturner
 }
 
-// NewRawSubmission creates a new RawSubmission from the given reader
-func NewRawSubmission(body io.Reader) (*RawSubmission, error) {
+// NewRawSubmission creates a new RawSubmission from the given reader.
+// Validation defaults to SubmissionMode; pass WithValidationMode to relax
+// checks for other use cases (e.g. the balance handler).
+func NewRawSubmission(body io.Reader, opts ...Option) (*RawSubmission, error) {
+	cfg := parseOptions{mode: SubmissionMode}
+	for _, opt := range opts {
+		opt(&cfg)
+	}
+
 	rs := &RawSubmission{
 		GameMeta:              make(map[string]string),
 		TeamEvents:            make([]map[string]string, 0),
@@ -87,7 +125,7 @@ func NewRawSubmission(body io.Reader) (*RawSubmission, error) {
 		return nil, err
 	}
 
-	err = rs.validate()
+	err = rs.validate(cfg.mode)
 	if err != nil {
 		return nil, err
 	}
@@ -388,8 +426,10 @@ func (s *RawSubmission) isBlankGame() error {
 	return nil
 }
 
-// validate runs the preconditions checks possible for raw submissions
-func (s *RawSubmission) validate() error {
+// validate runs the preconditions checks possible for raw submissions.
+// The blank game checks only apply to SubmissionMode; BalanceMode skips them
+// so matches the submission endpoint would reject still reach the balancer.
+func (s *RawSubmission) validate(mode ValidationMode) error {
 	err := s.hasRequiredMetadata()
 	if err != nil {
 		return err
@@ -400,9 +440,11 @@ func (s *RawSubmission) validate() error {
 		return err
 	}
 
-	err = s.isBlankGame()
-	if err != nil {
-		return err
+	if mode == SubmissionMode {
+		err = s.isBlankGame()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
